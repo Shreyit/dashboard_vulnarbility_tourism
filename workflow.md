@@ -2,7 +2,8 @@
 
 This describes how raw survey data becomes the dashboard: pipeline stages, index methodology, the
 stress-test simulator, the AI chat route, and the phased build plan. Variable-level detail lives in
-`VARIABLES_AND_DATA_SOURCES.md`; this doc is about the *how*.
+`VARIABLES_AND_DATA_SOURCES.md`; cited external metrics/thresholds live in `RESEARCH_BENCHMARKS.md`;
+this doc is about the *how*.
 
 ## 0. Architecture at a glance
 
@@ -15,7 +16,7 @@ flowchart LR
     E --> F[Compute composite indices + PSSM]
     F --> G[(SQLite/Parquet: processed data store)]
     G --> H[FastAPI backend]
-    H --> I[Frontend: HTML/CSS/GSAP/JS charts]
+    H --> I[Frontend: React + TS + Vite, GSAP animation, Recharts/react-leaflet]
     H --> J[AI chat route -> Groq]
     J --> H
 ```
@@ -36,32 +37,41 @@ flowchart LR
 - Tag every record with `respondent_type` (enterprise/location/tourist/resident/worker) and keep
   `_uuid`/`_submission_time` for traceability.
 
-## 2. Cleaning & harmonization
+## 2. Cleaning & harmonization — **done**, see `notebooks/01_data_cleaning_eda.ipynb`
 
-- **Coalesce duplicate/versioned columns.** Several questions were re-asked under different labels
-  across KoBo form versions (documented per-file in `VARIABLES_AND_DATA_SOURCES.md` §6). Rule: for
-  each canonical variable, take `first_non_null` across its known duplicate columns, in a mapping
-  table we maintain explicitly (`column_aliases.py` or similar) — never silent regex-guessing.
-- **Type coercion**: numeric fields (income, litres, hours, counts) parsed to numbers, blanks/"NA"
-  handled as null, not zero.
-- **GPS sanity filter**: drop/flag any lat/lon outside a Nainital bounding box (~29.30–29.45°N,
-  79.40–79.55°E). At least one Enterprise record has `lat=lon=82` — clearly bad.
-- **Ordinal scale normalization**: satisfaction/agreement scales (1–5, Likert-style text) mapped to
-  a consistent 0–1 scale, direction-checked (make sure "1=Very Dissatisfied" and "1=Very Difficult"
-  both point the same way before any averaging).
-- Output: 5 cleaned respondent-level tables, one row per submission, canonical column names.
+- **Coalesce duplicate/versioned columns.** Verified by inspecting non-null counts per candidate
+  pair before merging (not blind regex): Kobo splits every Likert question into an always-empty
+  label column plus the real numeric answer in the next column (`"(1 Very X – 5 Very Y)"`); a
+  handful of questions were genuinely reworded across form revisions with disjoint response counts
+  (documented per-file in the notebook and `VARIABLES_AND_DATA_SOURCES.md`). Rule: `coalesce()`
+  takes `first_non_null` across a survey-specific, explicitly-listed column group.
+- **Drop dead columns**: any column with 0 non-null responses (never-used later form-revision
+  fields) is dropped and logged — Enterprise −1 col, Location −27, Tourist −17, Residents −16,
+  Workers −12 (see `processed/data_quality_report.csv`).
+- **GPS sanity filter**: lat/lon outside a Nainital bounding box (29.30–29.45°N, 79.40–79.55°E) is
+  nulled (row kept, coordinates dropped). Caught 9 bad Enterprise points and 19 bad Residents points
+  — e.g. at least one Enterprise record had `lat=lon=82`.
+- **Ordinal scale normalization**: not yet applied (planned for the index-computation stage, §5) —
+  the notebook keeps 1–5 Likert answers as-is and just confirms which column holds the real answer.
+- **Known thin variable**: Enterprise's `water_shortage_days_month` / `water_hours_supply` each have
+  only 1 non-null response — flagged in the notebook, excluded from index inputs; use
+  `water_constraint_limits_ops` / `water_shortage_worse_peak` instead (far higher response counts).
+- Output: 5 cleaned respondent-level CSVs in `processed/` (`enterprise_clean.csv`,
+  `location_clean.csv`, `tourist_clean.csv`, `residents_clean.csv`, `workers_clean.csv`) plus
+  `processed/data_quality_report.csv` summarizing rows/columns in vs. out per survey.
 
-## 3. Zone assignment (spatial join)
+## 3. Zone assignment (spatial join) — **done** (join logic), naming still open
 
-- The 10 Location-survey points are our fixed zone set (v1 — see open question below on naming).
-- For every GPS-tagged Enterprise/Resident record, assign it to the **nearest zone point**
-  (haversine distance), with a max-distance cutoff (e.g. 500m) — beyond that, keep it in the
-  town-wide pool only, not forced into a zone.
+- The 10 Location-survey points are our fixed zone set, currently labeled placeholder `Z01`..`Z10`.
+- Every GPS-tagged Enterprise/Resident record is assigned to the **nearest zone point** (haversine
+  distance) with a 500m cutoff. Result: 61/157 Enterprise and 143/239 Residents records matched to a
+  zone; the rest (mostly outside the 10 audited hotspots) count in the **town-wide** rollup only, not
+  forced into a zone.
 - Tourist and Worker surveys are not GPS-tagged — they contribute to **town-wide** scores only, not
   per-zone maps.
-- Reverse-geocode the 10 zone points via OSM Nominatim to get human-readable names (e.g. "Mall
-  Road", "Tallital", "Naini Lake foreshore"); surface these as editable labels so the user can
-  correct them against local knowledge.
+- **Still open**: reverse-geocode the 10 zone points via OSM Nominatim to get human-readable names
+  (e.g. "Mall Road", "Tallital", "Naini Lake foreshore") — not yet run; needs the user to confirm the
+  resulting names against local knowledge before they're locked in.
 
 ## 4. External data enrichment
 
@@ -79,10 +89,12 @@ on Overpass/Nominatim being up.
 
 ## 5. Variable derivation & index construction
 
-1. Compute every "derived variable" in `VARIABLES_AND_DATA_SOURCES.md` §3 from the cleaned tables.
+1. Compute every "derived variable" in `VARIABLES_AND_DATA_SOURCES.md` §3 from the cleaned tables in
+   `processed/`.
 2. **Normalize**: min-max scale each derived variable to 0–1 across records (or across zones, for
    zone-level variables), clipping outliers at the 1st/99th percentile first so one bad response
-   doesn't blow out the scale.
+   doesn't blow out the scale. Methodology follows the OECD/JRC composite-indicator handbook —
+   see `RESEARCH_BENCHMARKS.md` §1.3.
 3. **Direction-align**: flip sign (`1 − x`) for variables where higher raw value = better outcome,
    so that in every sub-index, higher = more vulnerable/more pressure, consistently.
 4. **Aggregate to sub-indices**: simple weighted mean within each theme (weights start equal,
@@ -99,7 +111,10 @@ to the user/domain reviewers to sanity-check before trusting the numbers.
 
 Goal: let the user drag a "peak-season tourist footfall" slider (e.g. baseline → +25% → +50%) and
 see WSI, EDPI, and waste-pressure react, using transparent, documented elasticity assumptions
-instead of a black-box model:
+instead of a black-box model. Baseline anchor: Nainital's road capacity is ~3,000 vehicles vs.
+3,000–4,000/day actual peak-season inflow (already ~1.0–1.3× capacity) and up to ~50,000 vehicles on
+peak summer weekends (~16.7× capacity) — see `RESEARCH_BENCHMARKS.md` §1.1. The slider's "current
+peak," "+25%," "+50%" points should be shown against this real anchor, not an arbitrary 0–100% scale.
 
 - Water demand scales ~linearly with visitor count (assumption, tunable constant).
 - Waste generation scales ~linearly with visitor count.
@@ -124,36 +139,82 @@ Planned routes (v1):
 - Data loads from the processed store (SQLite or Parquet) at startup, served from memory —
   no live re-processing of the raw Excel files per request.
 
-## 8. AI chat route
+## 8. PahadiBot (AI chat route)
 
-- Provider: **Groq** (key to be supplied later — build behind a small `LLMClient` interface so the
+The dashboard's assistant is named **PahadiBot** ("pahadi" = of the hills, fitting for a Nainital
+tool). Frontend stub already built: `frontend/src/components/PahadiBot/PahadiBotLauncher.tsx`, a
+fixed launcher button + panel that currently states plainly that it isn't connected yet.
+
+- Provider: **Groq** (key to be supplied later, build behind a small `LLMClient` interface so the
   provider is swappable via `.env`, since the user indicated the key isn't ready yet).
 - The route grounds the model with the *current* computed indices (town-wide + selected zone) and
   the variable catalog as system-prompt context, so answers reference this dashboard's real numbers
-  instead of generic tourism trivia — e.g. "Why is Naini Lake zone's WSI high?" should be answerable
-  from the actual per-zone derived variables, not a guess.
-- No raw respondent free-text (open-ended "other, specify" answers) gets sent to the LLM by default
-  — only aggregated/derived numbers — to avoid leaking anything that could re-identify a
-  respondent, even though the source data is meant to be anonymous.
+  instead of generic tourism trivia. For example "Why is Naini Lake zone's WSI high?" should be
+  answerable from the actual per-zone derived variables, not a guess.
+- No raw respondent free-text (open-ended "other, specify" answers) gets sent to the LLM by default,
+  only aggregated/derived numbers, to avoid leaking anything that could re-identify a respondent,
+  even though the source data is meant to be anonymous.
+- Route: `POST /api/chat`, called from `PahadiBotLauncher`'s panel once built out into a real chat
+  UI (message list + input), replacing the current static placeholder text.
 
 ## 9. Frontend
 
-- Static HTML/CSS/JS (no framework) + GSAP for entrance/scroll animations and transitions between
-  dashboard views; a lightweight chart library (Chart.js or D3, to confirm) for gauges/bars/line
-  charts; a simple Leaflet or MapLibre map for the zone view (OSM tiles, free, no key).
+- **React + TypeScript, built with Vite** — a client-side SPA that talks to the FastAPI backend over
+  JSON, no SSR. GSAP still drives entrance/scroll animations and view transitions (used via
+  `useEffect`/`useLayoutEffect` + refs, GSAP's React integration pattern, not `react-gsap` wrapper
+  packages — direct GSAP API keeps it simple and matches GSAP's own recommended React usage).
+- Charting: a React-friendly chart library (Recharts or visx, to confirm) for gauges/bars/line
+  charts. Mapping: `react-leaflet` (OSM tiles, free, no key) for the zone view.
+- Structure: component-per-view, a small typed API client (`api/`) wrapping the FastAPI routes below,
+  shared TypeScript types for the index/zone/variable response shapes (mirrors the Pydantic models on
+  the backend, kept in sync manually or generated from the OpenAPI schema — to decide when we build
+  it).
+- Dev flow: Vite dev server proxies `/api/*` to the local FastAPI instance; production build is a
+  static `dist/` folder, served either by FastAPI's `StaticFiles` or a separate static host — to
+  confirm at deploy time.
 - Views: (1) Overview — TVI gauge + 6 sub-index bars, town-wide; (2) Zone map — click a zone to see
   its breakdown; (3) Stress-test — slider + before/after comparison; (4) Explorer — theme-level
-  charts of the derived variables; (5) AI chat panel.
+  charts of the derived variables; (5) AI chat panel (PahadiBot, see §8).
+
+### 9.1 Visual language (locked in, applies to every future screen)
+
+Set with the landing page (`frontend/src/App.tsx`, `frontend/src/styles/`), documented here so later
+work stays consistent instead of drifting toward generic AI-tool defaults:
+
+- **Palette**: warm white / grey / one terracotta orange only (`frontend/src/styles/tokens.css`).
+  No purple, no pastel rainbow, no neon, no dark mode. Gradients only ever blend two colors already
+  in the palette, and stay subtle.
+- **Type**: Fraunces (display serif) + Instrument Sans (body) + JetBrains Mono (labels, numerals,
+  UI chrome). Deliberately not Inter/Poppins/Manrope/DM Sans.
+- **Structure**: near-zero border radius, hard-offset "sticker" shadows (never blurred/soft), visible
+  hairline borders between sections. A bit of brutalism: exposed grid, mono index numbers, blocky
+  panels.
+- **No**: emoji, skeleton loaders (use the mono `Loading` component / terminal-style dot indicator
+  instead), hover animation on things that aren't actually interactive, sparkle icons, bento grids,
+  color-stripe accents, em dashes in any UI copy.
+- **Imagery**: real, properly licensed photography only (Wikimedia Commons CC BY-SA 4.0 so far, see
+  `frontend/src/assets/art/ATTRIBUTIONS.md`), processed into duotone/tritone art in the palette
+  (`process_art.py`-style pipeline: autocontrast grayscale + `ImageOps.colorize` + light grain).
+  Reused as the flowing-menu strip, the dome gallery, and the pixel-transition hero reveal.
+- **Signature components** (`frontend/src/components/`): `Cursor` (crosshair, viewfinder-bracket
+  hover state, no lag), `PixelTransition` (staggered square-grid reveal, doubles as the eventual
+  view-to-view transition once routing exists), `FlowingMenu` (marquee nav row with velocity-skew),
+  `DomeGallery` (drag-to-rotate 3D photo dome).
 
 ## 10. Phased implementation plan
 
-1. **Data pipeline**: cleaning/harmonization scripts + zone join + external enrichment → processed
-   tables checked into `reference_data/`/`processed/`. Review output numbers before building UI on
-   top of them.
+1. **Data pipeline** — *cleaning/harmonization + zone join done* (`notebooks/01_data_cleaning_eda.ipynb`
+   → `processed/*.csv`); *external enrichment (OSM/Open-Meteo/reference tables) still open*. Review
+   the notebook's output/open-items list before building UI on top of it.
 2. **Backend**: FastAPI routes serving the processed tables + stress-test math, no AI yet.
-3. **Frontend v1**: Overview + zone map + explorer views wired to the backend, static styling.
-4. **Stress-test UI**: slider wired to `/api/stress-test`.
-5. **GSAP polish pass**: animations, transitions, professional visual pass.
+3. **Frontend v1** — *design system + landing page done* (`frontend/`, Vite/React/TS): palette,
+   type, the custom crosshair cursor, pixel-transition reveal, flowing-menu nav, and dome photo
+   gallery are all built and wired into a landing page with real (cited) Nainital photography
+   processed into duotone/tritone art. *Not done yet*: the actual data-driven views (Overview,
+   Zone Map, Stress Test, Explorer) — right now those are placeholder anchors on the landing page;
+   they go live once the FastAPI backend (step 2) exists to wire them to.
+4. **Stress-test UI**: slider component wired to `/api/stress-test`.
+5. **GSAP polish pass**: animations, transitions, professional visual pass on top of the working React views.
 6. **AI chat route**: Groq integration once the key is available, wired into the frontend chat panel.
 7. **Review & weight tuning**: revisit index weights/normalization with the user once real numbers
    are visible.

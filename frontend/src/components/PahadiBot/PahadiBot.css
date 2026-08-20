@@ -1,0 +1,89 @@
+.pahadibot-launcher {
+  position: fixed;
+  right: var(--sp-4);
+  bottom: var(--sp-4);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 0.85rem 1.25rem;
+  background: var(--ink);
+  color: var(--paper);
+  border: var(--border-strong);
+  border-color: var(--ink);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-hard);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: transform 0.15s var(--ease), box-shadow 0.15s var(--ease);
+}
+
+.pahadibot-launcher:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0 var(--ink);
+}
+
+.pahadibot-launcher .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--rust);
+}
+
+.pahadibot-panel {
+  position: fixed;
+  right: var(--sp-4);
+  bottom: calc(var(--sp-4) + 3.75rem);
+  z-index: 500;
+  width: min(360px, calc(100vw - 2 * var(--sp-4)));
+  background: var(--white);
+  border: var(--border-strong);
+  box-shadow: var(--shadow-hard);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.pahadibot-panel header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.pahadibot-panel header h4 {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.pahadibot-panel header button {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--paper);
+}
+
+.pahadibot-panel .body {
+  padding: var(--sp-4);
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+
+.pahadibot-panel .body strong {
+  color: var(--ink);
+}
+
+.pahadibot-panel .status-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-top: var(--sp-3);
+  padding-top: var(--sp-3);
+  border-top: var(--border);
+}

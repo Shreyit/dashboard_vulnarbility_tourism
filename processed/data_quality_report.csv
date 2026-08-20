@@ -1,0 +1,6 @@
+survey,rows_in,rows_out,cols_in,cols_out,gps_outliers_nulled,rows_dropped,cols_dropped
+Enterprise,157,157,66,65,9,0,1
+Location,10,10,83,56,0,0,27
+Tourist,320,320,99,82,0,0,17
+Residents,239,239,91,75,19,0,16
+Workers,303,303,43,31,0,0,12

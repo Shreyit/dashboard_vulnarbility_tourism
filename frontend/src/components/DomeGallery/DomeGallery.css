@@ -1,0 +1,76 @@
+.dome-gallery {
+  position: relative;
+  width: 100%;
+  height: clamp(420px, 62vw, 640px);
+  perspective: 1400px;
+  overflow: hidden;
+  background: var(--paper-deep);
+  border-top: var(--border-strong);
+  border-bottom: var(--border-strong);
+  touch-action: none;
+}
+
+.dome-gallery::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, var(--paper-deep) 0%, transparent 18%, transparent 82%, var(--paper-deep) 100%),
+    linear-gradient(90deg, var(--paper-deep) 0%, transparent 12%, transparent 88%, var(--paper-deep) 100%);
+}
+
+.dome-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d;
+  cursor: grab;
+}
+
+.dome-stage:active {
+  cursor: grabbing;
+}
+
+.dome-tile {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: clamp(90px, 12vw, 160px);
+  height: clamp(120px, 16vw, 210px);
+  margin: calc(clamp(120px, 16vw, 210px) / -2) 0 0 calc(clamp(90px, 12vw, 160px) / -2);
+  transform-style: preserve-3d;
+}
+
+.dome-tile-face {
+  width: 100%;
+  height: 100%;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--white);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.dome-tile-face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dome-gallery-hint {
+  position: absolute;
+  bottom: var(--sp-3);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  pointer-events: none;
+}

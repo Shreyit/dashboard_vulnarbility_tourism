@@ -1,0 +1,59 @@
+/*
+  Design tokens. Palette is deliberately narrow: warm white, grey, one
+  earthy orange (terracotta, not neon). No purple, no pastel rainbow,
+  no gradients outside this palette. Radii stay near-zero (brutalist,
+  not soft/bubbly). Shadows are hard-offset, never blurred.
+*/
+
+:root {
+  /* --- surfaces --- */
+  --paper: #f6f2ea;       /* warm white, base background */
+  --paper-deep: #ece3d3;  /* deeper warm grey-beige, section alternation */
+  --white: #fffdf9;       /* near-white, cards/panels sit above paper */
+
+  /* --- ink --- */
+  --ink: #211d18;         /* near-black warm, primary text */
+  --ink-soft: #6e6656;    /* muted warm grey, secondary text */
+  --ink-faint: #a39a86;   /* faint warm grey, tertiary/labels */
+
+  /* --- lines --- */
+  --line: #d9cfba;        /* default hairline border */
+  --line-strong: #b3a688; /* emphasis border, brutalist blocks */
+
+  /* --- accent: terracotta / burnt orange --- */
+  --rust: #b3501f;
+  --rust-deep: #833a17;
+  --rust-soft: #ecd7bd;   /* pale fill for badges/tags */
+
+  /* --- gradients (palette-only, always subtle) --- */
+  --grad-paper: linear-gradient(180deg, var(--paper) 0%, var(--paper-deep) 100%);
+  --grad-rust: linear-gradient(135deg, var(--rust) 0%, var(--rust-deep) 100%);
+  --grad-fade-right: linear-gradient(90deg, var(--paper) 0%, transparent 100%);
+
+  /* --- type --- */
+  --font-display: "Fraunces", "Iowan Old Style", serif;
+  --font-body: "Instrument Sans", -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", monospace;
+
+  /* --- spacing scale (8px base) --- */
+  --sp-1: 0.5rem;
+  --sp-2: 0.75rem;
+  --sp-3: 1rem;
+  --sp-4: 1.5rem;
+  --sp-5: 2rem;
+  --sp-6: 3rem;
+  --sp-7: 4.5rem;
+  --sp-8: 7rem;
+
+  /* --- structure: near-zero radius, hard shadow --- */
+  --radius: 2px;
+  --radius-tag: 3px;
+  --shadow-hard: 5px 5px 0 var(--ink);
+  --shadow-hard-sm: 3px 3px 0 var(--ink);
+
+  --border: 1px solid var(--line);
+  --border-strong: 1.5px solid var(--ink);
+
+  --ease: cubic-bezier(0.65, 0, 0.35, 1);
+  --container: 1280px;
+}
