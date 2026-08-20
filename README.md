@@ -54,8 +54,8 @@ output tables land in `processed/`.
 
 ## Tech stack
 
-- **Backend** (planned): FastAPI (Python), serving processed indices + a stress-test scenario
-  endpoint + PahadiBot's chat route (Groq).
+- **Backend** (v1 built): FastAPI (Python), serving processed indices + a stress-test scenario
+  endpoint + PahadiBot's chat route (Groq, not yet keyed).
 - **Frontend** (scaffolded): React + TypeScript, built with Vite. Client-side SPA, GSAP-driven
   animation, real photography processed into duotone art, a deliberately narrow warm-white/grey/
   terracotta palette with no dark mode. See `workflow.md` §9.1 for the full visual-language rules.
@@ -64,19 +64,33 @@ output tables land in `processed/`.
 
 ## Status
 
-**Data pipeline and frontend design system are done; backend and data-driven views are next.**
+**Data pipeline, backend v1, and frontend design system are done; wiring the frontend views to
+the live API is next.**
 
 - `notebooks/01_data_cleaning_eda.ipynb`: done, cleaned tables in `processed/`.
+- `backend/`: FastAPI app is live -- loads `processed/*.csv`, derives every variable in
+  `VARIABLES_AND_DATA_SOURCES.md` §3, computes the 6 sub-indices + TVI (town-wide and per-zone)
+  and the peak-season stress-test scenario per `workflow.md` §5-§6. Routes: `/api/zones`,
+  `/api/indices/town`, `/api/indices/zone/{zone_id}`, `/api/variables/{theme}`,
+  `/api/stress-test`, `/api/chat` (PahadiBot -- replies that it isn't connected yet until a
+  `GROQ_API_KEY` is set in `backend/.env`). External enrichment (OSM/Open-Meteo, `workflow.md`
+  §4) and zone-name confirmation are still open; weights in `backend/app/weights.json` are
+  equal-default and the first thing to hand back to domain reviewers.
 - `frontend/`: design system, custom cursor, pixel-transition reveal, flowing-menu nav, and dome
   photo gallery are built and live on a landing page. The actual data views (Overview, Zone Map,
-  Stress Test, Explorer, PahadiBot chat) are placeholders until the backend exists to feed them.
-- `backend/`: not started.
+  Stress Test, Explorer, PahadiBot chat) are placeholders until wired to the backend above.
 
 See `workflow.md` §10 for the full phased plan.
 
 ## Running it
 
 ```
+# backend (FastAPI)
+cd backend
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8010   # http://localhost:8010/docs
+
 # frontend (design system + landing page)
 cd frontend
 npm install
@@ -97,10 +111,10 @@ notebooks/01_data_cleaning_eda.ipynb   cleaning + EDA notebook (run this to rege
 notebooks/requirements.txt       python deps for the notebook (pandas, numpy, matplotlib, openpyxl, jupyter)
 processed/                       cleaned per-survey CSVs + data_quality_report.csv (notebook output)
 frontend/                        React + TypeScript (Vite) dashboard, GSAP animation, design system
+backend/                         FastAPI app: derives indices from processed/, serves the API
 VARIABLES_AND_DATA_SOURCES.md    full data dictionary: raw/derived/composite variables + external sources
 workflow.md                      pipeline architecture, index methodology, visual language, build plan
 RESEARCH_BENCHMARKS.md           cited external research: metrics/thresholds/frameworks behind the indices
 # planned, not yet created:
 reference_data/                  static external reference tables (population, tourist stats, etc.)
-backend/                         FastAPI app, data pipeline, processed data store
 ```

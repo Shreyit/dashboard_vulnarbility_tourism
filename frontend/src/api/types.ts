@@ -1,0 +1,68 @@
+// Mirrors backend/app/schemas.py. Kept in sync manually for v1 (workflow.md SS9).
+
+export type ThemeKey = "wsi" | "wspi" | "iai" | "edpi" | "scpi" | "vei";
+
+export type ZoneOut = {
+  zone_id: string;
+  name: string;
+  latitude: number | null;
+  longitude: number | null;
+};
+
+export type ComponentDetail = {
+  component: string;
+  value: number;
+  town_wide_proxy: boolean;
+};
+
+export type IndexBundle = {
+  zone_id: string | null;
+  tvi: number | null;
+  sub_indices: Partial<Record<ThemeKey, number | null>>;
+  details: Partial<Record<ThemeKey, ComponentDetail[]>>;
+};
+
+export type VariablesOut = {
+  theme: ThemeKey;
+  label: string;
+  zone_id: string | null;
+  components: ComponentDetail[];
+};
+
+export type FootfallPreset = { label: string; multiplier: number };
+
+export type FootfallAnchors = {
+  road_capacity_vehicles: number;
+  baseline_peak_vehicles_low: number;
+  baseline_peak_vehicles_high: number;
+  extreme_weekend_vehicles: number;
+  presets: FootfallPreset[];
+};
+
+export type StressTestOut = {
+  footfall_multiplier: number;
+  zone_id: string | null;
+  baseline: { tvi: number | null; sub_indices: Partial<Record<ThemeKey, number | null>> };
+  scenario: { tvi: number | null; sub_indices: Partial<Record<ThemeKey, number | null>> };
+  elasticities: Partial<Record<ThemeKey, number>>;
+  footfall_anchors: FootfallAnchors;
+  note: string;
+};
+
+export type ChatResponse = {
+  reply: string;
+  grounded: boolean;
+  llm_configured: boolean;
+};
+
+// Direction + display metadata the backend doesn't need to send but the UI does.
+export const THEME_META: Record<ThemeKey, { label: string; short: string; higherIsBetter: boolean }> = {
+  wsi: { label: "Water Stress Index", short: "Water", higherIsBetter: false },
+  wspi: { label: "Waste & Sanitation Pressure Index", short: "Waste & Sanitation", higherIsBetter: false },
+  iai: { label: "Infrastructure Adequacy Index", short: "Infrastructure", higherIsBetter: true },
+  edpi: { label: "Economic Dependency & Precarity Index", short: "Economic Precarity", higherIsBetter: false },
+  scpi: { label: "Socio-Cultural Pressure Index", short: "Socio-Cultural", higherIsBetter: false },
+  vei: { label: "Visitor Experience Index", short: "Visitor Experience", higherIsBetter: true },
+};
+
+export const THEME_ORDER: ThemeKey[] = ["wsi", "wspi", "iai", "edpi", "scpi", "vei"];

@@ -1,0 +1,20 @@
+{
+  "_comment": "Default equal weighting (VARIABLES_AND_DATA_SOURCES.md SS4). First thing to hand back to domain reviewers to retune -- see workflow.md SS5/SS10 step 7. Weights are normalized to sum to 1 at load time, so relative values matter, not absolute ones.",
+  "tvi_weights": {
+    "wsi": 1,
+    "wspi": 1,
+    "iai": 1,
+    "edpi": 1,
+    "scpi": 1,
+    "vei": 1
+  },
+  "stress_test_elasticities": {
+    "_comment": "How much each sub-index moves per unit of (footfall_multiplier - 1). workflow.md SS6: water/waste scale ~linearly with visitor count, worker income share is structurally fixed short-run, infrastructure adequacy erodes (fixed capacity, more visitors per toilet/parking spot), socio-cultural pressure and visitor experience move with crowding. Tunable, documented, not a black box.",
+    "wsi": 0.6,
+    "wspi": 0.6,
+    "iai": 0.3,
+    "edpi": 0.0,
+    "scpi": 0.4,
+    "vei": 0.3
+  }
+}

@@ -1,0 +1,134 @@
+/* ---------- radial gauge ---------- */
+.radial-gauge {
+  position: relative;
+  display: inline-block;
+}
+
+.radial-gauge svg circle {
+  transition: stroke-dashoffset 0.5s var(--ease);
+}
+
+.radial-gauge-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.radial-gauge-value {
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  color: var(--ink);
+}
+
+.radial-gauge-label {
+  margin-top: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* ---------- sub-index bar row ---------- */
+.subindex-bar {
+  display: grid;
+  grid-template-columns: 11rem 1fr 3rem;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  padding: var(--sp-2) 0;
+  border-bottom: var(--border);
+  text-align: left;
+  background: none;
+}
+
+button.subindex-bar {
+  transition: background 0.15s var(--ease);
+}
+
+button.subindex-bar:hover,
+button.subindex-bar.is-active {
+  background: var(--paper-deep);
+}
+
+.subindex-bar-label {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+
+.subindex-bar-label small {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.03em;
+  color: var(--ink-faint);
+  text-transform: none;
+}
+
+.subindex-bar-track {
+  position: relative;
+  height: 0.6rem;
+  background: var(--paper-deep);
+  border: 1px solid var(--line-strong);
+}
+
+.subindex-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--rust);
+  transition: width 0.4s var(--ease);
+}
+
+.subindex-bar-value {
+  text-align: right;
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+
+/* ---------- component detail list (Explorer-style breakdown) ---------- */
+.component-list {
+  border-top: var(--border);
+  margin-top: var(--sp-3);
+}
+
+.component-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: var(--sp-3);
+  align-items: center;
+  padding: 0.55rem 0;
+  border-bottom: var(--border);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+}
+
+.component-row .name {
+  color: var(--ink-soft);
+  text-transform: lowercase;
+}
+
+.component-row .value {
+  color: var(--ink);
+  min-width: 3rem;
+  text-align: right;
+}
+
+.component-row .proxy-flag {
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  border: 1px solid var(--line-strong);
+  padding: 0.1rem 0.4rem;
+}
+
+@media (max-width: 640px) {
+  .subindex-bar {
+    grid-template-columns: 7rem 1fr 2.5rem;
+  }
+}

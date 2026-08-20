@@ -43,6 +43,7 @@ function MenuRow({
   const innerRef = useRef<HTMLDivElement>(null);
   const lastY = useRef<number | null>(null);
   const tween = useRef<gsap.core.Tween | null>(null);
+  const slideTween = useRef<gsap.core.Tween | null>(null);
 
   const edge = (e: React.MouseEvent): "top" | "bottom" => {
     const rect = itemRef.current!.getBoundingClientRect();
@@ -50,11 +51,18 @@ function MenuRow({
   };
 
   const onEnter = (e: React.MouseEvent) => {
+    // Chromium fires a synthetic mouseenter (movementX/Y both 0) when the layout
+    // shifts a row under a stationary cursor -- scrolling, or a route change
+    // right after load. That's not a real hover; ignore it so the marquee can't
+    // get stuck open on a row nobody's pointer ever actually touched.
+    if (e.movementX === 0 && e.movementY === 0) return;
+
     const from = edge(e);
     lastY.current = e.clientY;
     itemRef.current?.classList.add("is-active");
+    slideTween.current?.kill();
     gsap.set(marqueeRef.current, { yPercent: from === "top" ? -101 : 101 });
-    gsap.to(marqueeRef.current, { yPercent: 0, duration: 0.5, ease: "power3.out" });
+    slideTween.current = gsap.to(marqueeRef.current, { yPercent: 0, duration: 0.5, ease: "power3.out" });
     tween.current?.kill();
     tween.current = gsap.to(innerRef.current, {
       xPercent: -50,
@@ -76,7 +84,9 @@ function MenuRow({
   const onLeave = (e: React.MouseEvent) => {
     const from = edge(e);
     itemRef.current?.classList.remove("is-active");
-    gsap.to(marqueeRef.current, {
+    tween.current?.kill();
+    slideTween.current?.kill();
+    slideTween.current = gsap.to(marqueeRef.current, {
       yPercent: from === "top" ? -101 : 101,
       duration: 0.45,
       ease: "power3.in",

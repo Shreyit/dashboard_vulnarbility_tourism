@@ -179,65 +179,6 @@
   line-height: 1.5;
 }
 
-/* ---------- roadmap ---------- */
-.roadmap-list {
-  border-top: var(--border);
-}
-
-.roadmap-row {
-  display: grid;
-  grid-template-columns: 2.5rem 1fr auto;
-  gap: var(--sp-3);
-  align-items: baseline;
-  padding: var(--sp-3) 0;
-  border-bottom: var(--border);
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-}
-
-.roadmap-row .idx {
-  color: var(--ink-faint);
-}
-
-.roadmap-row .desc {
-  color: var(--ink);
-}
-
-.roadmap-row .desc small {
-  display: block;
-  margin-top: 0.15rem;
-  color: var(--ink-soft);
-  font-size: 0.78rem;
-}
-
-.tag {
-  font-size: 0.65rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 0.25rem 0.6rem;
-  border: 1px solid currentColor;
-  border-radius: var(--radius-tag);
-  white-space: nowrap;
-}
-
-/* status distinguished by fill weight, not by introducing new hues */
-.tag-done {
-  color: var(--paper);
-  background: var(--ink);
-  border-color: var(--ink);
-}
-
-.tag-next {
-  color: var(--white);
-  background: var(--rust);
-  border-color: var(--rust-deep);
-}
-
-.tag-planned {
-  color: var(--ink-faint);
-  background: transparent;
-}
-
 /* ---------- gallery section ---------- */
 .gallery-section .section-head { max-width: 70ch; }
 

@@ -1,0 +1,67 @@
+.photostrip-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.photostrip-sticky {
+  position: sticky;
+  top: 72px; /* just below the sticky site header */
+  /* fill the rest of the viewport and center the strip in it -- pinned at
+     the top with the rest of the viewport left empty was the actual bug:
+     during the whole scroll runway there was just a dead gap below it */
+  height: calc(100vh - 72px);
+  height: calc(100dvh - 72px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.photostrip-viewport {
+  position: relative;
+  width: 100%;
+  height: clamp(280px, 34vw, 380px);
+  overflow: hidden;
+  /* fade left/right into the page instead of a hard rectangular frame.
+     Safe here (unlike the earlier 3D-transform gallery attempts): this is a
+     flat 2D strip, no perspective/preserve-3d/rotation anywhere in this
+     tree, so there's no masked-3D-layer compositor bug to trigger. */
+  mask-image: linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%);
+}
+
+.photostrip-track {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  gap: 24px;
+  width: max-content;
+}
+
+.photostrip-item {
+  flex: 0 0 auto;
+  width: clamp(180px, 20vw, 280px);
+  height: clamp(220px, 24vw, 340px);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--white);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.photostrip-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photostrip-hint {
+  display: block;
+  margin-top: var(--sp-3);
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}

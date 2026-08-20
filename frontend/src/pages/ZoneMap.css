@@ -1,0 +1,57 @@
+.zonemap-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-4);
+}
+
+.zonemap-panel {
+  overflow: hidden;
+  /* leaflet's own controls/attribution keep their default look -- functional
+     chrome, not part of the dashboard's visual language, deliberately left alone */
+}
+
+.zonemap-detail-panel {
+  padding: var(--sp-4);
+}
+
+.zonemap-empty {
+  padding: var(--sp-5) 0;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+.zonemap-empty p {
+  margin-top: var(--sp-2);
+}
+
+/* custom brutalist marker: flat-fill square, hard border, mono index -- replaces
+   leaflet's default soft teardrop pin */
+.zone-marker-wrap {
+  background: none;
+  border: none;
+}
+
+.zone-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.zone-marker.is-selected {
+  border-color: var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  color: var(--white);
+}
+
+@media (min-width: 960px) {
+  .zonemap-grid {
+    grid-template-columns: 2fr 1fr;
+    align-items: start;
+  }
+}

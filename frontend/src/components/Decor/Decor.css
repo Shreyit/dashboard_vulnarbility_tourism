@@ -1,0 +1,25 @@
+/* ---------- boat: gentle bob + rock, like a paddleboat sitting on the lake ---------- */
+.decor-boat {
+  display: block;
+  animation: decor-bob 3.6s ease-in-out infinite;
+  transform-origin: 50% 80%;
+}
+
+@keyframes decor-bob {
+  0%, 100% { transform: translateY(0) rotate(-1.5deg); }
+  50% { transform: translateY(-5px) rotate(1.5deg); }
+}
+
+/* ---------- prayer flags: each pennant flutters independently, staggered ---------- */
+.decor-flags {
+  overflow: visible;
+}
+
+.decor-flag {
+  animation: decor-flutter 2.2s ease-in-out infinite;
+}
+
+@keyframes decor-flutter {
+  0%, 100% { transform: rotate(-6deg) skewX(-4deg); }
+  50% { transform: rotate(6deg) skewX(4deg); }
+}

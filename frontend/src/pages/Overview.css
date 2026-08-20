@@ -1,0 +1,23 @@
+.overview-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-4);
+}
+
+.overview-gauge-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-5);
+}
+
+.overview-bars-panel {
+  padding: var(--sp-4);
+}
+
+@media (min-width: 860px) {
+  .overview-grid {
+    grid-template-columns: 300px 1fr;
+    align-items: start;
+  }
+}
