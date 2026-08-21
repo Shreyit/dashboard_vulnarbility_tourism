@@ -1,0 +1,124 @@
+.nainital-wrapper {
+  position: relative;
+  width: 100%;
+  border-top: var(--border-strong);
+  background: var(--paper);
+}
+
+.nainital-sticky {
+  position: sticky;
+  top: var(--header-h); /* clears the sticky site header */
+  height: calc(100vh - var(--header-h));
+  height: calc(100dvh - var(--header-h));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-4);
+  overflow: hidden;
+}
+
+.nainital-frame {
+  position: relative;
+  width: 100%;
+  max-width: var(--container);
+  height: 100%;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  align-items: center;
+}
+
+/* ---------------- the drawing ---------------- */
+.nainital-svg {
+  width: 100%;
+  height: auto;
+  max-height: 62vh;
+  overflow: visible;
+}
+
+.nainital-svg .peak-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  fill: var(--ink-faint);
+}
+
+/* only the layers that actually move get promoted */
+.nainital-svg [data-layer],
+.nainital-svg .boat,
+.nainital-svg .bird,
+.nainital-svg #cable-car,
+.nainital-svg #sun {
+  will-change: transform;
+}
+
+/* ---------------- captions ---------------- */
+.nainital-captions {
+  position: relative;
+  min-height: 12rem;
+  max-width: 46ch;
+  margin-top: var(--sp-3);
+}
+
+.nainital-step {
+  position: absolute;
+  inset: 0;
+  will-change: transform, opacity;
+}
+
+.nainital-step h3 {
+  margin-top: var(--sp-2);
+}
+
+.nainital-step p {
+  margin-top: var(--sp-2);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+/* ---------------- progress + credit ---------------- */
+/* lifted clear of the fixed PahadiBot launcher in the bottom-right corner */
+.nainital-progress {
+  position: absolute;
+  right: 0;
+  bottom: 6.6rem;
+  width: min(30vw, 260px);
+  height: 4px;
+  background: var(--paper-deep);
+  border: 1px solid var(--line-strong);
+}
+
+.nainital-progress-bar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--rust);
+  transform-origin: left center;
+  transform: scaleX(0);
+  will-change: transform;
+}
+
+.nainital-credit {
+  position: absolute;
+  right: 0;
+  bottom: 5rem;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+@media (max-width: 860px) {
+  .nainital-svg {
+    max-height: 40vh;
+  }
+  .nainital-captions {
+    min-height: 15rem;
+    max-width: none;
+  }
+  .nainital-credit,
+  .nainital-progress {
+    display: none;
+  }
+}

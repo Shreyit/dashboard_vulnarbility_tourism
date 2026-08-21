@@ -1,0 +1,22 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Secrets. config.py reads the repo-root .env (env_prefix DASHBOARD_), so this
+# is the file that would hold DASHBOARD_GROQ_API_KEY -- never commit it.
+.env
+.env.*
+!.env.example
+
+# Node (frontend/ has its own .gitignore too)
+node_modules/
+dist/
+
+# OS / editor
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea/

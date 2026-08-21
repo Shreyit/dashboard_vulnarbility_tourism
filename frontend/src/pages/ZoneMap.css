@@ -5,6 +5,10 @@
 }
 
 .zonemap-panel {
+  position: relative;
+  /* a stacking context of its own, so the entrance shutter's z-index stays
+     scoped to the panel and can't paint over the sticky header */
+  z-index: 0;
   overflow: hidden;
   /* leaflet's own controls/attribution keep their default look -- functional
      chrome, not part of the dashboard's visual language, deliberately left alone */
@@ -54,4 +58,29 @@
     grid-template-columns: 2fr 1fr;
     align-items: start;
   }
+}
+
+/* ---------- entrance shutter over the map ---------- */
+/* Leaflet owns everything inside .zonemap-panel, so the reveal happens on an
+   overlay above it rather than by transforming the map container. */
+.zonemap-shutter {
+  position: absolute;
+  inset: 0;
+  z-index: 500; /* above leaflet's own panes */
+  display: flex;
+  pointer-events: none;
+}
+
+.zonemap-shutter i {
+  flex: 1 1 0;
+  margin-inline: -0.5px;
+  background: var(--paper-deep);
+  transform-origin: center top;
+  will-change: transform;
+}
+
+.zonemap-gauge-row {
+  display: flex;
+  justify-content: center;
+  margin: var(--sp-4) 0;
 }

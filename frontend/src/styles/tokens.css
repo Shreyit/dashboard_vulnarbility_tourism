@@ -56,4 +56,9 @@
 
   --ease: cubic-bezier(0.65, 0, 0.35, 1);
   --container: 1280px;
+
+  /* height of the sticky header bar (the status rail above it scrolls away).
+     Sticky sections and their ScrollTriggers offset by this, so the header can
+     be resized in one place. */
+  --header-h: 56px;
 }

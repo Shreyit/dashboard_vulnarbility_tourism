@@ -54,54 +54,159 @@ output tables land in `processed/`.
 
 ## Tech stack
 
-- **Backend** (v1 built): FastAPI (Python), serving processed indices + a stress-test scenario
-  endpoint + PahadiBot's chat route (Groq, not yet keyed).
-- **Frontend** (scaffolded): React + TypeScript, built with Vite. Client-side SPA, GSAP-driven
-  animation, real photography processed into duotone art, a deliberately narrow warm-white/grey/
-  terracotta palette with no dark mode. See `workflow.md` §9.1 for the full visual-language rules.
+- **Backend**: FastAPI (Python), serving processed indices + a stress-test scenario endpoint +
+  PahadiBot's chat route (Groq, optional key).
+- **Frontend**: React + TypeScript, built with Vite. Client-side SPA wired to the live API.
+  Animation is GSAP throughout (ScrollTrigger, SplitText, DrawSVG, MotionPath, Flip), with real
+  photography processed into duotone art and a deliberately narrow warm-white/grey/terracotta
+  palette with no dark mode. See `workflow.md` §9.1 for the full visual-language rules, and
+  `frontend/README.md` for how the animation layer is organised.
 - **Data prep**: pandas-based cleaning/harmonization/index-computation pipeline, run offline, output
   cached so the live dashboard never re-processes raw Excel files per request.
 
 ## Status
 
-**Data pipeline, backend v1, and frontend design system are done; wiring the frontend views to
-the live API is next.**
+**Data pipeline, backend, and all four frontend views are built and wired to the live API.**
 
-- `notebooks/01_data_cleaning_eda.ipynb`: done, cleaned tables in `processed/`.
-- `backend/`: FastAPI app is live -- loads `processed/*.csv`, derives every variable in
+- `notebooks/01_data_cleaning_eda.ipynb`: done, cleaned tables committed in `processed/`.
+- `backend/`: FastAPI app loads `processed/*.csv`, derives every variable in
   `VARIABLES_AND_DATA_SOURCES.md` §3, computes the 6 sub-indices + TVI (town-wide and per-zone)
   and the peak-season stress-test scenario per `workflow.md` §5-§6. Routes: `/api/zones`,
   `/api/indices/town`, `/api/indices/zone/{zone_id}`, `/api/variables/{theme}`,
-  `/api/stress-test`, `/api/chat` (PahadiBot -- replies that it isn't connected yet until a
-  `GROQ_API_KEY` is set in `backend/.env`). External enrichment (OSM/Open-Meteo, `workflow.md`
-  §4) and zone-name confirmation are still open; weights in `backend/app/weights.json` are
-  equal-default and the first thing to hand back to domain reviewers.
-- `frontend/`: design system, custom cursor, pixel-transition reveal, flowing-menu nav, and dome
-  photo gallery are built and live on a landing page. The actual data views (Overview, Zone Map,
-  Stress Test, Explorer, PahadiBot chat) are placeholders until wired to the backend above.
+  `/api/stress-test`, `/api/chat`.
+- `frontend/`: landing page plus the three data views (Overview, Zone Map, Stress Test), all
+  reading the live API. Design system, custom crosshair cursor, magnetic controls, the
+  scroll-drawn Nainital SVG scene, the looping photo strip, and the section nav are built.
+  PahadiBot's chat panel is wired to `/api/chat`.
+
+Still open:
+
+- External enrichment (OSM / Open-Meteo, `workflow.md` §4).
+- Zone-name confirmation with local reviewers -- the ten site names are placeholders.
+- `backend/app/weights.json` is equal-weight by default and is the first thing to hand back to
+  domain reviewers.
+- The Explorer view described in `workflow.md` §10 (the per-pillar breakdown currently lives
+  inline in Overview rather than as its own view).
 
 See `workflow.md` §10 for the full phased plan.
 
-## Running it
+## Running it on a new machine
 
+### Prerequisites
+
+| Tool | Version | Notes |
+|---|---|---|
+| Python | 3.10+ | `config.py` uses `X \| None` syntax and pydantic-settings |
+| Node.js | 20.19+ or 22.12+ | required by Vite 8 |
+| npm | 10+ | ships with Node |
+
+Check what you have:
+
+```bash
+python3 --version && node -v && npm -v
 ```
-# backend (FastAPI)
-cd backend
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8010   # http://localhost:8010/docs
 
-# frontend (design system + landing page)
+### 1. Clone
+
+```bash
+git clone <repo-url> dashboard_vulnarbility_tourism
+cd dashboard_vulnarbility_tourism
+```
+
+**You do not need to run the notebook first.** The cleaned tables in `processed/` are
+committed, and the backend reads those. Re-running the notebook is only needed if you change
+the cleaning logic or the raw survey exports.
+
+### 2. Backend (terminal 1)
+
+```bash
+cd backend
+python3 -m venv .venv
+source .venv/bin/activate          # fish: source .venv/bin/activate.fish
+                                   # Windows PowerShell: .venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8010
+```
+
+**The port matters.** `frontend/vite.config.ts` proxies `/api/*` to `localhost:8010`; if you
+start uvicorn on a different port the dashboard will load but every panel will show a fetch
+error.
+
+Verify before moving on:
+
+```bash
+curl http://localhost:8010/api/health          # {"status":"ok"}
+curl http://localhost:8010/api/indices/town    # the TVI and its six sub-indices
+```
+
+Interactive API docs: <http://localhost:8010/docs>
+
+### 3. Frontend (terminal 2)
+
+```bash
 cd frontend
 npm install
-npm run dev        # http://localhost:5173
+npm run dev
+```
 
-# notebook (data cleaning + EDA)
+Open the URL it prints -- normally <http://localhost:5173>. If 5173 is taken Vite picks the
+next free port and everything still works: the frontend calls `/api/*` on its own origin and
+Vite proxies it server-side, so no CORS is involved in development.
+
+### 4. Optional: PahadiBot's language model
+
+The dashboard is fully functional without this. `/api/chat` answers either way -- with no key
+it says it isn't connected and returns its raw grounding context instead of inventing an
+answer.
+
+```bash
+cp .env.example .env      # in the repo root, NOT in backend/
+```
+
+then set `DASHBOARD_GROQ_API_KEY` in it. Note the `DASHBOARD_` prefix: `backend/app/config.py`
+declares `env_prefix = "DASHBOARD_"` and reads the **repo-root** `.env`, so a plain
+`GROQ_API_KEY` will be ignored. Restart uvicorn after editing.
+
+### Optional: regenerate `processed/` from the raw surveys
+
+```bash
 cd notebooks
-python -m venv .venv && source .venv/bin/activate
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 jupyter notebook 01_data_cleaning_eda.ipynb
 ```
+
+Run all cells; it rewrites `processed/*.csv` from `survey_data/`. Restart the backend to pick
+up the new tables.
+
+### Troubleshooting
+
+| Symptom | Cause |
+|---|---|
+| Panels show "Request to /api/... failed" | Backend not running, or not on port 8010 |
+| `ModuleNotFoundError: No module named 'fastapi'` | Virtualenv not activated, or `pip install` skipped |
+| Vite fails with an engine/syntax error | Node older than 20.19 |
+| Backend starts but `/api/indices/town` 500s | `processed/*.csv` missing -- re-run the notebook |
+| PahadiBot says it isn't connected | Expected without a key; see step 4 |
+| The whole UI is still and nothing animates | The header's motion toggle is set to "still", or your OS has *reduce motion* on -- see below |
+
+### Motion
+
+Every animation on the site is behind one switch. It follows your OS
+`prefers-reduced-motion` setting by default, and the **motion / still toggle in the header**
+overrides it in either direction; the choice is remembered in `localStorage`. Under "still"
+the content is all still delivered -- the scroll-drawn Nainital scene renders complete rather
+than stroke-by-stroke, and every number shows its real value immediately.
+
+### Production build
+
+```bash
+cd frontend && npm run build     # type-checks, then emits frontend/dist/
+npm run preview                  # serve the build locally
+```
+
+The built SPA is designed to be served by FastAPI's `StaticFiles` at the same origin, which is
+why `src/api/client.ts` uses relative `/api` paths rather than an absolute base URL.
 
 ## Repo structure
 
@@ -112,6 +217,8 @@ notebooks/requirements.txt       python deps for the notebook (pandas, numpy, ma
 processed/                       cleaned per-survey CSVs + data_quality_report.csv (notebook output)
 frontend/                        React + TypeScript (Vite) dashboard, GSAP animation, design system
 backend/                         FastAPI app: derives indices from processed/, serves the API
+.env.example                     copy to .env for the optional PahadiBot LLM key
+.agents/skills/                  vendored GSAP skill docs (pinned by skills-lock.json)
 VARIABLES_AND_DATA_SOURCES.md    full data dictionary: raw/derived/composite variables + external sources
 workflow.md                      pipeline architecture, index methodology, visual language, build plan
 RESEARCH_BENCHMARKS.md           cited external research: metrics/thresholds/frameworks behind the indices

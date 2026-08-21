@@ -21,18 +21,28 @@
 
 .stress-slider-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--sp-4);
+}
+
+.stress-slider-stack {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-width: 0;
 }
 
 .stress-multiplier {
   min-width: 4.5rem;
   font-size: 1.4rem;
+  line-height: 1;
   color: var(--rust);
+  will-change: transform;
 }
 
 .stress-slider {
-  flex: 1;
+  width: 100%;
   appearance: none;
   height: 0.4rem;
   background: var(--line-strong);
@@ -156,4 +166,63 @@
     grid-template-columns: 1fr 1fr;
     align-items: start;
   }
+}
+
+/* ---------- load bar under the slider ---------- */
+/* Shows how much of the road's daily capacity the current scenario consumes,
+   with the three cited anchors marked on it. Driven off the slider directly,
+   so it answers the drag before the debounced recompute returns. */
+.stress-load {
+  position: relative;
+  display: block;
+  height: 0.55rem;
+  background: var(--paper-deep);
+  border: 1px solid var(--line-strong);
+}
+
+.stress-load-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--rust);
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
+}
+
+.stress-load-mark {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+}
+
+.stress-load-mark i {
+  display: block;
+  width: 1px;
+  height: 0.55rem;
+  background: var(--ink);
+}
+
+.stress-load-mark em {
+  position: absolute;
+  top: 0.65rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-style: normal;
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+/* the scenario column is the one the simulator actually changes */
+.stress-table-scenario {
+  color: var(--rust);
+}
+
+.stress-gauge-arrow {
+  min-width: 3.5rem;
+  text-align: center;
 }

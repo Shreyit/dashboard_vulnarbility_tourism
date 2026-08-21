@@ -1,34 +1,191 @@
-.site-header {
-  position: sticky;
-  overflow: visible;
+/* ============================================================
+   Header: a thin instrument rail, then the main bar.
+   Grid is `auto 1fr auto` so the wordmark and the controls pin to
+   the edges and the centre slot absorbs whatever width is left --
+   at 1920px that slot carries the ticker instead of dead space.
+   ============================================================ */
+
+.header-rail {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  height: 34px;
+  padding-inline: var(--sp-4);
+  background: var(--paper-deep);
+  border-bottom: var(--border);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  overflow: hidden;
 }
 
-/* thin non-sticky strip above the nav, just for the corner flourish -- keeps
-   it out of the sticky header's own row so it can never collide with nav text */
-.header-decor-strip {
-  display: flex;
-  justify-content: flex-end;
-  height: 30px;
-  padding-inline: var(--sp-4);
+.header-rail-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* live indicator: a hard square, blinking on the steps() cadence the rest of
+   the loading chrome uses -- never a soft pulse */
+.header-rail-dot {
+  width: 5px;
+  height: 5px;
+  background: var(--rust);
+  animation: rail-blink 2s steps(1) infinite;
+}
+
+@keyframes rail-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.25; }
+}
+
+.header-rail-scroll {
+  margin-left: auto;
+  color: var(--ink-soft);
+}
+
+.header-flags {
+  flex: 0 0 auto;
+  margin-left: var(--sp-4);
+  pointer-events: none;
+  /* the string hangs past the rail's own edge; the rail clips it cleanly */
+  margin-bottom: -4px;
+}
+
+/* ---------------- main bar ---------------- */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: 0.9rem var(--sp-4);
   background: var(--paper);
-  overflow: hidden;
+  border-bottom: var(--border-strong);
+  overflow: visible;
 }
 
 .brand-group {
   display: flex;
   align-items: center;
   gap: var(--sp-2);
+  min-width: 0;
 }
 
-.header-boat,
-.header-flags {
+.header-boat {
+  flex: 0 0 auto;
   pointer-events: none;
 }
 
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55em;
+  white-space: nowrap;
+}
+
+.brand strong {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.brand-sub {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  /* a hairline lead-in instead of a slash: reads as instrument chrome */
+  padding-left: 0.7em;
+  border-left: 1px solid var(--line-strong);
+}
+
+.brand:hover strong {
+  color: var(--rust);
+}
+
+/* ---------------- centre ticker ---------------- */
+.header-ticker {
+  height: 1.05rem;
+  overflow: hidden;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  mask-image: linear-gradient(90deg, transparent, black 12%, black 88%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, black 12%, black 88%, transparent);
+}
+
+.header-ticker-inner {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+}
+
+.header-ticker-inner span {
+  display: block;
+  height: 1.05rem;
+  line-height: 1.05rem;
+  white-space: nowrap;
+}
+
+/* ---------------- nav + controls ---------------- */
 .nav-group {
   display: flex;
   align-items: center;
-  gap: var(--sp-3);
+  gap: var(--sp-4);
+}
+
+.header-links {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.header-link {
+  position: relative;
+  padding-bottom: 5px;
+  transition: color 0.25s var(--ease);
+}
+
+.header-link:hover {
+  color: var(--rust);
+}
+
+.header-link.is-current {
+  color: var(--rust);
+}
+
+/* re-parented into the active link and animated with Flip */
+.nav-marker {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--rust);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nav-divider {
+  width: 1px;
+  height: 1.4rem;
+  background: var(--line-strong);
 }
 
 /* ---------- hamburger (mobile only) ---------- */
@@ -46,19 +203,25 @@
   display: block;
   height: 2px;
   background: var(--ink);
-  transition: transform 0.25s var(--ease), opacity 0.2s var(--ease);
+  transform-origin: center;
+  transition: transform 0.3s var(--ease), opacity 0.2s var(--ease), background-color 0.2s var(--ease);
 }
 
+/* the two outer bars travel to the middle and cross; the middle one collapses
+   along its own length rather than just fading, which reads as mechanical */
 .hamburger.is-open span:nth-child(1) {
   transform: translateY(7px) rotate(45deg);
+  background: var(--rust);
 }
 
 .hamburger.is-open span:nth-child(2) {
+  transform: scaleX(0);
   opacity: 0;
 }
 
 .hamburger.is-open span:nth-child(3) {
   transform: translateY(-7px) rotate(-45deg);
+  background: var(--rust);
 }
 
 /* ---------- mobile nav panel ---------- */
@@ -73,6 +236,7 @@
   background: var(--ink);
   border-bottom: var(--border-strong);
   box-shadow: var(--shadow-hard);
+  will-change: transform;
 }
 
 .mobile-nav-link {
@@ -84,7 +248,6 @@
   font-size: 1.5rem;
   color: var(--paper);
   border-bottom: 1px solid rgba(246, 242, 234, 0.15);
-  animation: mobile-link-in 0.3s var(--ease) both;
 }
 
 .mobile-nav-link .mono-num {
@@ -92,20 +255,47 @@
   color: var(--ink-faint);
 }
 
-@keyframes mobile-link-in {
-  from { opacity: 0; transform: translateX(-8px); }
-  to { opacity: 1; transform: translateX(0); }
+/* ---------------- responsive ---------------- */
+@media (max-width: 1180px) {
+  .header-ticker {
+    display: none;
+  }
+  .site-header {
+    grid-template-columns: auto 1fr;
+  }
+  .nav-group {
+    justify-self: end;
+  }
+}
+
+@media (max-width: 900px) {
+  .header-rail-meta {
+    display: none;
+  }
+  .header-rail-scroll {
+    margin-left: 0;
+  }
 }
 
 @media (max-width: 640px) {
-  .header-links {
+  .header-links,
+  .nav-divider {
     display: none;
   }
   .hamburger {
     display: flex;
   }
-  .header-decor-strip {
+  .header-rail {
+    justify-content: space-between;
+  }
+  .header-flags {
     display: none;
+  }
+  .brand-sub {
+    display: none;
+  }
+  .nav-group {
+    gap: var(--sp-3);
   }
 }
 

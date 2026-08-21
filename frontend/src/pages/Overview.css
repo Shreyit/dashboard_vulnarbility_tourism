@@ -21,3 +21,17 @@
     align-items: start;
   }
 }
+
+/* the breakdown's animated height container -- GSAP drives `height` here, so
+   the overflow must be clipped or rows show through while it is closed */
+.component-list-shell {
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
+}
+
+.component-empty {
+  padding: 0.5rem 0;
+  color: var(--ink-faint);
+  font-size: 0.8rem;
+}

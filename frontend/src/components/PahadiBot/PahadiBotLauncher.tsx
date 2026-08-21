@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { gsap, useGSAP } from "../../lib/gsap";
+import { useReducedMotion } from "../../hooks/useReducedMotion";
+import { useMagnetic } from "../Magnetic/useMagnetic";
 import { postChat } from "../../api/client";
 import Loading from "../Loading";
 import "./PahadiBot.css";
@@ -22,10 +25,58 @@ export default function PahadiBotLauncher() {
   const [sending, setSending] = useState(false);
   const [llmConfigured, setLlmConfigured] = useState<boolean | null>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
+  const { ref: launcherRef, innerRef: dotRef, press } = useMagnetic<HTMLButtonElement>({
+    strength: 0.4,
+    radius: 90,
+    maxOffset: 16,
+  });
 
   useEffect(() => {
-    bodyRef.current?.scrollTo({ top: bodyRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, sending]);
+    bodyRef.current?.scrollTo({
+      top: bodyRef.current.scrollHeight,
+      behavior: reduced ? "auto" : "smooth",
+    });
+  }, [messages, sending, reduced]);
+
+  // ---- the panel grows out of the launcher it is anchored to ----
+  useGSAP(
+    () => {
+      const panel = panelRef.current;
+      if (!panel || !open || reduced) return;
+      gsap
+        .timeline({ defaults: { ease: "power3.out" } })
+        .from(panel, { autoAlpha: 0, y: 16, scaleY: 0.8, transformOrigin: "bottom right", duration: 0.35 })
+        .from(panel.querySelectorAll("header > *"), { autoAlpha: 0, y: 8, duration: 0.25, stagger: 0.06 }, 0.1)
+        .from(panel.querySelectorAll(".chat-msg"), { autoAlpha: 0, y: 10, duration: 0.3, stagger: 0.06 }, 0.15)
+        .from(panel.querySelector(".chat-input-row"), { autoAlpha: 0, y: 10, duration: 0.3 }, 0.2);
+    },
+    { dependencies: [open, reduced], scope: panelRef },
+  );
+
+  // ---- each new message slides in on its own, without re-running the above ----
+  const lastCountRef = useRef(messages.length);
+  useGSAP(
+    () => {
+      const body = bodyRef.current;
+      if (!body || reduced || messages.length <= lastCountRef.current) {
+        lastCountRef.current = messages.length;
+        return;
+      }
+      lastCountRef.current = messages.length;
+      const last = body.querySelector<HTMLElement>(".chat-msg:last-of-type");
+      if (!last) return;
+      gsap.from(last, {
+        autoAlpha: 0,
+        y: 12,
+        x: last.classList.contains("chat-msg-user") ? 12 : -12,
+        duration: 0.35,
+        ease: "power3.out",
+      });
+    },
+    { dependencies: [messages.length, reduced], scope: bodyRef },
+  );
 
   const send = async () => {
     const text = input.trim();
@@ -51,17 +102,21 @@ export default function PahadiBotLauncher() {
     <>
       <button
         type="button"
+        ref={launcherRef}
         className="pahadibot-launcher"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          press();
+          setOpen((v) => !v);
+        }}
         data-cursor
         data-cursor-label={open ? "CLOSE" : "ASK"}
       >
-        <span className="dot" />
+        <span className="dot" ref={dotRef as React.RefObject<HTMLSpanElement>} />
         PahadiBot
       </button>
 
       {open && (
-        <div className="pahadibot-panel">
+        <div className="pahadibot-panel" ref={panelRef}>
           <header>
             <h4>PahadiBot</h4>
             <button type="button" onClick={() => setOpen(false)} data-cursor>

@@ -5,12 +5,12 @@
 
 .photostrip-sticky {
   position: sticky;
-  top: 72px; /* just below the sticky site header */
-  /* fill the rest of the viewport and center the strip in it -- pinned at
+  top: var(--header-h); /* just below the sticky site header */
+  /* fill the rest of the viewport and centre the strip in it -- pinned at
      the top with the rest of the viewport left empty was the actual bug:
      during the whole scroll runway there was just a dead gap below it */
-  height: calc(100vh - 72px);
-  height: calc(100dvh - 72px);
+  height: calc(100vh - var(--header-h));
+  height: calc(100dvh - var(--header-h));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -20,7 +20,7 @@
 .photostrip-viewport {
   position: relative;
   width: 100%;
-  height: clamp(280px, 34vw, 380px);
+  height: clamp(300px, 38vw, 440px);
   overflow: hidden;
   /* fade left/right into the page instead of a hard rectangular frame.
      Safe here (unlike the earlier 3D-transform gallery attempts): this is a
@@ -34,34 +34,87 @@
   display: flex;
   align-items: center;
   height: 100%;
-  gap: 24px;
+  gap: 24px; /* keep in sync with GAP in PhotoStrip.tsx */
   width: max-content;
+  will-change: transform;
 }
 
+/* the item carries only the focus pass's transform; all the visible chrome
+   lives on the plate inside it, so the entrance and the focus pass never
+   write to the same element */
 .photostrip-item {
   flex: 0 0 auto;
   width: clamp(180px, 20vw, 280px);
   height: clamp(220px, 24vw, 340px);
+  will-change: transform, opacity;
+}
+
+.photostrip-plate {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
   border: 1.5px solid var(--ink);
   border-radius: var(--radius);
-  overflow: hidden;
   background: var(--white);
   box-shadow: 4px 4px 0 var(--ink);
+  will-change: transform, opacity;
 }
 
 .photostrip-item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  will-change: transform;
 }
 
-.photostrip-hint {
-  display: block;
-  margin-top: var(--sp-3);
-  text-align: center;
+/* ---------------- focus line ---------------- */
+.photostrip-focus {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 3;
+  width: 1px;
+  height: 100%;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.photostrip-focus i {
+  position: absolute;
+  left: 0;
+  width: 1.5px;
+  height: 16px;
+  background: var(--rust);
+}
+
+.photostrip-focus i:nth-child(1) { top: 0; }
+.photostrip-focus i:nth-child(2) { bottom: 0; }
+
+/* ---------------- readout ---------------- */
+.photostrip-readout {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: var(--sp-4);
   font-family: var(--font-mono);
   font-size: 0.68rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+}
+
+.photostrip-counter {
+  color: var(--rust);
+  font-size: 0.78rem;
+}
+
+.photostrip-caption {
+  color: var(--ink);
+  letter-spacing: 0.06em;
+}
+
+.photostrip-hint {
+  color: var(--ink-faint);
 }

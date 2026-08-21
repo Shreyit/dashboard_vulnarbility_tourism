@@ -12,6 +12,23 @@
       rel="stylesheet"
     />
     <title>Nainital Tourism Vulnerability Dashboard</title>
+    <script>
+      // Stamp the motion setting before first paint. React's MotionProvider owns
+      // this attribute from mount onward, but CSS animations start at first
+      // paint -- without this, a reader who asked for reduced motion still gets
+      // one frame of fluttering prayer flags before the app hydrates.
+      (function () {
+        try {
+          var stored = localStorage.getItem("nainital:motion");
+          var reduced =
+            stored === "reduced" ||
+            (stored !== "full" && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+          document.documentElement.dataset.motion = reduced ? "reduced" : "full";
+        } catch (e) {
+          document.documentElement.dataset.motion = "full";
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -157,42 +157,19 @@ h3 {
   box-shadow: 5px 5px 0 var(--rust-deep);
 }
 
-/* terminal-style loading indicator -- replaces skeleton loaders across the app.
-   Markup: <span class="loading-text">FETCHING<i/><i/><i/></span> */
-.loading-text {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 2px;
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-}
+/* .loading-text styles now live in components/Loading.css, alongside Loading.tsx */
 
-.loading-text i {
-  font-style: normal;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: currentColor;
-  display: inline-block;
-  animation: loading-blink 1s infinite ease-in-out;
-}
-
-.loading-text i:nth-child(2) { animation-delay: 0.15s; }
-.loading-text i:nth-child(3) { animation-delay: 0.3s; }
-
-@keyframes loading-blink {
-  0%, 80%, 100% { opacity: 0.2; }
-  40% { opacity: 1; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
-    scroll-behavior: auto !important;
-  }
+/* The single motion gate for CSS-driven animation.
+   Keyed on `data-motion` rather than on the media query directly, because the
+   header's motion toggle can override the OS setting in *both* directions --
+   a media query can only see what the OS says. MotionProvider mirrors the
+   resolved value onto <html>, and a tiny script in index.html stamps it before
+   first paint so nothing flutters for a frame on load. */
+html[data-motion="reduced"] *,
+html[data-motion="reduced"] *::before,
+html[data-motion="reduced"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
 }

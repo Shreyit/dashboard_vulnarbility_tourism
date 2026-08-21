@@ -1,0 +1,40 @@
+/* terminal-style loading indicator -- replaces skeleton loaders across the app. */
+.loading-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* pixelated / stepped progress bar -- hard-cut cell fills, never a smooth sweep,
+   per the design system's mechanical-motion loading spec. */
+.loading-steps {
+  display: inline-flex;
+  gap: 2px;
+  margin-left: 6px;
+}
+
+.loading-steps i {
+  font-style: normal;
+  width: 4px;
+  height: 9px;
+  background: var(--line-strong);
+  display: inline-block;
+  animation: loading-step 1.2s steps(1) infinite;
+}
+
+.loading-steps i:nth-child(1) { animation-delay: 0s; }
+.loading-steps i:nth-child(2) { animation-delay: 0.2s; }
+.loading-steps i:nth-child(3) { animation-delay: 0.4s; }
+.loading-steps i:nth-child(4) { animation-delay: 0.6s; }
+.loading-steps i:nth-child(5) { animation-delay: 0.8s; }
+.loading-steps i:nth-child(6) { animation-delay: 1s; }
+
+@keyframes loading-step {
+  0%, 83.34%, 100% { background: var(--line-strong); }
+  16.67% { background: var(--rust); }
+}

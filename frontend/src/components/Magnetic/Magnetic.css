@@ -1,0 +1,121 @@
+.magnetic {
+  display: inline-flex;
+  will-change: transform;
+}
+
+.magnetic-inner {
+  display: inline-flex;
+}
+
+/* ---------------- motion toggle ---------------- */
+
+.motion-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0;
+  background: none;
+  will-change: transform;
+}
+
+.motion-toggle-label {
+  position: relative;
+  display: block;
+  width: 3.4rem;
+  height: 0.85rem;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  text-align: right;
+}
+
+.motion-toggle-label span {
+  position: absolute;
+  inset: 0;
+  display: block;
+  line-height: 0.85rem;
+}
+
+.motion-toggle:hover .motion-toggle-label {
+  color: var(--rust);
+}
+
+/* hard-edged switch, not a soft pill -- same brutalist vocabulary as .panel */
+.motion-toggle-track {
+  position: relative;
+  display: block;
+  width: 3.5rem;
+  height: 1.6rem;
+  border: var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--paper-deep);
+  overflow: hidden;
+}
+
+/* the rust fill that recedes as motion is switched off */
+.motion-toggle-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--rust-soft);
+  transform-origin: left center;
+  will-change: transform;
+}
+
+/* five bars behind the knob: a waveform when motion is on, a flat line when off */
+.motion-toggle-ticks {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  padding-inline: 0.3rem;
+}
+
+.motion-toggle-ticks i {
+  display: block;
+  width: 2px;
+  height: 0.75rem;
+  background: var(--line-strong);
+  transform-origin: center;
+  will-change: transform;
+}
+
+.motion-toggle-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: calc(1.6rem - 4px - 3px);
+  background: var(--ink);
+  box-shadow: 2px 2px 0 var(--rust);
+  will-change: transform;
+}
+
+.motion-toggle-knob svg {
+  overflow: visible;
+}
+
+.motion-toggle-knob rect {
+  fill: var(--paper);
+}
+
+/* ---------- press ripple: a single hard square, no blur, no glow ---------- */
+.motion-toggle-ripple {
+  position: absolute;
+  inset: -1px;
+  border: 1.5px solid var(--rust);
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 780px) {
+  .motion-toggle-label {
+    display: none;
+  }
+}

@@ -73,7 +73,43 @@
   transform: translate(0, 0);
 }
 
+/* ---------------- trailing ring ---------------- */
+/* A second, slower layer. Square rather than circular, and it rotates with
+   pointer speed -- the site has no circles in its chrome anywhere else. */
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 9998;
+  will-change: transform;
+}
+
+.cursor-ring::before {
+  content: "";
+  position: absolute;
+  top: -13px;
+  left: -13px;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--ink-faint);
+  transition: width 0.25s var(--ease), height 0.25s var(--ease), top 0.25s var(--ease),
+    left 0.25s var(--ease), border-color 0.25s var(--ease), opacity 0.2s var(--ease);
+}
+
+.cursor-ring.is-hover::before {
+  top: -21px;
+  left: -21px;
+  width: 42px;
+  height: 42px;
+  border-color: var(--rust);
+  opacity: 0.5;
+}
+
 /* system cursor stays on for touch/coarse pointers -- this component no-ops there */
 @media (hover: none), (pointer: coarse) {
-  .cursor { display: none; }
+  .cursor,
+  .cursor-ring { display: none; }
 }

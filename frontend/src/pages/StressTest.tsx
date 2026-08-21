@@ -1,10 +1,17 @@
 import { useEffect, useRef, useState } from "react";
+import { gsap, useGSAP } from "../lib/gsap";
 import { getZones, postStressTest } from "../api/client";
 import { THEME_META, THEME_ORDER, type StressTestOut, type ZoneOut } from "../api/types";
+import { useReducedMotion } from "../hooks/useReducedMotion";
 import RadialGauge from "../components/IndexViz/RadialGauge";
 import ErrorPanel from "../components/ErrorPanel";
 import Loading from "../components/Loading";
+import Magnetic from "../components/Magnetic/Magnetic";
+import { SplitHeading } from "../components/Reveal/Reveal";
 import "./StressTest.css";
+
+const MIN_MULTIPLIER = 1;
+const MAX_MULTIPLIER = 17;
 
 export default function StressTest() {
   const [zones, setZones] = useState<ZoneOut[]>([]);
@@ -14,6 +21,120 @@ export default function StressTest() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const controlsRef = useRef<HTMLDivElement>(null);
+  const resultGridRef = useRef<HTMLDivElement>(null);
+  const loadFillRef = useRef<HTMLSpanElement>(null);
+  const deltaRef = useRef<HTMLDivElement>(null);
+  // Holds the result the entrance has already been played for. Keyed on the
+  // result object rather than on a boolean, so StrictMode replaying the mount
+  // effect re-plays the entrance instead of falling through to the
+  // recompute flash for a result the reader has not actually seen yet.
+  const introPlayedFor = useRef<StressTestOut | null>(null);
+  const deltaShownRef = useRef(0);
+  const reducedMotion = useReducedMotion();
+
+  // ---- controls entrance ----
+  useGSAP(
+    () => {
+      if (!controlsRef.current || reducedMotion) return;
+      const q = gsap.utils.selector(controlsRef);
+      gsap
+        .timeline({ defaults: { ease: "power3.out" } })
+        .from(controlsRef.current, { autoAlpha: 0, y: 20, duration: 0.5 })
+        .from(q(".stress-controls-row > *"), { autoAlpha: 0, x: -14, duration: 0.35, stagger: 0.07 }, 0.15)
+        .from(q(".stress-slider-row > *"), { autoAlpha: 0, y: 12, duration: 0.35, stagger: 0.07 }, 0.25);
+    },
+    { dependencies: [reducedMotion], scope: controlsRef, revertOnUpdate: true },
+  );
+
+  // ---- the load bar under the slider tracks the multiplier continuously ----
+  // Driven off the slider's value rather than off the debounced API result, so
+  // the bar answers the drag immediately while the numbers catch up behind it.
+  useGSAP(
+    () => {
+      const fill = loadFillRef.current;
+      if (!fill) return;
+      const progress = (multiplier - MIN_MULTIPLIER) / (MAX_MULTIPLIER - MIN_MULTIPLIER);
+      if (reducedMotion) {
+        gsap.set(fill, { scaleX: progress });
+        return;
+      }
+      gsap.to(fill, { scaleX: progress, duration: 0.35, ease: "power3.out", overwrite: true });
+    },
+    { dependencies: [multiplier, reducedMotion], scope: controlsRef },
+  );
+
+  // ---- results ----
+  // First result: the grid enters. Every later result (a slider recompute):
+  // the numbers that actually changed flash, and the delta counts to its new
+  // value instead of snapping -- so a drag reads as one continuous instrument
+  // rather than as a series of unrelated redraws.
+  useGSAP(
+    () => {
+      if (!result || !resultGridRef.current || reducedMotion) return;
+      const q = gsap.utils.selector(resultGridRef);
+
+      if (introPlayedFor.current === null || introPlayedFor.current === result) {
+        introPlayedFor.current = result;
+        gsap
+          .timeline({ defaults: { ease: "power3.out" } })
+          .from(q(":scope > .panel"), { autoAlpha: 0, y: 24, scale: 0.98, duration: 0.55, stagger: 0.12 })
+          .from(q(".stress-table-row"), { autoAlpha: 0, x: -12, duration: 0.35, stagger: 0.05 }, "-=0.25");
+        return;
+      }
+
+      gsap.fromTo(
+        q(".stress-table-scenario"),
+        { backgroundColor: "var(--rust-soft)" },
+        { backgroundColor: "rgba(0,0,0,0)", duration: 0.4, ease: "power2.inOut", stagger: 0.02, overwrite: true },
+      );
+      gsap.fromTo(
+        q(".stress-multiplier"),
+        { scale: 1.12 },
+        { scale: 1, duration: 0.4, ease: "back.out(2.4)", overwrite: true },
+      );
+    },
+    { dependencies: [result, reducedMotion], scope: resultGridRef },
+  );
+
+  // ---- the baseline -> scenario delta counts, and colours by direction ----
+  const tviDelta =
+    result?.baseline.tvi != null && result?.scenario.tvi != null
+      ? result.scenario.tvi - result.baseline.tvi
+      : null;
+
+  useGSAP(
+    () => {
+      const el = deltaRef.current;
+      if (!el) return;
+      const target = tviDelta ?? 0;
+
+      const write = (v: number) => {
+        el.textContent = tviDelta === null ? "--" : `${v >= 0 ? "+" : ""}${v.toFixed(1)}`;
+      };
+
+      if (reducedMotion) {
+        deltaShownRef.current = target;
+        write(target);
+        gsap.set(el, { color: target > 0 ? "var(--rust)" : "var(--ink-soft)" });
+        return;
+      }
+
+      const counter = { v: deltaShownRef.current };
+      gsap.to(counter, {
+        v: target,
+        duration: 0.5,
+        ease: "power2.out",
+        overwrite: true,
+        onUpdate: () => {
+          deltaShownRef.current = counter.v;
+          write(counter.v);
+        },
+      });
+      gsap.to(el, { color: target > 0 ? "var(--rust)" : "var(--ink-soft)", duration: 0.4, overwrite: "auto" });
+    },
+    { dependencies: [tviDelta, reducedMotion] },
+  );
 
   useEffect(() => {
     getZones().then(setZones).catch(() => {});
@@ -34,16 +155,25 @@ export default function StressTest() {
     };
   }, [multiplier, zoneId]);
 
-  const tviDelta = result?.baseline.tvi != null && result?.scenario.tvi != null
-    ? result.scenario.tvi - result.baseline.tvi
-    : null;
+  // Ticks on the load bar, from the cited road-capacity anchors. 1.0x and 1.3x
+  // are only ~2% apart on a 1-17x scale, so the second one carries a tick but
+  // no caption -- two labels there just overprint each other.
+  const anchorMarks = result
+    ? [
+        { at: 1, label: "today" },
+        { at: 1.3, label: "" },
+        { at: 16.7, label: "extreme" },
+      ]
+    : [];
 
   return (
     <main>
       <section className="section container" style={{ borderTop: "none", paddingTop: "var(--sp-6)" }}>
         <div className="section-head">
           <span className="eyebrow">Peak-season simulator</span>
-          <h1 style={{ fontSize: "clamp(2rem, 4vw, 3rem)" }}>Stress test</h1>
+          <SplitHeading as="h1" className="page-title">
+            Stress test
+          </SplitHeading>
           <p className="section-lede">
             A scenario calculator, not a forecast: drag the footfall multiplier and every
             sub-index recomputes from documented elasticity assumptions -- water and waste
@@ -52,7 +182,7 @@ export default function StressTest() {
           </p>
         </div>
 
-        <div className="panel stress-controls">
+        <div className="panel stress-controls" ref={controlsRef}>
           <div className="stress-controls-row">
             <label className="eyebrow" htmlFor="zone-select">
               scope
@@ -74,31 +204,50 @@ export default function StressTest() {
 
           <div className="stress-slider-row">
             <span className="mono-num stress-multiplier">{multiplier.toFixed(2)}x</span>
-            <input
-              type="range"
-              min={1}
-              max={17}
-              step={0.05}
-              value={multiplier}
-              onChange={(e) => setMultiplier(Number(e.target.value))}
-              className="stress-slider"
-              aria-label="Footfall multiplier"
-            />
+            <div className="stress-slider-stack">
+              <input
+                type="range"
+                min={MIN_MULTIPLIER}
+                max={MAX_MULTIPLIER}
+                step={0.05}
+                value={multiplier}
+                onChange={(e) => setMultiplier(Number(e.target.value))}
+                className="stress-slider"
+                aria-label="Footfall multiplier"
+              />
+              {/* how much of the road's capacity the current scenario consumes */}
+              <span className="stress-load" aria-hidden="true">
+                <span className="stress-load-fill" ref={loadFillRef} />
+                {anchorMarks.map((mark) => (
+                  <span
+                    className="stress-load-mark"
+                    key={mark.at}
+                    style={{
+                      left: `${((mark.at - MIN_MULTIPLIER) / (MAX_MULTIPLIER - MIN_MULTIPLIER)) * 100}%`,
+                    }}
+                  >
+                    <i />
+                    {mark.label && <em>{mark.label}</em>}
+                  </span>
+                ))}
+              </span>
+            </div>
           </div>
 
           {result && (
             <div className="stress-presets">
               {result.footfall_anchors.presets.map((p) => (
-                <button
-                  key={p.label}
-                  type="button"
-                  className={`btn stress-preset-btn${Math.abs(multiplier - p.multiplier) < 0.01 ? " is-active" : ""}`}
-                  onClick={() => setMultiplier(p.multiplier)}
-                  data-cursor
-                  data-cursor-label="SET"
-                >
-                  {p.label}
-                </button>
+                <Magnetic key={p.label} strength={0.35} radius={70} maxOffset={12}>
+                  <button
+                    type="button"
+                    className={`btn stress-preset-btn${Math.abs(multiplier - p.multiplier) < 0.01 ? " is-active" : ""}`}
+                    onClick={() => setMultiplier(p.multiplier)}
+                    data-cursor
+                    data-cursor-label="SET"
+                  >
+                    {p.label}
+                  </button>
+                </Magnetic>
               ))}
             </div>
           )}
@@ -117,12 +266,12 @@ export default function StressTest() {
         {loading && !result && <Loading label="RUNNING SCENARIO" />}
 
         {result && (
-          <div className="stress-result-grid">
+          <div className="stress-result-grid" ref={resultGridRef}>
             <div className="panel stress-gauge-panel">
               <div className="stress-gauge-pair">
                 <RadialGauge value={result.baseline.tvi} label="Baseline TVI" size={160} />
-                <div className="stress-gauge-arrow mono-num">
-                  {tviDelta === null ? "--" : `${tviDelta >= 0 ? "+" : ""}${tviDelta.toFixed(1)}`}
+                <div className="stress-gauge-arrow mono-num" ref={deltaRef}>
+                  --
                 </div>
                 <RadialGauge value={result.scenario.tvi} label={`Scenario @ ${multiplier.toFixed(2)}x`} size={160} />
               </div>
@@ -145,7 +294,7 @@ export default function StressTest() {
                       </span>
                       <span className="mono-num">{base === null ? "--" : Math.round(base * 100)}</span>
                       <span className="stress-table-sep">→</span>
-                      <span className="mono-num" style={{ color: "var(--rust)" }}>
+                      <span className="mono-num stress-table-scenario">
                         {scen === null ? "--" : Math.round(scen * 100)}
                       </span>
                     </div>

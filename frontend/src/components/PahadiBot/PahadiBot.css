@@ -17,11 +17,14 @@
   font-size: 0.78rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  transition: transform 0.15s var(--ease), box-shadow 0.15s var(--ease);
+  transition: box-shadow 0.15s var(--ease);
+  will-change: transform;
 }
 
+/* no transform here: the magnetic pull writes an inline transform on this
+   element, which would override a CSS hover translate anyway. The lift is the
+   shadow growing instead. */
 .pahadibot-launcher:hover {
-  transform: translate(-2px, -2px);
   box-shadow: 7px 7px 0 var(--ink);
 }
 

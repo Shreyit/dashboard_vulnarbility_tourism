@@ -1,86 +1,174 @@
 .flowing-menu {
+  position: relative;
   width: 100%;
   border-top: var(--border-strong);
 }
 
-.flowing-menu-item {
+/* ---------------- row ---------------- */
+.fm-row {
   position: relative;
   overflow: hidden;
   border-bottom: var(--border-strong);
-  height: clamp(4.5rem, 9vw, 7.5rem);
+  height: clamp(4.75rem, 9vw, 7.5rem);
 }
 
-.flowing-menu-link {
+/* the louvre: vertical slats that flip the row's fill in from the column the
+   cursor crossed. Transform-only, so the whole reveal stays on the compositor. */
+.fm-slats {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  pointer-events: none;
+}
+
+.fm-slat {
+  flex: 1 1 0;
+  /* a hairline of overlap: neighbouring slats must not leave seams of paper
+     showing through at fractional pixel widths */
+  margin-inline: -0.5px;
+  background: var(--ink);
+  transform: scaleY(0);
+  transform-origin: center bottom;
+  will-change: transform;
+}
+
+.fm-link {
   position: relative;
   z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--sp-4);
   height: 100%;
   padding-inline: var(--sp-4);
+  color: var(--ink);
+}
+
+/* ---------------- rolling label ---------------- */
+.fm-label {
+  position: relative;
+  display: block;
+  overflow: hidden;
   font-family: var(--font-display);
   font-size: clamp(1.75rem, 4.5vw, 3.5rem);
   font-weight: 400;
-  color: var(--ink);
-  transition: color 0.25s var(--ease);
+  line-height: 1.08;
+  white-space: nowrap;
 }
 
-.flowing-menu-item.is-active .flowing-menu-link {
+.fm-label-base {
+  display: block;
+}
+
+.fm-label-over {
+  position: absolute;
+  inset: 0;
+  display: block;
+  font-style: italic;
   color: var(--paper);
 }
 
-.flowing-menu-index {
+/* SplitText wraps each character; the roll needs per-char clipping */
+.fm-label .split-char,
+.fm-label div {
+  will-change: transform;
+}
+
+/* ---------------- right-hand meta ---------------- */
+.fm-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-shrink: 0;
+}
+
+.fm-blurb {
+  display: none;
+  max-width: 26ch;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  line-height: 1.5;
+  letter-spacing: 0.03em;
+  color: var(--ink-soft);
+  text-align: right;
+  transition: color 0.25s var(--ease);
+}
+
+.fm-index {
   font-family: var(--font-mono);
   font-size: 0.8rem;
   color: var(--ink-faint);
   transition: color 0.25s var(--ease);
 }
 
-.flowing-menu-item.is-active .flowing-menu-index {
-  color: var(--paper);
-  opacity: 0.7;
+.fm-arrow {
+  color: var(--ink-faint);
+  overflow: visible;
+  transition: color 0.25s var(--ease);
 }
 
-.flowing-menu-marquee {
+/* Colour is state, so it is a CSS transition on the active class rather than a
+   tween. An interrupted hover can then never leave a row half-inked. */
+.fm-row.is-active .fm-link,
+.fm-row.is-active .fm-blurb,
+.fm-row.is-active .fm-index,
+.fm-row.is-active .fm-arrow {
+  color: var(--paper);
+}
+
+/* ---------------- cursor-tracking preview plate ---------------- */
+.fm-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: clamp(120px, 13vw, 190px);
+  height: clamp(90px, 10vw, 140px);
+  margin-top: calc(clamp(90px, 10vw, 140px) / -2);
+  margin-left: calc(clamp(120px, 13vw, 190px) / -2);
+  overflow: hidden;
+  border: var(--border-strong);
+  box-shadow: var(--shadow-hard-sm);
+  background: var(--paper);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.fm-preview-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+}
+
+.fm-preview img {
   position: absolute;
   inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  background: var(--ink);
-  /* hidden by default -- JS only ever animates *to* this on leave; without an
-     explicit resting transform, an interrupted or scroll-synthesized enter/leave
-     tween can strand the marquee visible with its label overlapping the row's own */
-  transform: translateY(101%);
-  will-change: transform;
-}
-
-.flowing-menu-marquee-inner {
-  display: flex;
-  align-items: center;
+  width: 100%;
   height: 100%;
-  width: max-content;
-  will-change: transform;
-}
-
-.flowing-menu-marquee-inner .chunk {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-4);
-  padding-inline: var(--sp-4);
-}
-
-.flowing-menu-marquee-inner .chunk span {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: clamp(1.75rem, 4.5vw, 3.5rem);
-  color: var(--paper);
-  white-space: nowrap;
-}
-
-.flowing-menu-marquee-inner .chunk img {
-  height: clamp(2.5rem, 5.5vw, 4.5rem);
-  width: clamp(4rem, 9vw, 7rem);
   object-fit: cover;
-  border-radius: var(--radius);
-  filter: sepia(0.15);
+  opacity: 0;
+  filter: sepia(0.18) contrast(1.05);
+}
+
+@media (min-width: 1000px) {
+  .fm-blurb {
+    display: block;
+  }
+}
+
+/* no hover to drive any of this: keep the rows plain and legible. The
+   matching gsap.matchMedia() query in FlowingMenu.tsx means no inline style
+   from the hover choreography survives down here to fight these rules. */
+@media (hover: none), (pointer: coarse) {
+  .fm-slats,
+  .fm-preview,
+  .fm-label-over {
+    display: none;
+  }
+  .fm-blurb {
+    display: block;
+  }
 }

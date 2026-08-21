@@ -1,0 +1,23 @@
+.route-wipe {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  pointer-events: none;
+}
+
+.route-wipe-col {
+  flex: 1 1 0;
+  /* a hairline of overlap so fractional column widths leave no seams */
+  margin-inline: -0.5px;
+  background: var(--ink);
+  transform: scaleY(0);
+  transform-origin: center top;
+  will-change: transform;
+}
+
+/* every second column in rust: the wipe reads as the site's own palette,
+   not as a generic black curtain */
+.route-wipe-col:nth-child(3n + 2) {
+  background: var(--rust-deep);
+}

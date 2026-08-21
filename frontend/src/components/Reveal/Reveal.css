@@ -1,0 +1,10 @@
+/* SplitText's masked line wrappers clip their line during the roll-up */
+.split-heading .reveal-line {
+  will-change: transform;
+}
+
+/* SplitText measures against the element's final layout, so headings must not
+   be mid-transition when they are split */
+.split-heading {
+  text-wrap: balance;
+}
