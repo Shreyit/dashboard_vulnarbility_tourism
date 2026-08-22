@@ -66,7 +66,7 @@ output tables land in `processed/`.
 
 ## Status
 
-**Data pipeline, backend, and all four frontend views are built and wired to the live API.**
+**Data pipeline, backend, and frontend are built and wired to the live API.**
 
 - `notebooks/01_data_cleaning_eda.ipynb`: done, cleaned tables committed in `processed/`.
 - `backend/`: FastAPI app loads `processed/*.csv`, derives every variable in
@@ -74,10 +74,12 @@ output tables land in `processed/`.
   and the peak-season stress-test scenario per `workflow.md` §5-§6. Routes: `/api/zones`,
   `/api/indices/town`, `/api/indices/zone/{zone_id}`, `/api/variables/{theme}`,
   `/api/stress-test`, `/api/chat`.
-- `frontend/`: landing page plus the three data views (Overview, Zone Map, Stress Test), all
-  reading the live API. Design system, custom crosshair cursor, magnetic controls, the
-  scroll-drawn Nainital SVG scene, the looping photo strip, and the section nav are built.
-  PahadiBot's chat panel is wired to `/api/chat`.
+- `frontend/`: two pages. **Landing** (`/`) is the front page. **Dashboard Dome** (`/dashboard`)
+  is a single merged instrument panel, not three separate routes -- an iOS-style pill tab bar
+  swaps between Overview, Zone Map, and Stress Test in place, all reading the live API. Design
+  system, custom crosshair cursor, magnetic controls, the scroll-drawn Nainital SVG scene, the
+  looping photo strip, and the route wipe between the two pages are built. PahadiBot's chat panel
+  is wired to `/api/chat` and floats over both pages.
 
 Still open:
 
@@ -85,8 +87,7 @@ Still open:
 - Zone-name confirmation with local reviewers -- the ten site names are placeholders.
 - `backend/app/weights.json` is equal-weight by default and is the first thing to hand back to
   domain reviewers.
-- The Explorer view described in `workflow.md` §10 (the per-pillar breakdown currently lives
-  inline in Overview rather than as its own view).
+- A possible third page, once the user picks the next theme (`workflow.md` §10).
 
 See `workflow.md` §10 for the full phased plan.
 

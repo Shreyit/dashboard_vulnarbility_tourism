@@ -1,0 +1,73 @@
+/* ---------- pill tab bar ----------
+   The one deliberate rounded shape in the whole system: an iOS-style
+   segmented control. Kept brutalist rather than soft -- a hard ink border
+   and a hard offset shadow, not a blurred plastic capsule. */
+.dome-tabs {
+  position: relative;
+  display: inline-flex;
+  gap: 2px;
+  margin: var(--sp-5) 0 var(--sp-2);
+  padding: 4px;
+  background: var(--white);
+  border: var(--border-strong);
+  border-radius: 999px;
+  box-shadow: var(--shadow-hard-sm);
+}
+
+.dome-tab {
+  position: relative;
+  padding: 0.6rem 1.4rem;
+  border-radius: 999px;
+}
+
+/* the label needs its own stacking context -- a plain text node can't be
+   promoted above the absolutely-positioned thumb by the button's z-index
+   alone, since only positioned elements take part in z-index ordering */
+.dome-tab-label {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  transition: color 0.25s var(--ease);
+}
+
+.dome-tab.is-active .dome-tab-label {
+  color: var(--white);
+}
+
+.dome-tab-thumb {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--rust);
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.dome-tab-lede {
+  max-width: 58ch;
+  margin-bottom: var(--sp-5);
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+/* ---------- content swap ---------- */
+.dome-content {
+  min-height: 420px;
+}
+
+@media (max-width: 560px) {
+  .dome-tabs {
+    display: flex;
+    width: 100%;
+  }
+  .dome-tab {
+    flex: 1;
+    padding-inline: 0.6rem;
+    text-align: center;
+  }
+}

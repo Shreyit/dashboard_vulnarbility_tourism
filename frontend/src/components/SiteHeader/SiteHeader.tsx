@@ -10,9 +10,7 @@ import "./SiteHeader.css";
 
 const NAV = [
   { to: "/", label: "home" },
-  { to: "/overview", label: "overview" },
-  { to: "/zones", label: "zone map" },
-  { to: "/stress-test", label: "stress test" },
+  { to: "/dashboard", label: "dashboard dome" },
 ];
 
 /** Rolled through the header's centre slot, so the widest breakpoint isn't

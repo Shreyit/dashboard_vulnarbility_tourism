@@ -10,9 +10,7 @@ import ScrollProgress from "./components/ScrollProgress/ScrollProgress";
 import PahadiBotLauncher from "./components/PahadiBot/PahadiBotLauncher";
 
 import Landing from "./pages/Landing";
-import Overview from "./pages/Overview";
-import ZoneMap from "./pages/ZoneMap";
-import StressTest from "./pages/StressTest";
+import Dashboard from "./pages/Dashboard";
 
 export default function App() {
   return (
@@ -27,9 +25,7 @@ export default function App() {
 
         <Routes>
           <Route path="/" element={<Landing />} />
-          <Route path="/overview" element={<Overview />} />
-          <Route path="/zones" element={<ZoneMap />} />
-          <Route path="/stress-test" element={<StressTest />} />
+          <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
 
         <footer className="site-footer">

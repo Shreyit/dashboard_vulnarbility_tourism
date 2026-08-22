@@ -27,19 +27,19 @@ import galleryNight from "../assets/art/gallery-night.webp";
 const MENU_ITEMS: FlowingMenuItem[] = [
   {
     label: "Overview",
-    href: "/overview",
+    href: "/dashboard?tab=overview",
     image: navLake,
     blurb: "The town-wide index and its six pillars, broken down to source questions.",
   },
   {
     label: "Zone Map",
-    href: "/zones",
+    href: "/dashboard?tab=zones",
     image: navHimalaya,
     blurb: "Ten surveyed sites, each with its own score and breakdown.",
   },
   {
     label: "Stress Test",
-    href: "/stress-test",
+    href: "/dashboard?tab=stress",
     image: navTown,
     blurb: "Drag peak-season footfall and watch every sub-index recompute.",
   },
@@ -147,16 +147,16 @@ export default function Landing() {
             <div className="hero-actions">
               <Magnetic strength={0.42} radius={100} maxOffset={22}>
                 <a
-                  href="/overview"
+                  href="/dashboard"
                   className="btn btn-solid"
                   data-cursor
                   data-cursor-label="GO"
                   onClick={(e) => {
                     e.preventDefault();
-                    navigate("/overview");
+                    navigate("/dashboard");
                   }}
                 >
-                  See the live index
+                  Enter the dashboard dome
                 </a>
               </Magnetic>
               <Magnetic strength={0.42} radius={100} maxOffset={22}>
@@ -214,11 +214,11 @@ export default function Landing() {
 
       <section className="section container">
         <div className="section-head">
-          <span className="eyebrow">The dashboard</span>
-          <SplitHeading as="h2">Five views, one dashboard.</SplitHeading>
+          <span className="eyebrow">The dashboard dome</span>
+          <SplitHeading as="h2">One page. Three lenses.</SplitHeading>
           <Reveal as="p" className="section-lede">
-            The town-wide index, a zone-by-zone map, and a peak-season stress-test simulator you
-            can play with yourself.
+            The town-wide index, the zone-by-zone map, and a peak-season stress-test simulator,
+            in one instrument panel you flip through instead of leaving.
           </Reveal>
         </div>
         <FlowingMenu items={MENU_ITEMS} onNavigate={handleNavigate} />

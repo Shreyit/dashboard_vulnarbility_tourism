@@ -172,9 +172,15 @@ fixed launcher button + panel that currently states plainly that it isn't connec
 - Dev flow: Vite dev server proxies `/api/*` to the local FastAPI instance; production build is a
   static `dist/` folder, served either by FastAPI's `StaticFiles` or a separate static host — to
   confirm at deploy time.
-- Views: (1) Overview — TVI gauge + 6 sub-index bars, town-wide; (2) Zone map — click a zone to see
-  its breakdown; (3) Stress-test — slider + before/after comparison; (4) Explorer — theme-level
-  charts of the derived variables; (5) AI chat panel (PahadiBot, see §8).
+- Pages: (1) **Landing** (`/`) — the front page: hero, flowing-menu nav into the dashboard, photo
+  gallery, methodology stats. (2) **Dashboard Dome** (`/dashboard`) — a single merged instrument
+  panel, not three separate routes. An iOS-style pill tab bar swaps three views in place: Overview
+  (TVI gauge + 6 sub-index bars, town-wide), Zone Map (click a zone to see its breakdown), and
+  Stress Test (slider + before/after comparison). Tab state lives in the URL as `?tab=`, so the
+  landing page's flowing-menu can deep-link straight into a given view. PahadiBot (see §8) is a
+  floating panel available from both pages, not a tab. Room is reserved for a possible third page
+  (another theme) later; the Explorer/per-pillar-drilldown idea folded into Overview's expandable
+  component rows rather than becoming its own view.
 
 ### 9.1 Visual language (locked in, applies to every future screen)
 
@@ -197,9 +203,14 @@ work stays consistent instead of drifting toward generic AI-tool defaults:
   (`process_art.py`-style pipeline: autocontrast grayscale + `ImageOps.colorize` + light grain).
   Reused as the flowing-menu strip, the dome gallery, and the pixel-transition hero reveal.
 - **Signature components** (`frontend/src/components/`): `Cursor` (crosshair, viewfinder-bracket
-  hover state, no lag), `PixelTransition` (staggered square-grid reveal, doubles as the eventual
-  view-to-view transition once routing exists), `FlowingMenu` (marquee nav row with velocity-skew),
+  hover state, no lag), `PixelTransition` (staggered square-grid reveal, also used as the full-page
+  route wipe between Landing and the Dome), `FlowingMenu` (marquee nav row with velocity-skew),
   `DomeGallery` (drag-to-rotate 3D photo dome).
+- **Dashboard Dome pill tab bar** (`frontend/src/pages/Dashboard.tsx`): the one deliberately rounded
+  shape in the system, an iOS-style segmented control, kept brutalist rather than soft — hard ink
+  border, hard offset shadow, a solid rust thumb re-parented between tabs with GSAP Flip (the same
+  pattern the header's active-link marker uses). This is a scoped exception to the near-zero-radius
+  rule, not a relaxation of it elsewhere.
 
 ## 10. Phased implementation plan
 
@@ -207,17 +218,22 @@ work stays consistent instead of drifting toward generic AI-tool defaults:
    → `processed/*.csv`); *external enrichment (OSM/Open-Meteo/reference tables) still open*. Review
    the notebook's output/open-items list before building UI on top of it.
 2. **Backend**: FastAPI routes serving the processed tables + stress-test math, no AI yet.
-3. **Frontend v1** — *design system + landing page done* (`frontend/`, Vite/React/TS): palette,
-   type, the custom crosshair cursor, pixel-transition reveal, flowing-menu nav, and dome photo
-   gallery are all built and wired into a landing page with real (cited) Nainital photography
-   processed into duotone/tritone art. *Not done yet*: the actual data-driven views (Overview,
-   Zone Map, Stress Test, Explorer) — right now those are placeholder anchors on the landing page;
-   they go live once the FastAPI backend (step 2) exists to wire them to.
-4. **Stress-test UI**: slider component wired to `/api/stress-test`.
-5. **GSAP polish pass**: animations, transitions, professional visual pass on top of the working React views.
-6. **AI chat route**: Groq integration once the key is available, wired into the frontend chat panel.
+3. **Frontend v1** — *design system, landing page, and backend wiring done* (`frontend/`,
+   Vite/React/TS): palette, type, the custom crosshair cursor, pixel-transition reveal,
+   flowing-menu nav, and dome photo gallery are built into the landing page with real (cited)
+   Nainital photography processed into duotone/tritone art. The data-driven views (Overview, Zone
+   Map, Stress Test) are live, reading the FastAPI backend (step 2).
+4. **Dashboard Dome merge** — *done*: the three data views were consolidated from separate routes
+   into one page (`frontend/src/pages/Dashboard.tsx`), navigated with an iOS-style pill tab bar
+   instead of a page change, per the "2-3 page, Tableau-style" direction — a presentable single
+   instrument panel rather than a multi-page app.
+5. **GSAP polish pass** — *done*: entrance/scroll animations, the scroll-drawn Nainital SVG scene,
+   the looping photo strip, magnetic controls, and the route/tab transitions are all built.
+6. **AI chat route** — *frontend done*: the PahadiBot panel is wired to `/api/chat` and degrades
+   honestly (shows raw grounding context, flags itself as unconfigured) with no key set. Only the
+   Groq key itself is still pending from the user.
 7. **Review & weight tuning**: revisit index weights/normalization with the user once real numbers
-   are visible.
+   are visible; confirm the ten zone names with local reviewers.
 
 ## Open questions for the user (before/while implementing)
 
