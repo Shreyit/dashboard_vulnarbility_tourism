@@ -54,3 +54,34 @@ class ChatResponse(BaseModel):
     reply: str
     grounded: bool
     llm_configured: bool
+
+
+class SustainabilityTriadOut(BaseModel):
+    economic: float | None
+    environmental: float | None
+    social: float | None
+
+
+class StakeholderMatrixOut(BaseModel):
+    surveys: list[str]
+    themes: list[str]
+    matrix: dict[str, dict[str, float | None]]
+
+
+class SeasonalityOut(BaseModel):
+    value: float | None
+    components: list[ComponentDetail]
+
+
+class HostVisitorGapOut(BaseModel):
+    visitor_satisfaction: float | None
+    host_sentiment: float | None
+    gap: float | None
+    doxey_stage: str | None
+
+
+class InsightsOut(BaseModel):
+    sustainability: SustainabilityTriadOut
+    stakeholder_matrix: StakeholderMatrixOut
+    seasonality: SeasonalityOut
+    host_visitor_gap: HostVisitorGapOut

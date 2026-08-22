@@ -55,6 +55,45 @@ export type ChatResponse = {
   llm_configured: boolean;
 };
 
+export type SustainabilityTriad = {
+  economic: number | null;
+  environmental: number | null;
+  social: number | null;
+};
+
+export type StakeholderMatrix = {
+  surveys: string[];
+  themes: ThemeKey[];
+  matrix: Record<string, Partial<Record<ThemeKey, number | null>>>;
+};
+
+export type SeasonalityOut = {
+  value: number | null;
+  components: ComponentDetail[];
+};
+
+export type HostVisitorGapOut = {
+  visitor_satisfaction: number | null;
+  host_sentiment: number | null;
+  gap: number | null;
+  doxey_stage: string | null;
+};
+
+export type InsightsOut = {
+  sustainability: SustainabilityTriad;
+  stakeholder_matrix: StakeholderMatrix;
+  seasonality: SeasonalityOut;
+  host_visitor_gap: HostVisitorGapOut;
+};
+
+// Display metadata for the stakeholder matrix rows -- the backend only sends survey keys.
+export const STAKEHOLDER_META: Record<string, string> = {
+  enterprise: "Enterprises",
+  residents: "Residents",
+  workers: "Workers",
+  tourist: "Tourists",
+};
+
 // Direction + display metadata the backend doesn't need to send but the UI does.
 export const THEME_META: Record<ThemeKey, { label: string; short: string; higherIsBetter: boolean }> = {
   wsi: { label: "Water Stress Index", short: "Water", higherIsBetter: false },

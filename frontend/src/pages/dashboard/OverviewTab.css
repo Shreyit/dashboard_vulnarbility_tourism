@@ -1,7 +1,38 @@
+.kpi-row {
+  margin-bottom: var(--sp-4);
+}
+
 .overview-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--sp-4);
+  margin-bottom: var(--sp-5);
+}
+
+.overview-insights-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-4);
+}
+
+.overview-coxcomb-panel,
+.overview-matrix-panel {
+  padding: var(--sp-4);
+}
+
+.overview-insights-note {
+  margin: var(--sp-2) 0 var(--sp-4);
+  max-width: 46ch;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+@media (min-width: 960px) {
+  .overview-insights-grid {
+    grid-template-columns: 1fr 1.4fr;
+    align-items: start;
+  }
 }
 
 .overview-gauge-panel {

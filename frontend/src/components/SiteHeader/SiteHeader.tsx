@@ -17,7 +17,7 @@ const NAV = [
  *  mostly empty space between the wordmark and the nav. */
 const TICKER = [
   "1,029 survey responses · 5 respondent groups",
-  "10 surveyed zones · 6 vulnerability pillars",
+  "9 surveyed zones · 6 vulnerability pillars",
   "9 cited external benchmarks · UNWTO, Sphere, GSTC",
   "extreme weekend inflow ≈ 16.7× road capacity",
 ];

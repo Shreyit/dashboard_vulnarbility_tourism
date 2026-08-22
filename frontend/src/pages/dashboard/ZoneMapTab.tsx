@@ -4,8 +4,8 @@ import * as L from "leaflet";
 import { gsap, useGSAP } from "../../lib/gsap";
 import "leaflet/dist/leaflet.css";
 
-import { getZones, getZoneIndices } from "../../api/client";
-import { THEME_ORDER, type IndexBundle, type ZoneOut } from "../../api/types";
+import { loadZonesWithIndices } from "../../api/loadZonesWithIndices";
+import { THEME_ORDER } from "../../api/types";
 import { useAsync } from "../../hooks/useAsync";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import RadialGauge from "../../components/IndexViz/RadialGauge";
@@ -15,12 +15,6 @@ import Loading from "../../components/Loading";
 import "./ZoneMapTab.css";
 
 const NAINITAL_CENTER: [number, number] = [29.3865, 79.459];
-
-async function loadZonesWithIndices(): Promise<{ zone: ZoneOut; bundle: IndexBundle }[]> {
-  const zones = await getZones();
-  const bundles = await Promise.all(zones.map((z) => getZoneIndices(z.zone_id)));
-  return zones.map((zone, i) => ({ zone, bundle: bundles[i] }));
-}
 
 function markerIcon(tvi: number | null, isSelected: boolean) {
   const pct = tvi === null ? 0 : Math.max(0, Math.min(100, tvi));

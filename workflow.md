@@ -62,20 +62,25 @@ flowchart LR
 
 ## 3. Zone assignment (spatial join) — **done** (join logic), naming still open
 
-- The 10 Location-survey points are our fixed zone set, currently labeled placeholder `Z01`..`Z10`.
+- The Location survey has 10 rows (`Z01`..`Z10`), but `Z01` and `Z02` are ~50m apart — a
+  duplicate/erroneous site submission, not two distinct locations (confirmed by the survey team:
+  only 9 real sites were surveyed). `backend/app/data_loader.py`'s `EXCLUDED_ZONES` filters `Z02`
+  out at load time (not hand-edited into the notebook's generated CSV, so the exclusion survives a
+  re-run of `processed/location_clean.csv`), leaving **9 zones**: `Z01`, `Z03`-`Z10`.
 - Every GPS-tagged Enterprise/Resident record is assigned to the **nearest zone point** (haversine
   distance) with a 500m cutoff. Result: 61/157 Enterprise and 143/239 Residents records matched to a
-  zone; the rest (mostly outside the 10 audited hotspots) count in the **town-wide** rollup only, not
-  forced into a zone.
+  zone; the rest (mostly outside the 9 audited hotspots) count in the **town-wide** rollup only, not
+  forced into a zone. A handful were nearest to the now-excluded `Z02` -- they still count in the
+  town-wide rollup, they just never surface under a zone-level query.
 - Tourist and Worker surveys are not GPS-tagged — they contribute to **town-wide** scores only, not
   per-zone maps.
-- **Still open**: reverse-geocode the 10 zone points via OSM Nominatim to get human-readable names
+- **Still open**: reverse-geocode the 9 zone points via OSM Nominatim to get human-readable names
   (e.g. "Mall Road", "Tallital", "Naini Lake foreshore") — not yet run; needs the user to confirm the
   resulting names against local knowledge before they're locked in.
 
 ## 4. External data enrichment
 
-Per zone (10 points, buffered ~150–300m):
+Per zone (9 points, buffered ~150–300m):
 - Overpass API queries for POI counts (parking, dustbins, toilets, drinking water, healthcare,
   hotels, footway length) — cached to disk after first fetch, not re-queried live per dashboard
   load.
@@ -107,6 +112,18 @@ on Overpass/Nominatim being up.
 All weights and normalization bounds live in one config file — this is the first thing to hand back
 to the user/domain reviewers to sanity-check before trusting the numbers.
 
+### 5.1 Dashboard insights (beyond the 6 pillars) — **done**, `backend/app/insights.py`
+
+Four cross-cutting composites, all town-wide only, all reusing already-computed values above (no
+new raw aggregation): the **Sustainability Triad** (the 6 pillars regrouped into Economic/Social/
+Environmental, Elkington 1997), the **Stakeholder Pressure Matrix** (which respondent group feels
+the most pressure on which pillar — falls out of `THEME_COMPONENTS`' existing survey tagging for
+free), the **Seasonality Amplification Index** (an empirical peak-vs-off-season signal, distinct
+from the stress test below, which is a hypothetical scenario), and the **Host-Visitor Perception
+Gap** (implements the Doxey's Irridex banding `RESEARCH_BENCHMARKS.md` §2.3 describes). Full
+formulas, normalization, and citations: `VARIABLES_AND_DATA_SOURCES.md` §4.1, and interactively
+per-indicator on the landing page's Data & Methodology section (`frontend/src/pages/methodologyContent.ts`).
+
 ## 6. Stress/pressure-test simulator
 
 Goal: let the user drag a "peak-season tourist footfall" slider (e.g. baseline → +25% → +50%) and
@@ -134,6 +151,8 @@ Planned routes (v1):
 - `GET /api/indices/town` — town-wide TVI + 6 sub-indices.
 - `GET /api/indices/zone/{zone_id}` — per-zone breakdown.
 - `GET /api/variables/{theme}` — underlying derived variables behind a sub-index (for chart drill-down).
+- `GET /api/insights/town` — the Sustainability Triad, Stakeholder Pressure Matrix, Seasonality
+  Amplification Index, and Host-Visitor Perception Gap (§5.1). Town-wide only.
 - `POST /api/stress-test` — body: `{ footfall_multiplier }` → returns recomputed indices.
 - `POST /api/chat` — AI chat route (see §8).
 - Data loads from the processed store (SQLite or Parquet) at startup, served from memory —
@@ -173,14 +192,21 @@ fixed launcher button + panel that currently states plainly that it isn't connec
   static `dist/` folder, served either by FastAPI's `StaticFiles` or a separate static host — to
   confirm at deploy time.
 - Pages: (1) **Landing** (`/`) — the front page: hero, flowing-menu nav into the dashboard, photo
-  gallery, methodology stats. (2) **Dashboard Dome** (`/dashboard`) — a single merged instrument
-  panel, not three separate routes. An iOS-style pill tab bar swaps three views in place: Overview
-  (TVI gauge + 6 sub-index bars, town-wide), Zone Map (click a zone to see its breakdown), and
-  Stress Test (slider + before/after comparison). Tab state lives in the URL as `?tab=`, so the
-  landing page's flowing-menu can deep-link straight into a given view. PahadiBot (see §8) is a
-  floating panel available from both pages, not a tab. Room is reserved for a possible third page
-  (another theme) later; the Explorer/per-pillar-drilldown idea folded into Overview's expandable
-  component rows rather than becoming its own view.
+  gallery, and the **Data & Methodology** section (`#data`), which ends with an interactive
+  per-indicator picker (`frontend/src/pages/MethodologyTab.tsx`, a `size="small"` `PillTabs`
+  instance) covering all 11 indicators — definition, source components, normalization method,
+  formula, and citations, one at a time (`pages/methodologyContent.ts`). Deliberately kept off the
+  Dashboard Dome itself, so the dashboard stays focused on the live numbers and the reference
+  material lives where a reader would look for it first. (2) **Dashboard Dome** (`/dashboard`) — a
+  single merged instrument panel, not three separate routes. An iOS-style pill tab bar
+  (`components/PillTabs/`, shared with the Methodology picker above) swaps three views in place, in
+  this order: **Overview** (TVI gauge + 6 sub-index bars, the KPI strip, the Sustainability Triad
+  Coxcomb, and the Stakeholder Pressure Matrix — §5.1), **Zone Map** (click a zone to see its
+  breakdown), and **Stress Test** (slider + before/after comparison, deliberately last now that the
+  dashboard has more to see first). Tab state lives in the URL as `?tab=`, so the landing page's
+  flowing-menu can deep-link straight into a given view. PahadiBot (see §8) is a floating panel
+  available from both pages, not a tab. Room is reserved for a possible third page (another theme)
+  later.
 
 ### 9.1 Visual language (locked in, applies to every future screen)
 
@@ -206,11 +232,19 @@ work stays consistent instead of drifting toward generic AI-tool defaults:
   hover state, no lag), `PixelTransition` (staggered square-grid reveal, also used as the full-page
   route wipe between Landing and the Dome), `FlowingMenu` (marquee nav row with velocity-skew),
   `DomeGallery` (drag-to-rotate 3D photo dome).
-- **Dashboard Dome pill tab bar** (`frontend/src/pages/Dashboard.tsx`): the one deliberately rounded
-  shape in the system, an iOS-style segmented control, kept brutalist rather than soft — hard ink
-  border, hard offset shadow, a solid rust thumb re-parented between tabs with GSAP Flip (the same
-  pattern the header's active-link marker uses). This is a scoped exception to the near-zero-radius
-  rule, not a relaxation of it elsewhere.
+- **Pill tab bar** (`frontend/src/components/PillTabs/`): the one deliberately rounded shape in the
+  system, an iOS-style segmented control, kept brutalist rather than soft — hard ink border, hard
+  offset shadow, a solid rust thumb re-parented between tabs with GSAP Flip (the same pattern the
+  header's active-link marker uses). A scoped exception to the near-zero-radius rule, not a
+  relaxation of it elsewhere. Extracted as a generic `{ tabs, active, onSelect }` component so both
+  the Dashboard Dome's top-level nav and the landing page's Methodology picker (`size="small"`)
+  share one implementation.
+- **Coxcomb / stakeholder-matrix charts** (`frontend/src/components/IndexViz/`): `CoxcombChart` is a
+  hand-built SVG Nightingale rose — three categories told apart by *texture* (solid rust, a
+  diagonal-hatch rust pattern, an outline-only wedge), not by introducing new hues, staying inside
+  the warm-white/grey/orange rule. `StakeholderMatrixGrid` is a hard-bordered grid, not a soft
+  gradient heatmap, cell fill = rust `color-mix` opacity (the same technique the zone-map markers
+  already use).
 
 ## 10. Phased implementation plan
 
@@ -223,21 +257,32 @@ work stays consistent instead of drifting toward generic AI-tool defaults:
    flowing-menu nav, and dome photo gallery are built into the landing page with real (cited)
    Nainital photography processed into duotone/tritone art. The data-driven views (Overview, Zone
    Map, Stress Test) are live, reading the FastAPI backend (step 2).
-4. **Dashboard Dome merge** — *done*: the three data views were consolidated from separate routes
-   into one page (`frontend/src/pages/Dashboard.tsx`), navigated with an iOS-style pill tab bar
-   instead of a page change, per the "2-3 page, Tableau-style" direction — a presentable single
-   instrument panel rather than a multi-page app.
+4. **Dashboard Dome merge** — *done*: the data views were consolidated from separate routes into
+   one page (`frontend/src/pages/Dashboard.tsx`), navigated with an iOS-style pill tab bar instead
+   of a page change, per the "2-3 page, Tableau-style" direction. Later extended (still *done*)
+   with the Sustainability Triad, Stakeholder Pressure Matrix, Seasonality Amplification Index, and
+   Host-Visitor Perception Gap in Overview, and reordered to Overview → Zone Map → Stress Test
+   (last). The per-indicator Methodology picker (§5.1) was built as part of this pass but moved to
+   the landing page's Data & Methodology section rather than staying a Dashboard Dome tab, so the
+   dashboard itself stays focused on the live numbers.
 5. **GSAP polish pass** — *done*: entrance/scroll animations, the scroll-drawn Nainital SVG scene,
    the looping photo strip, magnetic controls, and the route/tab transitions are all built.
 6. **AI chat route** — *frontend done*: the PahadiBot panel is wired to `/api/chat` and degrades
    honestly (shows raw grounding context, flags itself as unconfigured) with no key set. Only the
    Groq key itself is still pending from the user.
 7. **Review & weight tuning**: revisit index weights/normalization with the user once real numbers
-   are visible; confirm the ten zone names with local reviewers.
+   are visible; confirm the nine zone names with local reviewers.
 
 ## Open questions for the user (before/while implementing)
 
 - Confirm or correct the auto-generated zone names (Nominatim reverse-geocode guesses).
 - Confirm default equal weighting for sub-indices/TVI, or supply preferred weights.
 - Confirm the elasticity assumptions in §6 (linear scaling) are acceptable for v1, or refine them.
+- Confirm the Sustainability Triad's Economic/Social/Environmental grouping (§5.1) — infrastructure
+  adequacy was placed under Environmental (physical/ecological carrying capacity), not a separate
+  institutional pillar; corroborated by the GSTC crosswalk in `RESEARCH_BENCHMARKS.md` §2.4 but it's
+  this project's own interpretive choice, not a fixed standard.
+- Confirm the Seasonality Amplification Index's 5 components (§5.1) and the Host-Visitor Perception
+  Gap's Doxey-stage banding thresholds (`RESEARCH_BENCHMARKS.md` §2.3) read as reasonable, since both
+  are this project's own aggregation choices, not lifted from an external validated formula.
 - Groq API key + preferred model (e.g. `llama-3.3-70b-versatile`) — to be added to `.env` when ready.

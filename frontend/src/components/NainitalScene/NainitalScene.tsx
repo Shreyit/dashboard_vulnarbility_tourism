@@ -23,7 +23,7 @@ const STEPS = [
   {
     kicker: "the reading",
     title: "Pressure, as a number.",
-    body: "Everything in this drawing becomes six sub-indices and one composite score -- measured from 1,029 survey responses across ten zones, not estimated from the view.",
+    body: "Everything in this drawing becomes six sub-indices and one composite score -- measured from 1,029 survey responses across nine zones, not estimated from the view.",
   },
 ];
 

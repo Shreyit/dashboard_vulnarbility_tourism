@@ -56,17 +56,19 @@ rather than filled with a guess.
 ### 2.2 ESPON Carrying Capacity Methodology
 - Pairs **tourism exposure indicators** with **territorial sensitivity indicators** in a
   destination-tailored (not one-size-fits-all) process.
-- **Use**: conceptually validates our zone-level approach (each of the 10 zones can have different
+- **Use**: conceptually validates our zone-level approach (each of the 9 zones can have different
   sensitivity even under similar tourist exposure) rather than a single town-wide number only.
 - Source: [ESPON — Carrying capacity methodology for tourism: Targeted Analysis](https://archive.espon.eu/sites/default/files/attachments/Tourism_methodology-handbook.pdf)
 
 ### 2.3 Doxey's Irridex (1975)
 - Four qualitative stages of host-community sentiment as tourism grows: **Euphoria → Apathy →
   Irritation → Antagonism**.
-- **Use**: gives the **Socio-Cultural Pressure Index (SCPI)** interpretable score bands instead of a
-  bare 0–100 number — e.g., low SCPI ≈ "Euphoria/Apathy," high SCPI with strong crowding-avoidance
-  and negative environment-trend perception ≈ "Irritation/Antagonism" territory. Purely a labeling
-  convention layered on top of our own computed score, not a separate measurement.
+- **Use**: implemented directly as the **Host-Visitor Perception Gap (HVG)**'s `doxey_stage`
+  (`backend/app/insights.py::_doxey_stage`, `VARIABLES_AND_DATA_SOURCES.md` §4.1) — `1 − SCPI`
+  (host sentiment) is banded into the four stages (≥0.75 Euphoria, ≥0.5 Apathy, ≥0.25 Irritation,
+  else Antagonism), then compared against tourists' own `overall_satisfaction`. The bands are our
+  own threshold choice (Doxey's original is qualitative, not numeric), stated as such rather than
+  presented as a validated cutoff.
 - Source: [Irritation Index, tourism — Springer](https://link.springer.com/rwe/10.1007/978-3-319-01669-6_564-1), [Tourism Teacher — Doxey's Irritation Index](https://tourismteacher.com/doxeys-irritation-index/)
 
 ### 2.4 GSTC Destination Criteria v2.0
@@ -88,6 +90,22 @@ rather than filled with a guess.
   `worker_months_employed_last_year`) as internationally recognized precarity markers, not
   arbitrarily chosen survey questions.
 - Source: [ILOSTAT — Decent Work Reality Check: Informality Across the World of Work](https://ilostat.ilo.org/blog/decent-work-reality-check-informality-is-everywhere/), [ILO — Decent Work Indicators Guidelines](https://www.ilo.org/sites/default/files/wcmsp5/groups/public/@dgreports/@integration/documents/publication/wcms_229374.pdf)
+
+### 2.6 Triple Bottom Line (Elkington, 1997)
+- The standard Economic / Social / Environmental sustainability triad, popularized as the "three
+  pillars" or "3 Ps" (People, Planet, Profit) framework for measuring organizational and destination
+  sustainability, not just financial performance.
+- **Use**: regroups our 6 pillars into the three dimensions for the dashboard's Sustainability
+  Triad (Coxcomb chart) — `economic = EDPI`; `environmental = mean(WSI, WSPI, 1−IAI)`;
+  `social = mean(SCPI, 1−VEI)`. This grouping is our own interpretive choice (infrastructure
+  adequacy is treated as part of the physical/environmental capacity dimension, following the
+  Boullón/UNWTO physical-ecological carrying-capacity tradition, rather than as a fourth
+  "institutional" pillar some frameworks use); it is corroborated, not contradicted, by the GSTC
+  4-pillar crosswalk in §2.4.
+- Source: Elkington, J. (1997). *Cannibals with Forks: The Triple Bottom Line of 21st Century
+  Business*. Capstone Publishing. (Bibliographic reference — no URL cited here; unlike the other
+  sources in this file, deliberately not linked to avoid citing an unverified web address for a
+  1997 print book.)
 
 ## 3. Context-only — real thresholds, but the wrong unit/scale for our data (stated, not applied)
 

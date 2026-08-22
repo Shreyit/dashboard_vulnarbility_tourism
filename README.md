@@ -13,7 +13,7 @@ Studies (2024–28 batch), which ran 5 field surveys in Nainital:
 | Survey | Respondents | Captures |
 |---|---|---|
 | Enterprise | 157 | Hotels, restaurants, shops: water/waste/energy/labour practices |
-| Location (site audit) | 10 zones | Physical infrastructure at fixed GPS points across town |
+| Location (site audit) | 9 zones | Physical infrastructure at fixed GPS points across town |
 | Tourist | 320 | Visitor experience, spend, satisfaction |
 | Local Residents | 239 | Household water/sanitation, livelihood, perceived crowding/noise/price strain |
 | Workers | 303 | Tourism-sector employment, income seasonality, precarity |
@@ -25,12 +25,21 @@ Raw files live in `survey_data/` (KoBoToolbox exports, labeled).
 - **Tourism Vulnerability Index (TVI)**: a 0-100 composite score, town-wide and per zone, built
   from six pillars: water stress, waste & sanitation pressure, infrastructure adequacy, economic
   dependency/precarity, socio-cultural pressure, and visitor experience.
+- **Sustainability Triad**: the six pillars regrouped into the standard Economic/Social/
+  Environmental sustainability triad, shown as a Coxcomb (Nightingale rose) chart.
+- **Stakeholder Pressure Matrix**: which respondent group (enterprises, residents, workers,
+  tourists) feels the most pressure on which pillar.
+- **Seasonality Amplification Index & Host-Visitor Perception Gap**: two further indicators built
+  from the same data -- an empirical peak-season signal, and a Doxey's-Irridex-banded comparison
+  of tourist satisfaction against host-community sentiment.
 - **Peak-season stress test**: a "what if tourist footfall rises by X%" simulator that recomputes
   water, waste, and livelihood pressure under a higher-load scenario, with the assumptions shown,
   not hidden.
-- **Zone map**: the 10 surveyed sites plotted with per-zone scores, enriched with OpenStreetMap
+- **Zone map**: the 9 surveyed sites plotted with per-zone scores, enriched with OpenStreetMap
   points of interest (parking, toilets, dustbins, healthcare) around each site.
-- **Explorer**: drill into the derived variables behind any pillar.
+- **Methodology** (on the home page's Data & Methodology section, not a dashboard tab): exact
+  definition, source components, normalization method, formula, and citations for every indicator
+  above, one at a time.
 - **PahadiBot**: the dashboard's AI chat assistant. Ask it about the dashboard's own numbers;
   answers are grounded in the computed indices, not generic tourism facts.
 
@@ -69,22 +78,26 @@ output tables land in `processed/`.
 **Data pipeline, backend, and frontend are built and wired to the live API.**
 
 - `notebooks/01_data_cleaning_eda.ipynb`: done, cleaned tables committed in `processed/`.
-- `backend/`: FastAPI app loads `processed/*.csv`, derives every variable in
-  `VARIABLES_AND_DATA_SOURCES.md` §3, computes the 6 sub-indices + TVI (town-wide and per-zone)
+- `backend/`: FastAPI app loads `processed/*.csv` (`Z02` excluded as a duplicate site, leaving
+  9 zones -- `workflow.md` §3), derives every variable in `VARIABLES_AND_DATA_SOURCES.md` §3,
+  computes the 6 sub-indices + TVI (town-wide and per-zone), the 4 cross-cutting insights (§4.1),
   and the peak-season stress-test scenario per `workflow.md` §5-§6. Routes: `/api/zones`,
   `/api/indices/town`, `/api/indices/zone/{zone_id}`, `/api/variables/{theme}`,
-  `/api/stress-test`, `/api/chat`.
-- `frontend/`: two pages. **Landing** (`/`) is the front page. **Dashboard Dome** (`/dashboard`)
-  is a single merged instrument panel, not three separate routes -- an iOS-style pill tab bar
-  swaps between Overview, Zone Map, and Stress Test in place, all reading the live API. Design
-  system, custom crosshair cursor, magnetic controls, the scroll-drawn Nainital SVG scene, the
-  looping photo strip, and the route wipe between the two pages are built. PahadiBot's chat panel
-  is wired to `/api/chat` and floats over both pages.
+  `/api/insights/town`, `/api/stress-test`, `/api/chat`.
+- `frontend/`: two pages. **Landing** (`/`) is the front page, ending in a **Data & Methodology**
+  section with an interactive per-indicator picker (definitions/formulas/citations for all 11
+  indicators). **Dashboard Dome** (`/dashboard`) is a single merged instrument panel, not three
+  separate routes -- an iOS-style pill tab bar (`components/PillTabs/`, shared with the Methodology
+  picker) swaps between **Overview** (TVI, six pillars, KPI strip, Sustainability Triad,
+  Stakeholder Pressure Matrix), **Zone Map**, and **Stress Test** (now last), all reading the live
+  API. Design system, custom crosshair cursor, magnetic controls, the scroll-drawn Nainital SVG scene,
+  the looping photo strip, and the route wipe between the two pages are built. PahadiBot's chat
+  panel is wired to `/api/chat` and floats over both pages.
 
 Still open:
 
 - External enrichment (OSM / Open-Meteo, `workflow.md` §4).
-- Zone-name confirmation with local reviewers -- the ten site names are placeholders.
+- Zone-name confirmation with local reviewers -- the nine site names are placeholders.
 - `backend/app/weights.json` is equal-weight by default and is the first thing to hand back to
   domain reviewers.
 - A possible third page, once the user picks the next theme (`workflow.md` §10).

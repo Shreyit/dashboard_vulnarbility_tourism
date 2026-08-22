@@ -131,7 +131,7 @@ def derive_location(df: pd.DataFrame) -> pd.DataFrame:
     out["parking_supply"] = minmax((parking_hotel.fillna(0) + parking_public.fillna(0)))
     out["street_light_density"] = minmax(street_lights)
     # Sphere floor: <20 users/toilet (RESEARCH_BENCHMARKS.md SS1.2); no verified per-zone
-    # footfall count exists yet, so this is a relative (min-max across the 10 zones) proxy,
+    # footfall count exists yet, so this is a relative (min-max across the 9 zones) proxy,
     # not an absolute occupancy-based adequacy score -- see notebook cell on this caveat.
     out["toilet_provision"] = minmax(toilet_count)
     out["soap_water_available"] = pd.concat([yesno01(soap), yesno01(water_avail)], axis=1).mean(axis=1, skipna=True)

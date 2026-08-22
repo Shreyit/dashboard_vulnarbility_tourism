@@ -146,6 +146,17 @@
 /* ---------- gallery section ---------- */
 .gallery-section .section-head { max-width: 70ch; }
 
+/* ---------- methodology picker (Data & Methodology section) ---------- */
+.methodology-intro {
+  margin-top: var(--sp-6);
+  padding-top: var(--sp-5);
+  border-top: var(--border-strong);
+}
+
+.methodology-intro .section-lede {
+  margin-top: var(--sp-2);
+}
+
 /* ---------- footer ---------- */
 .site-footer {
   padding: var(--sp-5) var(--sp-4) var(--sp-7);

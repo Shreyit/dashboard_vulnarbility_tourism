@@ -1,0 +1,86 @@
+.methodology-tab .pill-tabs {
+  margin-bottom: var(--sp-4);
+}
+
+.methodology-card {
+  padding: var(--sp-5);
+}
+
+.methodology-definition {
+  margin: var(--sp-2) 0 var(--sp-5);
+  max-width: 62ch;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+.methodology-field {
+  padding: var(--sp-3) 0;
+  border-top: var(--border);
+}
+
+.methodology-field-label {
+  display: block;
+  margin-bottom: var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.methodology-field p {
+  max-width: 64ch;
+  color: var(--ink);
+  line-height: 1.55;
+  font-size: 0.88rem;
+}
+
+.methodology-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.methodology-chip {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.7rem;
+  color: var(--ink);
+  background: var(--paper-deep);
+  border: 1px solid var(--line-strong);
+}
+
+.methodology-formula {
+  display: block;
+  padding: var(--sp-3);
+  background: var(--paper-deep);
+  border: 1px solid var(--line-strong);
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.methodology-citations {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.methodology-citations li {
+  font-size: 0.84rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.methodology-citations a {
+  color: var(--rust);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.methodology-citations a:hover {
+  color: var(--rust-deep);
+}

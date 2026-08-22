@@ -122,7 +122,9 @@ def list_zones() -> list[dict]:
     ]
 
 
-def _town_value(survey: str, col: str) -> float | None:
+def town_value(survey: str, col: str) -> float | None:
+    """Town-wide mean of one derived column. Public: also used by insights.py to
+    build the stakeholder pressure matrix and the seasonality/host-visitor indicators."""
     s = _derived_tables()[survey][col]
     v = s.mean(skipna=True)
     return None if pd.isna(v) else float(v)
@@ -147,7 +149,7 @@ def compute_subindex(theme: str, zone_id: str | None = None) -> tuple[float | No
     detail = []
     values = []
     for name, survey, col in THEME_COMPONENTS[theme]:
-        town_val = _town_value(survey, col)
+        town_val = town_value(survey, col)
         if zone_id is None:
             val, is_proxy = town_val, False
         else:

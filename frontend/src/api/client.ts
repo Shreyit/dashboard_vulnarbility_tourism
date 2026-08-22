@@ -1,4 +1,4 @@
-import type { ChatResponse, IndexBundle, StressTestOut, VariablesOut, ZoneOut } from "./types";
+import type { ChatResponse, IndexBundle, InsightsOut, StressTestOut, VariablesOut, ZoneOut } from "./types";
 
 // Relative paths: Vite's dev proxy (vite.config.ts) forwards /api/* to FastAPI on :8010;
 // a production build served by FastAPI's StaticFiles hits the same origin directly.
@@ -34,6 +34,10 @@ export function getTownIndices(): Promise<IndexBundle> {
 
 export function getZoneIndices(zoneId: string): Promise<IndexBundle> {
   return request(`/indices/zone/${zoneId}`);
+}
+
+export function getInsights(): Promise<InsightsOut> {
+  return request("/insights/town");
 }
 
 export function getThemeVariables(theme: string, zoneId?: string | null): Promise<VariablesOut> {

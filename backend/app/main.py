@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import get_settings
-from .routers import chat, indices_router, stress_test_router, variables, zones
+from .routers import chat, indices_router, insights_router, stress_test_router, variables, zones
 
 app = FastAPI(
     title="Nainital Tourism Vulnerability Dashboard API",
@@ -23,6 +23,7 @@ app.add_middleware(
 
 app.include_router(zones.router)
 app.include_router(indices_router.router)
+app.include_router(insights_router.router)
 app.include_router(variables.router)
 app.include_router(stress_test_router.router)
 app.include_router(chat.router)

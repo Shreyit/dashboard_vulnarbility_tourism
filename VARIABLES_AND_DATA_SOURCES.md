@@ -190,6 +190,19 @@ All `_raw` scores are min-max normalized to **0–1** at build time before enter
 Index construction method (normalize → weight → aggregate) and the stress-test simulator's elasticity
 assumptions are detailed in `workflow.md` §5–§6.
 
+### 4.1 Dashboard insights (derived composites, beyond the 6 pillars)
+
+All four below are computed in `backend/app/insights.py`, town-wide only (Workers/Tourist aren't
+GPS-tagged, so a zone breakdown would be inconsistent across pillars), reusing already-computed
+values from §4 above — no new raw aggregation.
+
+| Insight | Formula | Normalization | Citation |
+|---|---|---|---|
+| **Sustainability Triad** (Coxcomb) | `economic = EDPI`; `environmental = mean(WSI, WSPI, 1−IAI)`; `social = mean(SCPI, 1−VEI)`, ×100 | Reuses each pillar's own OECD/JRC min-max normalization; this step is a re-grouping, not a re-normalization | Triple Bottom Line (Elkington, 1997) — `RESEARCH_BENCHMARKS.md` §2.6 |
+| **Stakeholder Pressure Matrix** | For each (survey × pillar) pair with ≥1 component, mean of that survey's already direction-aligned components for that pillar (IAI/VEI inverted first, so every cell reads "higher = more pressure") | Same as the 6 pillars — components already OECD/JRC-normalized 0–1 | Falls directly out of `THEME_COMPONENTS`' existing survey tagging, no new methodology |
+| **Seasonality Amplification Index (SAI)** | Mean of 5 peak-season-framed components: `enterprise.water_constraint_stress`, `enterprise.peak_offpeak_cost_pressure`, `residents.travel_difficulty_peak`, `residents.sewage_overflow_peak`, `workers.months_without_work_share`, ×100 | Same OECD/JRC-normalized components as the 6 pillars | Empirical (respondents' own peak-vs-off-season answers) — distinct from PSSM, which is a hypothetical footfall-multiplier scenario, not a measured signal |
+| **Host-Visitor Perception Gap (HVG)** | `visitor_satisfaction = tourist.overall_satisfaction`; `host_sentiment = 1 − SCPI`; `gap = visitor_satisfaction − host_sentiment`; banded into a Doxey stage from `host_sentiment` (≥0.75 Euphoria, ≥0.5 Apathy, ≥0.25 Irritation, else Antagonism) | Reuses SCPI/VEI's own normalization | Doxey's Irridex (1975) — `RESEARCH_BENCHMARKS.md` §2.3 |
+
 ---
 
 ## 5. Public / external data
@@ -199,8 +212,8 @@ replace it.
 
 | Source | What we pull | Access method | Feeds into |
 |---|---|---|---|
-| **OpenStreetMap (Overpass API)** | POI counts within a buffer (~150–300m) around each of the 10 zone points: `amenity=parking`, `amenity=waste_basket`, `amenity=toilets`, `amenity=drinking_water`, `amenity=hospital/pharmacy`, `tourism=hotel/attraction`, `highway=footway` length, `natural=water` (Naini Lake outline) | Overpass QL query, live HTTP, no key | Cross-checks/backfills Location survey infra counts; `zone_dustbin_density`, IAI |
-| **OSM Nominatim** | Reverse-geocode the 10 zone lat/lon into human-readable place names (e.g., "Mall Road", "Naini Lake", "Tallital") | Reverse geocode HTTP call, no key (rate-limited, cache results) | Zone labels for maps/charts |
+| **OpenStreetMap (Overpass API)** | POI counts within a buffer (~150–300m) around each of the 9 zone points (`Z02` excluded as a duplicate site, see §6): `amenity=parking`, `amenity=waste_basket`, `amenity=toilets`, `amenity=drinking_water`, `amenity=hospital/pharmacy`, `tourism=hotel/attraction`, `highway=footway` length, `natural=water` (Naini Lake outline) | Overpass QL query, live HTTP, no key | Cross-checks/backfills Location survey infra counts; `zone_dustbin_density`, IAI |
+| **OSM Nominatim** | Reverse-geocode the 9 zone lat/lon into human-readable place names (e.g., "Mall Road", "Naini Lake", "Tallital") | Reverse geocode HTTP call, no key (rate-limited, cache results) | Zone labels for maps/charts |
 | **Open-Meteo Historical Weather API** | Monthly rainfall & temperature normals for Nainital coords, incl. monsoon (Jun–Sep) extremes | Live HTTP JSON, no key | Context for water-availability trend & seasonality; flags flood/landslide-prone months |
 | **Open-Elevation API / SRTM** | Elevation at each zone point (terrain steepness proxy) | Live HTTP JSON, no key | Disaster/terrain-risk context, not in TVI v1 |
 | **Census of India 2011 (Nainital Nagar Palika Parishad)** | Resident population count | Static, manually sourced once, cited in code | Per-capita ratios (infra per resident vs per peak tourist) |
@@ -222,7 +235,10 @@ transform code.
   per respondent before any variable is trusted.
 - **GPS outliers**: at least one Enterprise row has `latitude/longitude = 82` (clearly a data-entry
   error, not a real coordinate near Nainital's ~29.39°N/79.46°E). Needs a bounding-box filter.
-- **Location survey n=10**: only 10 site audits exist — that's our zone count, small but usable as a
-  fixed lookup table, not something to statistically model further.
+- **Location survey n=10, but 9 real sites**: `Z01` (29.390786, 79.455892) and `Z02` (29.390439,
+  79.455517) are ~50m apart — a duplicate/erroneous site submission, not two distinct locations
+  (confirmed by the survey team). `backend/app/data_loader.py` excludes `Z02` at load time, so the
+  live zone count is **9**, not 10 — that's our zone count, small but usable as a fixed lookup
+  table, not something to statistically model further.
 - **Zone names undefined**: the Location survey only has lat/lon, no name field — we'll assign
   names via Nominatim reverse geocoding and let the user confirm/rename them in review.

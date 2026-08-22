@@ -1,8 +1,9 @@
 import { useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { gsap, useGSAP, Flip } from "../lib/gsap";
+import { gsap, useGSAP } from "../lib/gsap";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { SplitHeading } from "../components/Reveal/Reveal";
+import PillTabs from "../components/PillTabs/PillTabs";
 import OverviewTab from "./dashboard/OverviewTab";
 import ZoneMapTab from "./dashboard/ZoneMapTab";
 import StressTestTab from "./dashboard/StressTestTab";
@@ -14,12 +15,12 @@ const TABS: { id: TabId; label: string; lede: string }[] = [
   {
     id: "overview",
     label: "Overview",
-    lede: "Town-wide TVI and its six pillars, broken down to source questions.",
+    lede: "Town-wide TVI, its six pillars, the sustainability triad, and who feels the pressure.",
   },
   {
     id: "zones",
     label: "Zone Map",
-    lede: "The ten surveyed sites, each with its own score and breakdown.",
+    lede: "The nine surveyed sites, each with its own score and breakdown.",
   },
   {
     id: "stress",
@@ -44,41 +45,15 @@ export default function Dashboard() {
   const [params, setParams] = useSearchParams();
   const initial = params.get("tab");
   const [active, setActive] = useState<TabId>(isTabId(initial) ? initial : "overview");
-  const tabsRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const shownTab = useRef(active);
-  // the thumb's very first placement has no meaningful "previous box" to fly
-  // from -- same guard as the header's active-link marker
-  const thumbPlaced = useRef(false);
   const reduced = useReducedMotion();
 
-  const select = (id: TabId) => {
-    if (id === active) return;
+  const select = (id: string) => {
+    if (id === active || !isTabId(id)) return;
     setActive(id);
     setParams({ tab: id }, { replace: true });
   };
-
-  // ---- the pill thumb slides between tabs, re-parented into whichever
-  // button is active -- the same Flip pattern as the header's nav marker ----
-  useGSAP(
-    () => {
-      const bar = tabsRef.current;
-      if (!bar) return;
-      const thumb = bar.querySelector<HTMLElement>(".dome-tab-thumb");
-      const target = bar.querySelector<HTMLElement>(`[data-tab="${active}"]`);
-      if (!thumb || !target) return;
-
-      const state = Flip.getState(thumb);
-      target.appendChild(thumb);
-
-      if (reduced || !thumbPlaced.current) {
-        thumbPlaced.current = true;
-        return;
-      }
-      Flip.from(state, { duration: 0.4, ease: "power3.inOut", absolute: true });
-    },
-    { dependencies: [active, reduced], scope: tabsRef },
-  );
 
   // ---- content swap: a short settle rather than a full route wipe -- this
   // is a tab flip within one page, not a navigation ----
@@ -109,28 +84,17 @@ export default function Dashboard() {
           </SplitHeading>
           <p className="section-lede">
             One instrument panel: the composite index, the zone-by-zone map, and the peak-season
-            stress simulator, read together instead of as separate screens.
+            stress simulator, read together instead of as separate screens. Exact methodology for
+            every number lives on the home page's Data &amp; Methodology section.
           </p>
         </div>
 
-        <div className="dome-tabs" ref={tabsRef} role="tablist" aria-label="Dashboard view">
-          <span className="dome-tab-thumb" aria-hidden="true" />
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              role="tab"
-              data-tab={tab.id}
-              aria-selected={active === tab.id}
-              className={`dome-tab${active === tab.id ? " is-active" : ""}`}
-              onClick={() => select(tab.id)}
-              data-cursor
-              data-cursor-label="VIEW"
-            >
-              <span className="dome-tab-label">{tab.label}</span>
-            </button>
-          ))}
-        </div>
+        <PillTabs
+          tabs={TABS.map((t) => ({ id: t.id, label: t.label }))}
+          active={active}
+          onSelect={select}
+          ariaLabel="Dashboard view"
+        />
 
         <p className="dome-tab-lede">{current.lede}</p>
 

@@ -9,6 +9,7 @@ import PhotoStrip from "../components/PhotoStrip/PhotoStrip";
 import NainitalScene from "../components/NainitalScene/NainitalScene";
 import Magnetic from "../components/Magnetic/Magnetic";
 import { Reveal, SplitHeading, CountUp } from "../components/Reveal/Reveal";
+import MethodologyTab from "./MethodologyTab";
 
 import heroPanorama from "../assets/art/hero-panorama.webp";
 import navLake from "../assets/art/nav-lake.webp";
@@ -139,7 +140,7 @@ export default function Landing() {
               Measuring the weight tourism puts on a lake town.
             </SplitHeading>
             <p className="hero-lede">
-              Five field surveys, ten zones, one composite vulnerability index. Built from real
+              Five field surveys, nine zones, one composite vulnerability index. Built from real
               data collected across Nainital&apos;s hotels, households, workers, visitors, and
               streets, so pressure on water, waste, infrastructure, and livelihoods stops being
               anecdotal.
@@ -182,7 +183,7 @@ export default function Landing() {
             </div>
             <div className="hero-stat">
               <span className="num mono-num">
-                <CountUp value={10} />
+                <CountUp value={9} />
               </span>
               <span className="label">Surveyed zones</span>
             </div>
@@ -227,7 +228,7 @@ export default function Landing() {
       <section id="gallery" className="section gallery-section container">
         <div className="section-head">
           <span className="eyebrow">The ground truth</span>
-          <SplitHeading as="h2">Ten zones. Five voices. One lake.</SplitHeading>
+          <SplitHeading as="h2">Nine zones. Five voices. One lake.</SplitHeading>
           <Reveal as="p" className="section-lede">
             Field photography from the surveyed area, processed into this dashboard&apos;s
             visual language. Keep scrolling to browse.
@@ -247,7 +248,7 @@ export default function Landing() {
         </div>
         <Reveal className="panel-grid" stagger>
           <div className="panel stat-panel">
-            <span className="num mono-num">157 / 320 / 239 / 303 / 10</span>
+            <span className="num mono-num">157 / 320 / 239 / 303 / 9</span>
             <span className="label">Enterprise / Tourist / Residents / Workers / Zones</span>
             <p>Respondent counts per survey, after cleaning.</p>
           </div>
@@ -271,6 +272,15 @@ export default function Landing() {
             <p>UNWTO, Sphere, GSTC, Doxey&apos;s Irridex, OECD/JRC, Nainital&apos;s own NGT carrying-capacity study, and more.</p>
           </div>
         </Reveal>
+
+        <div className="methodology-intro">
+          <span className="eyebrow">Pick an indicator</span>
+          <p className="section-lede">
+            Exact definition, source components, normalization method, formula, and citations,
+            for every indicator on the dashboard, one at a time.
+          </p>
+        </div>
+        <MethodologyTab />
       </section>
     </main>
   );
