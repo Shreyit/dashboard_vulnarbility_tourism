@@ -1,0 +1,134 @@
+.attitude-disclosure {
+  max-width: 68ch;
+  margin-bottom: var(--sp-4);
+  padding-bottom: var(--sp-4);
+  border-bottom: var(--border);
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.attitude-groups-panel {
+  padding: var(--sp-4);
+  margin-bottom: var(--sp-4);
+}
+
+.attitude-groups {
+  display: flex;
+  gap: var(--sp-6);
+  margin-top: var(--sp-2);
+}
+
+.attitude-groups .num {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 1.75rem;
+  color: var(--rust);
+}
+
+.attitude-groups .label {
+  display: block;
+  margin-top: 0.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.attitude-table-panel {
+  padding: var(--sp-4);
+  margin-bottom: var(--sp-4);
+}
+
+.attitude-table {
+  margin-top: var(--sp-3);
+  overflow-x: auto;
+}
+
+.attitude-row {
+  display: grid;
+  grid-template-columns: 9rem 3.5rem 1.5rem 3.5rem 5rem 4.5rem 6rem;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 0.6rem 0;
+  border-bottom: var(--border);
+  min-width: 640px;
+}
+
+.attitude-row-head {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.attitude-row-label {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--ink);
+}
+
+.attitude-row-sep {
+  color: var(--ink-faint);
+  text-align: center;
+  font-size: 0.7rem;
+}
+
+.attitude-row-stat {
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+}
+
+.attitude-row-empty {
+  grid-column: 2 / -1;
+  color: var(--ink-faint);
+  font-size: 0.78rem;
+}
+
+.attitude-signal-panel {
+  padding: var(--sp-4);
+}
+
+.attitude-signal-panel p {
+  margin-top: var(--sp-2);
+  max-width: 68ch;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  font-size: 0.9rem;
+}
+
+.attitude-signal-panel strong {
+  color: var(--ink);
+}
+
+/* ---------- significance tag ----------
+   same fill-vs-outline weight convention as the E-S-AC vulnerability band. */
+.attitude-band {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid var(--line-strong);
+  color: var(--ink-faint);
+  text-align: center;
+}
+
+.attitude-band-significant {
+  background: var(--rust);
+  border-color: var(--rust-deep);
+  color: var(--white);
+}
+
+.attitude-band-marginal {
+  color: var(--rust);
+  border-color: var(--rust);
+}
+
+.attitude-band-not-significant {
+  color: var(--ink-faint);
+  border-color: var(--line);
+}

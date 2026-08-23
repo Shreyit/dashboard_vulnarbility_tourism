@@ -85,3 +85,36 @@ class InsightsOut(BaseModel):
     stakeholder_matrix: StakeholderMatrixOut
     seasonality: SeasonalityOut
     host_visitor_gap: HostVisitorGapOut
+
+
+class EsacZoneOut(BaseModel):
+    zone_id: str
+    composite: float | None
+    band: str | None
+
+
+class EsacOut(BaseModel):
+    exposure: float | None
+    sensitivity: float | None
+    adaptive_capacity: float | None
+    composite: float | None
+    band: str | None
+    zones: list[EsacZoneOut]
+
+
+class GroupComparisonOut(BaseModel):
+    n_dependent: int
+    n_non_dependent: int
+    mean_dependent: float
+    mean_non_dependent: float
+    median_dependent: float
+    median_non_dependent: float
+    p_value: float
+    rank_biserial: float
+    band: str
+
+
+class ResidentAttitudesOut(BaseModel):
+    group_sizes: dict[str, int]
+    aggregate: GroupComparisonOut | None
+    pillars: dict[str, GroupComparisonOut | None]

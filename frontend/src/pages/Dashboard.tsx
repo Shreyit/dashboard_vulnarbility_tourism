@@ -6,10 +6,12 @@ import { SplitHeading } from "../components/Reveal/Reveal";
 import PillTabs from "../components/PillTabs/PillTabs";
 import OverviewTab from "./dashboard/OverviewTab";
 import ZoneMapTab from "./dashboard/ZoneMapTab";
+import EsacTab from "./dashboard/EsacTab";
+import ResidentAttitudesTab from "./dashboard/ResidentAttitudesTab";
 import StressTestTab from "./dashboard/StressTestTab";
 import "./Dashboard.css";
 
-type TabId = "overview" | "zones" | "stress";
+type TabId = "overview" | "zones" | "esac" | "attitudes" | "stress";
 
 const TABS: { id: TabId; label: string; lede: string }[] = [
   {
@@ -21,6 +23,16 @@ const TABS: { id: TabId; label: string; lede: string }[] = [
     id: "zones",
     label: "Zone Map",
     lede: "The nine surveyed sites, each with its own score and breakdown.",
+  },
+  {
+    id: "esac",
+    label: "E-S-AC",
+    lede: "A second vulnerability lens: Exposure, Sensitivity, and Adaptive Capacity, by zone.",
+  },
+  {
+    id: "attitudes",
+    label: "Attitudes",
+    lede: "Do tourism-dependent residents feel less irritation? A Social Exchange Theory test.",
   },
   {
     id: "stress",
@@ -83,9 +95,10 @@ export default function Dashboard() {
             Nainital tourism vulnerability
           </SplitHeading>
           <p className="section-lede">
-            One instrument panel: the composite index, the zone-by-zone map, and the peak-season
-            stress simulator, read together instead of as separate screens. Exact methodology for
-            every number lives on the home page's Data &amp; Methodology section.
+            One instrument panel: the composite index, the zone-by-zone map, a second vulnerability
+            lens, a resident-attitudes test, and the peak-season stress simulator, read together
+            instead of as separate screens. Exact methodology for every number lives on the home
+            page's Data &amp; Methodology section.
           </p>
         </div>
 
@@ -101,6 +114,8 @@ export default function Dashboard() {
         <div className="dome-content" ref={contentRef}>
           {active === "overview" && <OverviewTab />}
           {active === "zones" && <ZoneMapTab />}
+          {active === "esac" && <EsacTab />}
+          {active === "attitudes" && <ResidentAttitudesTab />}
           {active === "stress" && <StressTestTab />}
         </div>
       </section>

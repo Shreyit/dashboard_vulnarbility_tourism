@@ -32,6 +32,11 @@ Raw files live in `survey_data/` (KoBoToolbox exports, labeled).
 - **Seasonality Amplification Index & Host-Visitor Perception Gap**: two further indicators built
   from the same data -- an empirical peak-season signal, and a Doxey's-Irridex-banded comparison
   of tourist satisfaction against host-community sentiment.
+- **E-S-AC framework**: a second, complementary vulnerability lens, an IPCC-style Exposure /
+  Sensitivity / Adaptive Capacity structure, town-wide and per zone.
+- **Resident Attitudes & Social Exchange Theory**: does tourism dependence correlate with less
+  felt irritation? A real Mann-Whitney U comparison of tourism-dependent vs. non-dependent
+  residents across Economic/Social/Environmental attitude pillars.
 - **Peak-season stress test**: a "what if tourist footfall rises by X%" simulator that recomputes
   water, waste, and livelihood pressure under a higher-load scenario, with the assumptions shown,
   not hidden.
@@ -64,7 +69,8 @@ output tables land in `processed/`.
 ## Tech stack
 
 - **Backend**: FastAPI (Python), serving processed indices + a stress-test scenario endpoint +
-  PahadiBot's chat route (Groq, optional key).
+  PahadiBot's chat route (Groq, optional key). `scipy` powers the Resident Attitudes/SET group
+  comparison (Mann-Whitney U + rank-biserial effect size).
 - **Frontend**: React + TypeScript, built with Vite. Client-side SPA wired to the live API.
   Animation is GSAP throughout (ScrollTrigger, SplitText, DrawSVG, MotionPath, Flip), with real
   photography processed into duotone art and a deliberately narrow warm-white/grey/terracotta
@@ -81,15 +87,18 @@ output tables land in `processed/`.
 - `backend/`: FastAPI app loads `processed/*.csv` (`Z02` excluded as a duplicate site, leaving
   9 zones -- `workflow.md` §3), derives every variable in `VARIABLES_AND_DATA_SOURCES.md` §3,
   computes the 6 sub-indices + TVI (town-wide and per-zone), the 4 cross-cutting insights (§4.1),
-  and the peak-season stress-test scenario per `workflow.md` §5-§6. Routes: `/api/zones`,
+  the E-S-AC framework and Resident Attitudes/SET group comparison (§4.2-§4.3), and the
+  peak-season stress-test scenario per `workflow.md` §5-§6. Routes: `/api/zones`,
   `/api/indices/town`, `/api/indices/zone/{zone_id}`, `/api/variables/{theme}`,
-  `/api/insights/town`, `/api/stress-test`, `/api/chat`.
+  `/api/insights/town`, `/api/insights/esac`, `/api/insights/resident-attitudes`,
+  `/api/stress-test`, `/api/chat`.
 - `frontend/`: two pages. **Landing** (`/`) is the front page, ending in a **Data & Methodology**
-  section with an interactive per-indicator picker (definitions/formulas/citations for all 11
-  indicators). **Dashboard Dome** (`/dashboard`) is a single merged instrument panel, not three
+  section with an interactive per-indicator picker (definitions/formulas/citations for all 13
+  indicators). **Dashboard Dome** (`/dashboard`) is a single merged instrument panel, not five
   separate routes -- an iOS-style pill tab bar (`components/PillTabs/`, shared with the Methodology
   picker) swaps between **Overview** (TVI, six pillars, KPI strip, Sustainability Triad,
-  Stakeholder Pressure Matrix), **Zone Map**, and **Stress Test** (now last), all reading the live
+  Stakeholder Pressure Matrix), **Zone Map**, **E-S-AC** (second vulnerability lens), **Attitudes**
+  (Social Exchange Theory group comparison), and **Stress Test** (now last), all reading the live
   API. Design system, custom crosshair cursor, magnetic controls, the scroll-drawn Nainital SVG scene,
   the looping photo strip, and the route wipe between the two pages are built. PahadiBot's chat
   panel is wired to `/api/chat` and floats over both pages.
@@ -226,6 +235,9 @@ why `src/api/client.ts` uses relative `/api` paths rather than an absolute base 
 
 ```
 survey_data/                     raw KoBoToolbox survey exports (source of truth, do not edit)
+Nainital_Tourism_Vulnerability_Derived_Variables.xlsx   source workbook for the E-S-AC framework
+                                 (VARIABLES_AND_DATA_SOURCES.md SS4.2) -- reimplemented from
+                                 processed/*.csv, not read at request time
 notebooks/01_data_cleaning_eda.ipynb   cleaning + EDA notebook (run this to regenerate processed/)
 notebooks/requirements.txt       python deps for the notebook (pandas, numpy, matplotlib, openpyxl, jupyter)
 processed/                       cleaned per-survey CSVs + data_quality_report.csv (notebook output)

@@ -124,6 +124,27 @@ Gap** (implements the Doxey's Irridex banding `RESEARCH_BENCHMARKS.md` §2.3 des
 formulas, normalization, and citations: `VARIABLES_AND_DATA_SOURCES.md` §4.1, and interactively
 per-indicator on the landing page's Data & Methodology section (`frontend/src/pages/methodologyContent.ts`).
 
+### 5.2 E-S-AC framework and Resident Attitudes/SET — **done**
+
+Two more, prompted by a user-supplied workbook (`Nainital_Tourism_Vulnerability_Derived_Variables.xlsx`)
+and a pasted research narrative:
+
+- **E-S-AC framework** (`backend/app/framework_esac.py`, dashboard tab "E-S-AC"): the
+  Exposure/Sensitivity/Adaptive Capacity structure `RESEARCH_BENCHMARKS.md` §4 (Shimla study) had
+  flagged as a possible v2 restructuring, now built as a second, complementary lens next to the
+  6-pillar TVI, reimplemented from `processed/*.csv` via this pipeline's own `derive_*` outputs.
+  Several of the source workbook's named sub-variables have no isolated equivalent here and are
+  substituted with the nearest available column instead -- every substitution is documented in
+  `VARIABLES_AND_DATA_SOURCES.md` §4.2 and in the module's own docstrings.
+- **Resident Attitudes & Social Exchange Theory** (`backend/app/resident_attitudes.py`, dashboard
+  tab "Attitudes"): tests whether tourism-dependent residents report less irritation than
+  non-dependent ones, across the same 3 components SCPI already uses (Economic/Social/Environmental,
+  partitioned), using a real Mann-Whitney U + rank-biserial effect size on the actual 239 residents
+  (`scipy`, newly added to `backend/requirements.txt`). The pasted narrative's exact figures
+  (p=0.093, r=-0.016) came from a pillar-item bundle and stats run this pipeline can't reproduce, so
+  this recomputes the same *kind* of analysis fresh rather than displaying those numbers -- per the
+  user's own choice when asked. `VARIABLES_AND_DATA_SOURCES.md` §4.3, `RESEARCH_BENCHMARKS.md` §2.7.
+
 ## 6. Stress/pressure-test simulator
 
 Goal: let the user drag a "peak-season tourist footfall" slider (e.g. baseline → +25% → +50%) and
@@ -153,6 +174,8 @@ Planned routes (v1):
 - `GET /api/variables/{theme}` — underlying derived variables behind a sub-index (for chart drill-down).
 - `GET /api/insights/town` — the Sustainability Triad, Stakeholder Pressure Matrix, Seasonality
   Amplification Index, and Host-Visitor Perception Gap (§5.1). Town-wide only.
+- `GET /api/insights/esac` — the E-S-AC framework, town-wide + per zone (§5.2).
+- `GET /api/insights/resident-attitudes` — the Resident Attitudes/SET group comparison (§5.2).
 - `POST /api/stress-test` — body: `{ footfall_multiplier }` → returns recomputed indices.
 - `POST /api/chat` — AI chat route (see §8).
 - Data loads from the processed store (SQLite or Parquet) at startup, served from memory —
@@ -194,19 +217,21 @@ fixed launcher button + panel that currently states plainly that it isn't connec
 - Pages: (1) **Landing** (`/`) — the front page: hero, flowing-menu nav into the dashboard, photo
   gallery, and the **Data & Methodology** section (`#data`), which ends with an interactive
   per-indicator picker (`frontend/src/pages/MethodologyTab.tsx`, a `size="small"` `PillTabs`
-  instance) covering all 11 indicators — definition, source components, normalization method,
+  instance) covering all 13 indicators — definition, source components, normalization method,
   formula, and citations, one at a time (`pages/methodologyContent.ts`). Deliberately kept off the
   Dashboard Dome itself, so the dashboard stays focused on the live numbers and the reference
   material lives where a reader would look for it first. (2) **Dashboard Dome** (`/dashboard`) — a
-  single merged instrument panel, not three separate routes. An iOS-style pill tab bar
-  (`components/PillTabs/`, shared with the Methodology picker above) swaps three views in place, in
+  single merged instrument panel, not five separate routes. An iOS-style pill tab bar
+  (`components/PillTabs/`, shared with the Methodology picker above) swaps five views in place, in
   this order: **Overview** (TVI gauge + 6 sub-index bars, the KPI strip, the Sustainability Triad
   Coxcomb, and the Stakeholder Pressure Matrix — §5.1), **Zone Map** (click a zone to see its
-  breakdown), and **Stress Test** (slider + before/after comparison, deliberately last now that the
-  dashboard has more to see first). Tab state lives in the URL as `?tab=`, so the landing page's
-  flowing-menu can deep-link straight into a given view. PahadiBot (see §8) is a floating panel
-  available from both pages, not a tab. Room is reserved for a possible third page (another theme)
-  later.
+  breakdown), **E-S-AC** (the second Exposure/Sensitivity/Adaptive Capacity vulnerability lens,
+  town-wide + per zone — §5.2), **Attitudes** (the Resident Attitudes/Social Exchange Theory group
+  comparison — §5.2), and **Stress Test** (slider + before/after comparison, deliberately last now
+  that the dashboard has more to see first). Tab state lives in the URL as `?tab=`, so the landing
+  page's flowing-menu can deep-link straight into a given view. PahadiBot (see §8) is a floating
+  panel available from both pages, not a tab. Room is reserved for a possible third page (another
+  theme) later.
 
 ### 9.1 Visual language (locked in, applies to every future screen)
 
@@ -270,7 +295,11 @@ work stays consistent instead of drifting toward generic AI-tool defaults:
 6. **AI chat route** — *frontend done*: the PahadiBot panel is wired to `/api/chat` and degrades
    honestly (shows raw grounding context, flags itself as unconfigured) with no key set. Only the
    Groq key itself is still pending from the user.
-7. **Review & weight tuning**: revisit index weights/normalization with the user once real numbers
+7. **E-S-AC framework + Resident Attitudes/SET** — *done* (§5.2): two more tabs, prompted by a
+   user-supplied workbook and a pasted research narrative. Per the user's own choice when asked:
+   both became Dashboard Dome tabs (not a separate page), and the Resident Attitudes numbers are
+   freshly computed from real data rather than reproducing the pasted figures.
+8. **Review & weight tuning**: revisit index weights/normalization with the user once real numbers
    are visible; confirm the nine zone names with local reviewers.
 
 ## Open questions for the user (before/while implementing)
@@ -285,4 +314,10 @@ work stays consistent instead of drifting toward generic AI-tool defaults:
 - Confirm the Seasonality Amplification Index's 5 components (§5.1) and the Host-Visitor Perception
   Gap's Doxey-stage banding thresholds (`RESEARCH_BENCHMARKS.md` §2.3) read as reasonable, since both
   are this project's own aggregation choices, not lifted from an external validated formula.
+- Confirm the E-S-AC framework's substitutions (§5.2, listed in full in
+  `VARIABLES_AND_DATA_SOURCES.md` §4.2) are acceptable stand-ins for the source workbook's original
+  variables, given this pipeline doesn't derive several of them separately today.
+- Confirm the Resident Attitudes/SET pillar definitions (§5.2, §4.3) — this project's own 3-way split
+  of SCPI's existing components, not the exact bundle behind the pasted narrative's p=0.093/r=-0.016
+  figures, which this pipeline can't reproduce.
 - Groq API key + preferred model (e.g. `llama-3.3-70b-versatile`) — to be added to `.env` when ready.

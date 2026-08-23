@@ -107,6 +107,20 @@ rather than filled with a guess.
   sources in this file, deliberately not linked to avoid citing an unverified web address for a
   1997 print book.)
 
+### 2.7 Social Exchange Theory (Ap, 1992)
+- Residents who perceive themselves as benefiting from tourism (economically or otherwise) tend to
+  evaluate its costs more favorably, and vice versa — a widely used lens in tourism-impact-perception
+  research for explaining why host-community attitudes vary even under similar objective tourism
+  pressure.
+- **Use**: frames the dashboard's Resident Attitudes tab — a fresh Mann-Whitney U comparison of
+  tourism-dependent vs. non-dependent residents across Economic/Social/Environmental attitude
+  pillars (`backend/app/resident_attitudes.py`, `VARIABLES_AND_DATA_SOURCES.md` §4.3). Prompted by a
+  pasted research narrative reporting a related finding on a different pillar-item bundle we can't
+  reproduce here; this implements the same *kind* of test on our own data, not that exact result.
+- Source: Ap, J. (1992). Residents' Perceptions Research on the Social Exchange Theory. *Annals of
+  Tourism Research*, 19(4), 665-690. (Bibliographic reference — no URL cited, same treatment as the
+  Elkington 1997 entry above.)
+
 ## 3. Context-only — real thresholds, but the wrong unit/scale for our data (stated, not applied)
 
 ### 3.1 Falkenmark Water Stress Indicator
@@ -145,11 +159,12 @@ rather than filled with a guess.
   **Adaptive Capacity** (medical facilities, road density, accommodation, telecom, electricity),
   weighted via **Analytic Hierarchy Process (AHP)** pairwise comparison.
 - **Use**: this Exposure–Sensitivity–Adaptive Capacity (E-S-AC) structure is a well-established
-  alternative framing to our 6-pillar TVI. Noted as a **possible v2 restructuring** if the user wants
-  the index to more closely follow this published mountain-tourism-vulnerability template — flagged
-  as an open option, not adopted by default in v1 (our data doesn't currently include NDVI/slope/
-  land-use layers to populate an Exposure pillar; would require the OSM/elevation enrichment in
-  `workflow.md` §4 to be extended).
+  alternative framing to our 6-pillar TVI. **Implemented as a second, complementary lens**
+  (`backend/app/framework_esac.py`, dashboard tab "E-S-AC"), not a replacement for the TVI — our
+  version reuses this pipeline's own already-derived columns rather than the Shimla study's original
+  NDVI/slope/land-use/AHP-weighted inputs (we don't have those layers), so it's a reimplementation of
+  the *structure*, not the original study's exact indicators or weights. Every substitution is
+  documented in `VARIABLES_AND_DATA_SOURCES.md` §4.2.
 - Source: [Assessing and Mapping Tourism Vulnerability Using Remote Sensing — Shimla District case](https://link.springer.com/chapter/10.1007/978-981-95-0156-4_11)
 
 ## 5. How this feeds the dashboard

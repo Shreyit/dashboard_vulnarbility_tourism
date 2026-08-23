@@ -114,6 +114,13 @@ def _derived_tables() -> dict[str, pd.DataFrame]:
     }
 
 
+def derived_table(survey: str) -> pd.DataFrame:
+    """The full per-respondent (or per-zone, for `location`) derived table for one
+    survey. Public: resident_attitudes.py needs per-respondent rows, not just the
+    town/zone means `town_value`/`zone_value` give."""
+    return _derived_tables()[survey]
+
+
 def list_zones() -> list[dict]:
     loc = _derived_tables()["location"]
     return [
@@ -130,7 +137,10 @@ def town_value(survey: str, col: str) -> float | None:
     return None if pd.isna(v) else float(v)
 
 
-def _zone_value(survey: str, col: str, zone_id: str) -> float | None:
+def zone_value(survey: str, col: str, zone_id: str) -> float | None:
+    """Zone-level mean of one derived column, or None if this survey has no tie
+    to that zone (Tourist/Workers aren't GPS-tagged at all; Location/Enterprise/
+    Residents fall back to None if that specific zone has no matching rows)."""
     df = _derived_tables()[survey]
     if survey == "location":
         if zone_id not in df.index:
@@ -145,19 +155,24 @@ def _zone_value(survey: str, col: str, zone_id: str) -> float | None:
     return float(sub.mean(skipna=True))
 
 
+def value_for(survey: str, col: str, zone_id: str | None = None) -> tuple[float | None, bool]:
+    """`(value, is_town_wide_proxy)` for one derived column -- the shared zone-or-
+    town-wide-fallback lookup every composite (TVI, insights, E-S-AC framework)
+    uses. Public: also used by framework_esac.py."""
+    town_val = town_value(survey, col)
+    if zone_id is None:
+        return town_val, False
+    zv = zone_value(survey, col, zone_id)
+    if zv is not None:
+        return zv, False
+    return town_val, True  # fall back to town-wide (no zone tie / no data)
+
+
 def compute_subindex(theme: str, zone_id: str | None = None) -> tuple[float | None, list[dict]]:
     detail = []
     values = []
     for name, survey, col in THEME_COMPONENTS[theme]:
-        town_val = town_value(survey, col)
-        if zone_id is None:
-            val, is_proxy = town_val, False
-        else:
-            zone_val = _zone_value(survey, col, zone_id)
-            if zone_val is not None:
-                val, is_proxy = zone_val, False
-            else:
-                val, is_proxy = town_val, True  # fall back to town-wide (no zone tie / no data)
+        val, is_proxy = value_for(survey, col, zone_id)
         if val is not None:
             values.append(val)
             detail.append({"component": name, "value": round(val, 4), "town_wide_proxy": is_proxy})

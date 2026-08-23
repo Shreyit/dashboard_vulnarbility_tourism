@@ -259,4 +259,63 @@ export const METHODOLOGY: MethodologyEntry[] = [
       },
     ],
   },
+  {
+    id: "esac",
+    name: "E-S-AC Framework (second vulnerability lens)",
+    definition:
+      "A complementary, IPCC-style Exposure / Sensitivity / Adaptive Capacity structure, built " +
+      "alongside the 6-pillar TVI, not in place of it. Reimplemented from a second, " +
+      "independently-built workbook's exact formulas and weights, using this pipeline's own " +
+      "already-derived columns wherever they match; several inputs substitute the nearest " +
+      "available column for one the original framework named more narrowly.",
+    components: [
+      "Exposure = 0.35 seasonal employment dependency + 0.35 tourism livelihood dependency + 0.30 peak tourism disruption",
+      "Sensitivity = 0.30 water operational stress + 0.20 water source stress + 0.20 resident water-service stress + 0.15 resident sanitation stress + 0.15 sewage risk",
+      "Adaptive Capacity = 0.55 enterprise adaptation + 0.25 resident adaptation + 0.20 disaster preparedness",
+    ],
+    normalization:
+      "Each weighted mean renormalizes over whichever inputs are present (average over what's " +
+      "there, don't fabricate zeros). Several inputs are substitutions for the original workbook's " +
+      "narrower variable: enterprise.tanker_dependency stands in for a 3-tier municipal/spring/tanker " +
+      "water-source scale; residents.sewage_overflow_peak stands in for a broader sanitation-stress " +
+      "measure; residents.tourism_dependency (yes/no) stands in for a continuous tourism-income-share " +
+      "ratio; enterprise/resident 'adaptation' use 2 and 1 available components respectively rather " +
+      "than the original's 4 and 3. See backend/app/framework_esac.py for the full list.",
+    formula:
+      "Composite = 100 x [Exposure + Sensitivity + (1 - Adaptive Capacity)] / 3, banded 0-33.33 " +
+      "Lower / 33.34-66.67 Moderate / >66.67 Higher, computed both town-wide and per zone.",
+    citations: [
+      {
+        label: "Assessing and Mapping Tourism Vulnerability Using Remote Sensing -- Shimla District case (the Exposure-Sensitivity-Adaptive Capacity structure this reimplements)",
+        url: "https://link.springer.com/chapter/10.1007/978-981-95-0156-4_11",
+      },
+    ],
+  },
+  {
+    id: "resident-attitudes-set",
+    name: "Resident Attitudes & Social Exchange Theory",
+    definition:
+      "Does tourism dependence correlate with less felt irritation at tourism's pressure, as " +
+      "Social Exchange Theory predicts? Splits residents into tourism-dependent vs. non-dependent " +
+      "and tests three attitude pillars, computed fresh from the real 239 residents in this " +
+      "session -- not a reproduction of any externally reported figure.",
+    components: [
+      "Economic = tourism_no_net_benefit",
+      "Social = mean(crowding_avoidance, travel_difficulty_peak, noise_increase_perception)",
+      "Environmental = environment_trend_worsened",
+      "RII (aggregate) = mean(Economic, Social, Environmental) -- the same component set SCPI already uses, scored per respondent instead of town-averaged",
+      "Group = residents.tourism_dependency (tourism as primary livelihood, yes/no)",
+    ],
+    normalization: "Same OECD/JRC-normalized 0-1 components SCPI already uses; no new derivation.",
+    formula:
+      "Two-sided Mann-Whitney U test (dependent vs. non-dependent) per pillar and for the " +
+      "aggregate; rank-biserial effect size r = 1 - 2U/(n1 x n2) (Kerby, 2014). Banded significant " +
+      "(p<0.05) / marginal (0.05-0.10) / not significant (>=0.10). Requires >=5 respondents per " +
+      "group to run.",
+    citations: [
+      {
+        label: "Ap, J. (1992). Residents' Perceptions Research on the Social Exchange Theory. Annals of Tourism Research, 19(4), 665-690. (Bibliographic reference -- no URL cited, same treatment as the Elkington 1997 entry.)",
+      },
+    ],
+  },
 ];

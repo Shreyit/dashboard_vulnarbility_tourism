@@ -94,6 +94,39 @@ export const STAKEHOLDER_META: Record<string, string> = {
   tourist: "Tourists",
 };
 
+export type EsacZone = {
+  zone_id: string;
+  composite: number | null;
+  band: string | null;
+};
+
+export type EsacOut = {
+  exposure: number | null;
+  sensitivity: number | null;
+  adaptive_capacity: number | null;
+  composite: number | null;
+  band: string | null;
+  zones: EsacZone[];
+};
+
+export type GroupComparison = {
+  n_dependent: number;
+  n_non_dependent: number;
+  mean_dependent: number;
+  mean_non_dependent: number;
+  median_dependent: number;
+  median_non_dependent: number;
+  p_value: number;
+  rank_biserial: number;
+  band: "significant" | "marginal" | "not significant";
+};
+
+export type ResidentAttitudesOut = {
+  group_sizes: { dependent: number; non_dependent: number };
+  aggregate: GroupComparison | null;
+  pillars: Record<"economic" | "social" | "environmental", GroupComparison | null>;
+};
+
 // Direction + display metadata the backend doesn't need to send but the UI does.
 export const THEME_META: Record<ThemeKey, { label: string; short: string; higherIsBetter: boolean }> = {
   wsi: { label: "Water Stress Index", short: "Water", higherIsBetter: false },

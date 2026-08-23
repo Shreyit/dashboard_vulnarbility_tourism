@@ -203,6 +203,47 @@ values from §4 above — no new raw aggregation.
 | **Seasonality Amplification Index (SAI)** | Mean of 5 peak-season-framed components: `enterprise.water_constraint_stress`, `enterprise.peak_offpeak_cost_pressure`, `residents.travel_difficulty_peak`, `residents.sewage_overflow_peak`, `workers.months_without_work_share`, ×100 | Same OECD/JRC-normalized components as the 6 pillars | Empirical (respondents' own peak-vs-off-season answers) — distinct from PSSM, which is a hypothetical footfall-multiplier scenario, not a measured signal |
 | **Host-Visitor Perception Gap (HVG)** | `visitor_satisfaction = tourist.overall_satisfaction`; `host_sentiment = 1 − SCPI`; `gap = visitor_satisfaction − host_sentiment`; banded into a Doxey stage from `host_sentiment` (≥0.75 Euphoria, ≥0.5 Apathy, ≥0.25 Irritation, else Antagonism) | Reuses SCPI/VEI's own normalization | Doxey's Irridex (1975) — `RESEARCH_BENCHMARKS.md` §2.3 |
 
+### 4.2 E-S-AC framework (second vulnerability lens, `backend/app/framework_esac.py`)
+
+A user-supplied workbook, `Nainital_Tourism_Vulnerability_Derived_Variables.xlsx`, independently
+implements an IPCC-style Exposure/Sensitivity/Adaptive Capacity (E-S-AC) structure — exactly the
+"possible v2 restructuring" `RESEARCH_BENCHMARKS.md` §4 flagged as an open option. It's now built
+as a genuine second lens alongside the 6-pillar TVI (not a replacement), reimplemented from
+`processed/*.csv` via this pipeline's own `derive_*` outputs rather than reading the workbook at
+request time (it's a static snapshot that predates the Z02 exclusion).
+
+| Component | Formula | Substitutions from the source workbook |
+|---|---|---|
+| **Exposure** | `0.35×seasonal_employment_dependency + 0.35×tourism_livelihood_dependency + 0.30×peak_tourism_disruption` | `workers.months_without_work_share`, `residents.tourism_dependency` (binary, vs. the workbook's continuous earners/household-size ratio), and a peak-disruption score built from the same 4 `residents.*` components SCPI uses |
+| **Sensitivity** | `0.30×water_operational_stress + 0.20×water_source_stress + 0.20×resident_water_service_stress + 0.15×resident_sanitation_stress + 0.15×sewage_risk` | `enterprise.water_constraint_stress` (exact match); `enterprise.tanker_dependency` stands in for a 3-tier municipal/spring/tanker scale; `residents.water_hours_deficit` (exact match); `residents.sewage_overflow_peak` stands in for a broader sanitation-stress measure; `enterprise.poor_sewage_adequacy` (same categories, different weights than the workbook's 1/0.35/0.15/0.05) |
+| **Adaptive Capacity** | `0.55×enterprise_adaptation + 0.25×resident_adaptation + 0.20×disaster_preparedness` | Enterprise/resident "adaptation" use 2 and 1 available components respectively (rainwater harvesting, off-season government support), narrower than the workbook's 4- and 3-component versions; disaster preparedness isolates `emergency_contact_displayed`/`evacuation_info_displayed` from the raw Location columns at the workbook's own 0.45/0.55 weights |
+| **Composite** | `100 × [Exposure + Sensitivity + (1 − Adaptive Capacity)] / 3`, banded 0–33.33 Lower / 33.34–66.67 Moderate / >66.67 Higher | Same formula and bands as the source workbook |
+
+Every substitution is a deliberate nearest-equivalent using data this pipeline already derives, not
+a silent approximation — see `backend/app/framework_esac.py`'s per-function docstrings for the exact
+reasoning, and the interactive Methodology picker for the same detail in the dashboard itself.
+
+### 4.3 Resident Attitudes & Social Exchange Theory (`backend/app/resident_attitudes.py`)
+
+Prompted by a pasted research narrative (Resident Irritation Index, Social Exchange Theory, a
+tourism-dependent vs. non-dependent group comparison across Economic/Social/Environmental pillars).
+The exact reported figures (p=0.093 aggregate, rank-biserial r=−0.016 for Environmental) came from a
+pillar-item bundle and statistical run outside this pipeline that can't be verified here, so this
+recomputes the same *kind* of analysis fresh, from the real 239 residents, with this project's own
+transparent pillar definitions — not a reproduction of those exact numbers.
+
+| Pillar | Definition |
+|---|---|
+| Economic | `residents.tourism_no_net_benefit` |
+| Social | `mean(residents.crowding_avoidance, residents.travel_difficulty_peak, residents.noise_increase_perception)` |
+| Environmental | `residents.environment_trend_worsened` |
+| RII (aggregate) | `mean(Economic, Social, Environmental)` — the exact same component set SCPI already averages town-wide, scored per respondent instead |
+
+Group: `residents.tourism_dependency` (tourism as primary household livelihood, yes/no). Test: a
+two-sided Mann-Whitney U per pillar and for the aggregate (requires ≥5 respondents per group), with
+rank-biserial effect size `r = 1 − 2U/(n1×n2)` (Kerby, 2014), banded significant (p<0.05) / marginal
+(0.05–0.10) / not significant (≥0.10).
+
 ---
 
 ## 5. Public / external data

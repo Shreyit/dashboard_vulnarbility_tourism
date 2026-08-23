@@ -46,8 +46,22 @@
   pointer-events: none;
 }
 
+/* The "small" variant (the Methodology picker's 13 indicators) wraps to several
+   rows -- a 999px capsule stretched around multiple rows reads as a broken oval,
+   not a segmented control. Flattened to the standard near-zero brutalist radius
+   instead; the single deliberately-rounded capsule stays reserved for the
+   single-row Dashboard Dome nav, where it actually reads as a pill. */
+.pill-tabs-small {
+  border-radius: var(--radius);
+}
+
 .pill-tabs-small .pill-tab {
   padding: 0.42rem 0.9rem;
+  border-radius: var(--radius);
+}
+
+.pill-tabs-small .pill-tab-thumb {
+  border-radius: var(--radius);
 }
 
 .pill-tabs-small .pill-tab-label {
