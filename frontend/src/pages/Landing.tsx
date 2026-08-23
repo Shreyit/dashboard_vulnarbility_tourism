@@ -36,7 +36,7 @@ const MENU_ITEMS: FlowingMenuItem[] = [
     label: "Zone Map",
     href: "/dashboard?tab=zones",
     image: navHimalaya,
-    blurb: "Ten surveyed sites, each with its own score and breakdown.",
+    blurb: "Nine surveyed sites, each with its own score and breakdown.",
   },
   {
     label: "Stress Test",
@@ -157,7 +157,7 @@ export default function Landing() {
                     navigate("/dashboard");
                   }}
                 >
-                  Enter the dashboard dome
+                  Enter the dashboard
                 </a>
               </Magnetic>
               <Magnetic strength={0.42} radius={100} maxOffset={22}>
@@ -215,11 +215,12 @@ export default function Landing() {
 
       <section className="section container">
         <div className="section-head">
-          <span className="eyebrow">The dashboard dome</span>
-          <SplitHeading as="h2">One page. Three lenses.</SplitHeading>
+          <span className="eyebrow">The dashboard</span>
+          <SplitHeading as="h2">One page. Several lenses.</SplitHeading>
           <Reveal as="p" className="section-lede">
-            The town-wide index, the zone-by-zone map, and a peak-season stress-test simulator,
-            in one instrument panel you flip through instead of leaving.
+            The town-wide index, the zone-by-zone map, a second vulnerability framework, a
+            resident-attitudes test, a trends report, and a peak-season stress-test simulator, in
+            one instrument panel you flip through instead of leaving.
           </Reveal>
         </div>
         <FlowingMenu items={MENU_ITEMS} onNavigate={handleNavigate} />

@@ -182,6 +182,12 @@ button.subindex-bar.is-active {
 }
 
 .stakeholder-row-head .stakeholder-col-label {
+  /* grid items default to min-width: auto (their max-content size), so a long
+     un-hyphenated label like "Infrastructure" would rather overflow past its
+     own track and overlap the next column's label than wrap -- min-width: 0
+     lets it wrap inside its column instead */
+  min-width: 0;
+  overflow-wrap: break-word;
   font-family: var(--font-mono);
   font-size: 0.62rem;
   letter-spacing: 0.04em;
@@ -201,4 +207,71 @@ button.subindex-bar.is-active {
   background: var(--paper-deep);
   color: var(--ink-faint);
   font-size: 0.78rem;
+}
+
+/* ---------- line chart ---------- */
+.line-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.line-chart-value {
+  fill: var(--rust);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
+.line-chart-label {
+  fill: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ---------- radar chart ---------- */
+.radar-chart-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.radar-chart {
+  overflow: visible;
+}
+
+.radar-axis-label {
+  fill: var(--ink-soft);
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.radar-legend {
+  display: flex;
+  gap: var(--sp-4);
+  margin-top: var(--sp-3);
+}
+
+.radar-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+
+.radar-legend-swatch {
+  display: inline-block;
+  width: 1.2rem;
+  height: 2px;
+  background: var(--rust);
+}
+
+.radar-legend-swatch-dashed {
+  background: repeating-linear-gradient(to right, var(--rust) 0 5px, transparent 5px 8px);
 }

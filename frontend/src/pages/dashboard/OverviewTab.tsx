@@ -1,14 +1,24 @@
 import { useMemo, useRef, useState } from "react";
 import { gsap, useGSAP } from "../../lib/gsap";
-import { getInsights, getTownIndices } from "../../api/client";
+import { getDemographics, getInsights, getTownIndices } from "../../api/client";
 import { loadZonesWithIndices, type ZoneWithIndices } from "../../api/loadZonesWithIndices";
-import { THEME_META, THEME_ORDER, type IndexBundle, type InsightsOut, type ThemeKey } from "../../api/types";
+import {
+  THEME_META,
+  THEME_ORDER,
+  type DemographicBar,
+  type DemographicsOut,
+  type IndexBundle,
+  type InsightsOut,
+  type ThemeKey,
+} from "../../api/types";
+import { stressValue } from "../../lib/pillarStress";
 import { useAsync } from "../../hooks/useAsync";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import RadialGauge from "../../components/IndexViz/RadialGauge";
 import SubIndexBar from "../../components/IndexViz/SubIndexBar";
 import CoxcombChart from "../../components/IndexViz/CoxcombChart";
 import StakeholderMatrixGrid from "../../components/IndexViz/StakeholderMatrixGrid";
+import BarChartGeneric, { type BarDatum } from "../../components/IndexViz/BarChartGeneric";
 import KpiRow from "../../components/IndexViz/KpiRow";
 import ErrorPanel from "../../components/ErrorPanel";
 import Loading from "../../components/Loading";
@@ -18,24 +28,21 @@ type OverviewData = {
   indices: IndexBundle;
   insights: InsightsOut;
   zones: ZoneWithIndices[];
+  demographics: DemographicsOut;
 };
 
 async function loadOverviewData(): Promise<OverviewData> {
-  const [indices, insights, zones] = await Promise.all([
+  const [indices, insights, zones, demographics] = await Promise.all([
     getTownIndices(),
     getInsights(),
     loadZonesWithIndices(),
+    getDemographics(),
   ]);
-  return { indices, insights, zones };
+  return { indices, insights, zones, demographics };
 }
 
-// A pillar's own natural direction differs (IAI/VEI are "higher = better"); this
-// flips those two so every pillar reads on the same "higher = more stressed"
-// scale for ranking, matching the convention `insights.py`'s stakeholder matrix
-// already uses.
-function stressValue(theme: ThemeKey, v: number | null): number | null {
-  if (v === null) return null;
-  return THEME_META[theme].higherIsBetter ? 1 - v : v;
+function toBars(bars: DemographicBar[]): BarDatum[] {
+  return bars.map((b) => ({ key: b.label, label: b.label, value: b.value, hint: `${b.count} responses` }));
 }
 
 export default function OverviewTab() {
@@ -96,8 +103,9 @@ export default function OverviewTab() {
           },
           "-=0.25",
         )
-        .from(q(".subindex-bar"), { autoAlpha: 0, x: -14, duration: 0.4, stagger: 0.06 }, "-=0.3")
+        .from(q(".overview-bars-panel .subindex-bar"), { autoAlpha: 0, x: -14, duration: 0.4, stagger: 0.06 }, "-=0.3")
         .from(q(".overview-insights-grid > .panel"), { autoAlpha: 0, y: 20, duration: 0.5, stagger: 0.12 }, "-=0.2")
+        .from(q(".overview-demographics-grid > .panel"), { autoAlpha: 0, y: 20, duration: 0.5, stagger: 0.1 }, "-=0.2")
         .from(q(".eyebrow"), { autoAlpha: 0, duration: 0.3 }, 0.2);
     },
     { dependencies: [status, reducedMotion], scope: gridRef, revertOnUpdate: true },
@@ -220,6 +228,53 @@ export default function OverviewTab() {
                 asked about that pillar.
               </p>
               <StakeholderMatrixGrid data={data.insights.stakeholder_matrix} />
+            </div>
+          </div>
+
+          <div className="overview-demographics-grid">
+            <div className="panel overview-demo-panel">
+              <span className="eyebrow">
+                Who we surveyed -- {data.demographics.zones_surveyed} zones
+              </span>
+              <div style={{ marginTop: "var(--sp-3)" }}>
+                <BarChartGeneric data={toBars(data.demographics.respondent_mix)} max={100} />
+              </div>
+            </div>
+
+            <div className="panel overview-demo-panel">
+              <span className="eyebrow">Tourist profile</span>
+              <div className="overview-demo-subchart" style={{ marginTop: "var(--sp-3)" }}>
+                <span className="overview-demo-sublabel">Age group</span>
+                <BarChartGeneric data={toBars(data.demographics.tourist_age_group)} max={100} />
+              </div>
+              <div className="overview-demo-subchart">
+                <span className="overview-demo-sublabel">Gender</span>
+                <BarChartGeneric data={toBars(data.demographics.tourist_gender)} max={100} />
+              </div>
+            </div>
+
+            <div className="panel overview-demo-panel">
+              <span className="eyebrow">Visit pattern</span>
+              <div className="overview-demo-subchart" style={{ marginTop: "var(--sp-3)" }}>
+                <span className="overview-demo-sublabel">First-time vs. repeat visitor</span>
+                <BarChartGeneric data={toBars(data.demographics.tourist_first_visit)} max={100} />
+              </div>
+              <div className="overview-demo-subchart">
+                <span className="overview-demo-sublabel">Accommodation type</span>
+                <BarChartGeneric data={toBars(data.demographics.tourist_accommodation)} max={100} />
+              </div>
+            </div>
+
+            <div className="panel overview-demo-panel">
+              <span className="eyebrow">Livelihoods -- enterprise &amp; worker mix</span>
+              <div className="overview-demo-subchart" style={{ marginTop: "var(--sp-3)" }}>
+                <span className="overview-demo-sublabel">Enterprise type</span>
+                <BarChartGeneric data={toBars(data.demographics.enterprise_type)} max={100} />
+              </div>
+              <div className="overview-demo-subchart">
+                <span className="overview-demo-sublabel">Worker sector</span>
+                <BarChartGeneric data={toBars(data.demographics.worker_sector)} max={100} />
+              </div>
             </div>
           </div>
         </div>

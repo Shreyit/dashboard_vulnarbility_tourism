@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import httpx
 from fastapi import APIRouter, HTTPException
 
 from .. import indices
@@ -19,5 +20,14 @@ async def post_chat(body: ChatRequest) -> ChatResponse:
         context["zone"] = indices.compute_tvi(zone_id=body.zone_id)
 
     client = get_llm_client()
-    reply = await client.reply(body.message, context)
+    try:
+        reply = await client.reply(body.message, context)
+    except httpx.HTTPStatusError as exc:
+        if exc.response.status_code == 429:
+            reply = (
+                "All of PahadiBot's configured Groq keys are rate-limited right now -- "
+                "try again in a moment."
+            )
+        else:
+            raise HTTPException(status_code=502, detail=f"Groq request failed: {exc}") from exc
     return ChatResponse(reply=reply, grounded=True, llm_configured=client.configured)

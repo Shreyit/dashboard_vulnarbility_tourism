@@ -39,18 +39,22 @@ class UnconfiguredLLMClient(LLMClient):
 
     async def reply(self, message: str, context: dict) -> str:
         return (
-            "PahadiBot isn't connected to a language model yet (no GROQ_API_KEY set). "
-            "Once it's added to backend/.env, I'll be able to answer in plain language -- "
-            "for now, here are the current numbers I'd have grounded my answer in: "
+            "PahadiBot isn't connected to a language model yet (no DASHBOARD_GROQ_API_KEY(S) "
+            "set). Once it's added to .env, I'll be able to answer in plain language -- for "
+            "now, here are the current numbers I'd have grounded my answer in: "
             f"{json.dumps(context, indent=2)}"
         )
 
 
 class GroqLLMClient(LLMClient):
+    """Tries each configured key in order, falling back to the next one only on a
+    429 (rate limit) response -- any other error (bad request, auth failure, etc.)
+    is raised immediately rather than masked by silently trying the next key."""
+
     configured = True
 
-    def __init__(self, api_key: str, model: str):
-        self._api_key = api_key
+    def __init__(self, api_keys: list[str], model: str):
+        self._api_keys = api_keys
         self._model = model
 
     async def reply(self, message: str, context: dict) -> str:
@@ -63,16 +67,25 @@ class GroqLLMClient(LLMClient):
             ],
             "temperature": 0.3,
         }
-        headers = {"Authorization": f"Bearer {self._api_key}"}
+        last_rate_limit: httpx.HTTPStatusError | None = None
         async with httpx.AsyncClient(timeout=20) as client:
-            resp = await client.post(GROQ_URL, json=payload, headers=headers)
-            resp.raise_for_status()
-            data = resp.json()
-        return data["choices"][0]["message"]["content"]
+            for key in self._api_keys:
+                headers = {"Authorization": f"Bearer {key}"}
+                resp = await client.post(GROQ_URL, json=payload, headers=headers)
+                if resp.status_code == 429:
+                    last_rate_limit = httpx.HTTPStatusError(
+                        f"Rate limited (429) on key ending ...{key[-4:]}", request=resp.request, response=resp
+                    )
+                    continue
+                resp.raise_for_status()
+                return resp.json()["choices"][0]["message"]["content"]
+        assert last_rate_limit is not None
+        raise last_rate_limit
 
 
 def get_llm_client() -> LLMClient:
     settings = get_settings()
-    if settings.groq_api_key:
-        return GroqLLMClient(settings.groq_api_key, settings.groq_model)
+    keys = settings.groq_keys()
+    if keys:
+        return GroqLLMClient(keys, settings.groq_model)
     return UnconfiguredLLMClient()

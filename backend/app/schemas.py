@@ -118,3 +118,32 @@ class ResidentAttitudesOut(BaseModel):
     group_sizes: dict[str, int]
     aggregate: GroupComparisonOut | None
     pillars: dict[str, GroupComparisonOut | None]
+
+
+class ScenarioTrendPoint(BaseModel):
+    label: str
+    multiplier: float
+    tvi: float | None
+
+
+class StakeholderTriadOut(BaseModel):
+    economic: float | None
+    environmental: float | None
+    social: float | None
+
+
+class DemographicBar(BaseModel):
+    label: str
+    value: float
+    count: int
+
+
+class DemographicsOut(BaseModel):
+    respondent_mix: list[DemographicBar]
+    zones_surveyed: int
+    tourist_age_group: list[DemographicBar]
+    tourist_gender: list[DemographicBar]
+    tourist_first_visit: list[DemographicBar]
+    tourist_accommodation: list[DemographicBar]
+    enterprise_type: list[DemographicBar]
+    worker_sector: list[DemographicBar]

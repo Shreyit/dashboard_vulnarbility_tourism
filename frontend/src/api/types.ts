@@ -127,6 +127,35 @@ export type ResidentAttitudesOut = {
   pillars: Record<"economic" | "social" | "environmental", GroupComparison | null>;
 };
 
+export type ScenarioTrendPoint = {
+  label: string;
+  multiplier: number;
+  tvi: number | null;
+};
+
+export type StakeholderTriad = {
+  economic: number | null;
+  environmental: number | null;
+  social: number | null;
+};
+
+export type DemographicBar = {
+  label: string;
+  value: number;
+  count: number;
+};
+
+export type DemographicsOut = {
+  respondent_mix: DemographicBar[];
+  zones_surveyed: number;
+  tourist_age_group: DemographicBar[];
+  tourist_gender: DemographicBar[];
+  tourist_first_visit: DemographicBar[];
+  tourist_accommodation: DemographicBar[];
+  enterprise_type: DemographicBar[];
+  worker_sector: DemographicBar[];
+};
+
 // Direction + display metadata the backend doesn't need to send but the UI does.
 export const THEME_META: Record<ThemeKey, { label: string; short: string; higherIsBetter: boolean }> = {
   wsi: { label: "Water Stress Index", short: "Water", higherIsBetter: false },

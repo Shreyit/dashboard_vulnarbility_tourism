@@ -318,4 +318,32 @@ export const METHODOLOGY: MethodologyEntry[] = [
       },
     ],
   },
+  {
+    id: "trends",
+    name: "Trends report (scenario trend + stakeholder radar)",
+    definition:
+      "Two re-readings of already-computed values, not new derivations. The line chart tracks " +
+      "town-wide TVI across the Stress Test's own footfall-multiplier presets, read as a trend " +
+      "instead of a single before/after. The radar re-buckets the Stakeholder Pressure Matrix into " +
+      "the same Economic/Social/Environmental triad the Overview's Sustainability Triad uses, per " +
+      "respondent group instead of town-wide.",
+    components: [
+      "Line chart: town-wide TVI at each of the Stress Test's footfall_multiplier presets (today, +25%, +50%, extreme weekend)",
+      "Radar: economic = EDPI, environmental = mean(WSI, WSPI, 1-IAI), social = mean(SCPI, 1-VEI), computed per survey (enterprise/residents/workers/tourist)",
+    ],
+    normalization:
+      "No new normalization -- reuses the Stress Test's elasticity-scaled sub-indices for the " +
+      "line chart, and the Sustainability Triad's own OECD/JRC-normalized pillars for the radar. " +
+      "Workers and Tourist only populate 1-2 of the 3 radar pillars, so only groups with all three " +
+      "present are plotted -- in practice, Enterprise vs. Residents.",
+    formula:
+      "Line: tvi = run_stress_test(multiplier).scenario.tvi for each preset (backend/app/stress_test.py: compute_scenario_trend). " +
+      "Radar: bucket(survey) = {economic: edpi, environmental: mean(wsi, wspi, iai), social: mean(scpi, vei)} " +
+      "x100, from the direction-aligned Stakeholder Pressure Matrix (backend/app/insights.py: compute_sustainability_by_stakeholder).",
+    citations: [
+      {
+        label: "Not modeled on an external benchmark -- both charts re-read this project's own already-computed Stress Test and Stakeholder Pressure Matrix values from a different angle.",
+      },
+    ],
+  },
 ];

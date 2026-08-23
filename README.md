@@ -45,6 +45,9 @@ Raw files live in `survey_data/` (KoBoToolbox exports, labeled).
 - **Methodology** (on the home page's Data & Methodology section, not a dashboard tab): exact
   definition, source components, normalization method, formula, and citations for every indicator
   above, one at a time.
+- **Trends** (a Dashboard tab): a single long report -- top KPIs, a scenario-based intensity trend,
+  the six pillars as a bar chart, an Enterprise-vs-Residents sustainability radar, and a dynamic
+  variable explorer (pick a pillar, the chart updates).
 - **PahadiBot**: the dashboard's AI chat assistant. Ask it about the dashboard's own numbers;
   answers are grounded in the computed indices, not generic tourism facts.
 
@@ -69,8 +72,9 @@ output tables land in `processed/`.
 ## Tech stack
 
 - **Backend**: FastAPI (Python), serving processed indices + a stress-test scenario endpoint +
-  PahadiBot's chat route (Groq, optional key). `scipy` powers the Resident Attitudes/SET group
-  comparison (Mann-Whitney U + rank-biserial effect size).
+  PahadiBot's chat route (Groq, `openai/gpt-oss-120b`, a 3-key fallback pool configured in `.env`).
+  `scipy` powers the Resident Attitudes/SET group comparison (Mann-Whitney U + rank-biserial effect
+  size).
 - **Frontend**: React + TypeScript, built with Vite. Client-side SPA wired to the live API.
   Animation is GSAP throughout (ScrollTrigger, SplitText, DrawSVG, MotionPath, Flip), with real
   photography processed into duotone art and a deliberately narrow warm-white/grey/terracotta
@@ -87,29 +91,34 @@ output tables land in `processed/`.
 - `backend/`: FastAPI app loads `processed/*.csv` (`Z02` excluded as a duplicate site, leaving
   9 zones -- `workflow.md` §3), derives every variable in `VARIABLES_AND_DATA_SOURCES.md` §3,
   computes the 6 sub-indices + TVI (town-wide and per-zone), the 4 cross-cutting insights (§4.1),
-  the E-S-AC framework and Resident Attitudes/SET group comparison (§4.2-§4.3), and the
-  peak-season stress-test scenario per `workflow.md` §5-§6. Routes: `/api/zones`,
-  `/api/indices/town`, `/api/indices/zone/{zone_id}`, `/api/variables/{theme}`,
+  the E-S-AC framework and Resident Attitudes/SET group comparison (§4.2-§4.3), and two re-readings
+  for the Trends tab (§4.4), plus the peak-season stress-test scenario per `workflow.md` §5-§6.
+  Routes: `/api/zones`, `/api/indices/town`, `/api/indices/zone/{zone_id}`, `/api/variables/{theme}`,
   `/api/insights/town`, `/api/insights/esac`, `/api/insights/resident-attitudes`,
+  `/api/insights/scenario-trend`, `/api/insights/sustainability-by-stakeholder`,
   `/api/stress-test`, `/api/chat`.
 - `frontend/`: two pages. **Landing** (`/`) is the front page, ending in a **Data & Methodology**
   section with an interactive per-indicator picker (definitions/formulas/citations for all 13
-  indicators). **Dashboard Dome** (`/dashboard`) is a single merged instrument panel, not five
-  separate routes -- an iOS-style pill tab bar (`components/PillTabs/`, shared with the Methodology
-  picker) swaps between **Overview** (TVI, six pillars, KPI strip, Sustainability Triad,
-  Stakeholder Pressure Matrix), **Zone Map**, **E-S-AC** (second vulnerability lens), **Attitudes**
-  (Social Exchange Theory group comparison), and **Stress Test** (now last), all reading the live
-  API. Design system, custom crosshair cursor, magnetic controls, the scroll-drawn Nainital SVG scene,
-  the looping photo strip, and the route wipe between the two pages are built. PahadiBot's chat
-  panel is wired to `/api/chat` and floats over both pages.
+  indicators). **Dashboard** (`/dashboard`) is a single merged instrument panel, not six separate
+  routes -- an iOS-style pill tab bar (`components/PillTabs/`, shared with the Methodology picker)
+  swaps between **Overview** (TVI, six pillars, KPI strip, Sustainability Triad, Stakeholder
+  Pressure Matrix, and a "who we surveyed" chart grid: respondent composition, tourist age/gender/
+  visit-pattern, enterprise & worker mix -- all raw survey counts, no derived index), **Zone Map**,
+  **E-S-AC** (second vulnerability lens), **Attitudes** (Social
+  Exchange Theory group comparison), **Trends** (KPIs, a scenario-trend line chart, a six-pillar bar
+  chart, an Enterprise-vs-Residents radar, and a dynamic variable explorer), and **Stress Test** (now
+  last), all reading the live API. Design system, custom crosshair cursor, magnetic controls, the
+  scroll-drawn Nainital SVG scene, the looping photo strip, and the route wipe between pages are
+  built. PahadiBot's chat panel is wired to `/api/chat` and floats over every page.
 
 Still open:
 
-- External enrichment (OSM / Open-Meteo, `workflow.md` §4).
+- External enrichment (OSM / Open-Meteo, `workflow.md` §4) -- including real year-by-year
+  tourist-arrival data, which would let the Trends tab's line chart become an actual historical
+  series instead of a scenario-based substitute.
 - Zone-name confirmation with local reviewers -- the nine site names are placeholders.
 - `backend/app/weights.json` is equal-weight by default and is the first thing to hand back to
   domain reviewers.
-- A possible third page, once the user picks the next theme (`workflow.md` §10).
 
 See `workflow.md` §10 for the full phased plan.
 

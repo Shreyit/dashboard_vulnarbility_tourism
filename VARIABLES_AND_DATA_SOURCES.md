@@ -244,6 +244,19 @@ two-sided Mann-Whitney U per pillar and for the aggregate (requires ≥5 respond
 rank-biserial effect size `r = 1 − 2U/(n1×n2)` (Kerby, 2014), banded significant (p<0.05) / marginal
 (0.05–0.10) / not significant (≥0.10).
 
+### 4.4 Trends page re-readings (`/trends`, no new methodology)
+
+Two of the Trends page's four charts are re-readings of §4/§4.1's already-computed values, not new
+derivations:
+
+| View | Source | Note |
+|---|---|---|
+| Scenario-trend line chart | `stress_test.compute_scenario_trend()` | The Stress Test's own footfall-multiplier presets (today, +25%, +50%, extreme weekend), each run through the same `run_stress_test()` §6 already uses, returned as a series instead of one slider position. Not a historical time series -- see §5 below, annual tourist-arrival data isn't fetched yet. |
+| Stakeholder radar | `insights.compute_sustainability_by_stakeholder()` | The Sustainability Triad's Economic/Social/Environmental grouping (§4.1), applied per survey (Enterprise, Residents, Workers, Tourist) instead of blended town-wide. Workers/Tourist only populate 1-2 of the 3 buckets, so the chart only plots groups with all three present. |
+
+The remaining two (the six-pillar bar chart and the dynamic variable explorer) render §4's sub-index
+scores and §3's raw components directly -- no new backend computation at all.
+
 ---
 
 ## 5. Public / external data

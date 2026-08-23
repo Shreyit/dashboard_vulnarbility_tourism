@@ -41,14 +41,9 @@
   50%, 100% { opacity: 0.25; }
 }
 
-.header-rail-scroll {
-  margin-left: auto;
-  color: var(--ink-soft);
-}
-
 .header-flags {
   flex: 0 0 auto;
-  margin-left: var(--sp-4);
+  margin-left: auto;
   pointer-events: none;
   /* the string hangs past the rail's own edge; the rail clips it cleanly */
   margin-bottom: -4px;
@@ -271,9 +266,6 @@
 @media (max-width: 900px) {
   .header-rail-meta {
     display: none;
-  }
-  .header-rail-scroll {
-    margin-left: 0;
   }
 }
 

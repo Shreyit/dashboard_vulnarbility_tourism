@@ -1,17 +1,21 @@
 import type {
   ChatResponse,
+  DemographicsOut,
   EsacOut,
   IndexBundle,
   InsightsOut,
   ResidentAttitudesOut,
+  ScenarioTrendPoint,
+  StakeholderTriad,
   StressTestOut,
   VariablesOut,
   ZoneOut,
 } from "./types";
 
-// Relative paths: Vite's dev proxy (vite.config.ts) forwards /api/* to FastAPI on :8010;
-// a production build served by FastAPI's StaticFiles hits the same origin directly.
-const BASE = "/api";
+// Local dev: Vite's dev proxy (vite.config.ts) forwards /api/* to FastAPI on :8010, so the
+// relative default works unchanged. Deployed split (frontend on Vercel, backend elsewhere,
+// different origins): set VITE_API_BASE_URL to the backend's own /api URL at build time.
+const BASE = import.meta.env.VITE_API_BASE_URL ?? "/api";
 
 class ApiError extends Error {
   status: number;
@@ -55,6 +59,18 @@ export function getEsacFramework(): Promise<EsacOut> {
 
 export function getResidentAttitudes(): Promise<ResidentAttitudesOut> {
   return request("/insights/resident-attitudes");
+}
+
+export function getScenarioTrend(): Promise<ScenarioTrendPoint[]> {
+  return request("/insights/scenario-trend");
+}
+
+export function getSustainabilityByStakeholder(): Promise<Record<string, StakeholderTriad>> {
+  return request("/insights/sustainability-by-stakeholder");
+}
+
+export function getDemographics(): Promise<DemographicsOut> {
+  return request("/insights/demographics");
 }
 
 export function getThemeVariables(theme: string, zoneId?: string | null): Promise<VariablesOut> {

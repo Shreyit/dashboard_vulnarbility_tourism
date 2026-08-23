@@ -8,10 +8,11 @@ import OverviewTab from "./dashboard/OverviewTab";
 import ZoneMapTab from "./dashboard/ZoneMapTab";
 import EsacTab from "./dashboard/EsacTab";
 import ResidentAttitudesTab from "./dashboard/ResidentAttitudesTab";
+import TrendsTab from "./dashboard/TrendsTab";
 import StressTestTab from "./dashboard/StressTestTab";
 import "./Dashboard.css";
 
-type TabId = "overview" | "zones" | "esac" | "attitudes" | "stress";
+type TabId = "overview" | "zones" | "esac" | "attitudes" | "trends" | "stress";
 
 const TABS: { id: TabId; label: string; lede: string }[] = [
   {
@@ -35,6 +36,11 @@ const TABS: { id: TabId; label: string; lede: string }[] = [
     lede: "Do tourism-dependent residents feel less irritation? A Social Exchange Theory test.",
   },
   {
+    id: "trends",
+    label: "Trends",
+    lede: "KPIs, an intensity trend, the six pillars as a bar chart, a stakeholder radar, and a variable explorer.",
+  },
+  {
     id: "stress",
     label: "Stress Test",
     lede: "Drag peak-season footfall and watch every sub-index recompute.",
@@ -48,10 +54,11 @@ function isTabId(v: string | null): v is TabId {
 }
 
 /**
- * The Dashboard Dome: one page, one dome-shaped instrument panel, three
- * lenses on the same underlying data. A pill tab bar swaps the content below
- * it rather than routing to a new page, so the index, the map, and the
- * simulator read as one instrument rather than three separate screens.
+ * The Dashboard: one page, one instrument panel, several lenses on the same
+ * underlying data. A pill tab bar swaps the content below it rather than
+ * routing to a new page, so the index, the map, the alternate frameworks, the
+ * trend report, and the simulator all read as one instrument rather than as
+ * separate screens.
  */
 export default function Dashboard() {
   const [params, setParams] = useSearchParams();
@@ -90,15 +97,15 @@ export default function Dashboard() {
     <main>
       <section className="section container dome-section" style={{ borderTop: "none", paddingTop: "var(--sp-6)" }}>
         <div className="section-head">
-          <span className="eyebrow">The dashboard dome</span>
+          <span className="eyebrow">The dashboard</span>
           <SplitHeading as="h1" className="page-title">
             Nainital tourism vulnerability
           </SplitHeading>
           <p className="section-lede">
             One instrument panel: the composite index, the zone-by-zone map, a second vulnerability
-            lens, a resident-attitudes test, and the peak-season stress simulator, read together
-            instead of as separate screens. Exact methodology for every number lives on the home
-            page's Data &amp; Methodology section.
+            lens, a resident-attitudes test, a trends report, and the peak-season stress simulator,
+            read together instead of as separate screens. Exact methodology for every number lives
+            on the home page's Data &amp; Methodology section.
           </p>
         </div>
 
@@ -116,6 +123,7 @@ export default function Dashboard() {
           {active === "zones" && <ZoneMapTab />}
           {active === "esac" && <EsacTab />}
           {active === "attitudes" && <ResidentAttitudesTab />}
+          {active === "trends" && <TrendsTab />}
           {active === "stress" && <StressTestTab />}
         </div>
       </section>

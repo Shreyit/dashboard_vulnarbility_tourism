@@ -20,8 +20,8 @@ type PillTabsProps = {
  * border, hard offset shadow on the capsule, not a blurred plastic one -- the one
  * deliberately rounded shape in the system (workflow.md SS9.1).
  *
- * Used both for the Dashboard Dome's top-level view switch and, at `size="small"`,
- * for the Methodology tab's per-indicator picker.
+ * Used both for the Dashboard's top-level view switch and, at `size="small"`,
+ * for the Methodology picker's per-indicator switch.
  */
 export default function PillTabs({ tabs, active, onSelect, ariaLabel, size = "default" }: PillTabsProps) {
   const tabsRef = useRef<HTMLDivElement>(null);

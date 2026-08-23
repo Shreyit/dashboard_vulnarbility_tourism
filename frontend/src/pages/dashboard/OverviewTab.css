@@ -66,3 +66,37 @@
   color: var(--ink-faint);
   font-size: 0.8rem;
 }
+
+/* ---------- who we surveyed: real survey-composition charts ---------- */
+.overview-demographics-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-4);
+  margin-top: var(--sp-4);
+}
+
+@media (min-width: 860px) {
+  .overview-demographics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.overview-demo-panel {
+  padding: var(--sp-4);
+}
+
+.overview-demo-subchart + .overview-demo-subchart {
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-4);
+  border-top: var(--border);
+}
+
+.overview-demo-sublabel {
+  display: block;
+  margin-bottom: var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}

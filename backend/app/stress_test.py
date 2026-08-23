@@ -63,3 +63,23 @@ def run_stress_test(footfall_multiplier: float, zone_id: str | None = None) -> d
             "workflow.md SS6."
         ),
     }
+
+
+def compute_scenario_trend() -> list[dict]:
+    """The stress test's own footfall-multiplier presets (today, +25%, +50%, extreme
+    weekend), re-read as a trend: how does town-wide TVI move as intensity scales up?
+    Not a historical time series -- this project has no year-by-year tourist-arrival
+    data (VARIABLES_AND_DATA_SOURCES.md SS5 flags that as still-unfetched external
+    data) -- so this is a real, honest substitute rather than a fabricated 2000-2024
+    chart: the same anchors and elasticities the Stress Test tab already uses, town-wide."""
+    points = []
+    for preset in FOOTFALL_ANCHORS["presets"]:
+        result = run_stress_test(preset["multiplier"], zone_id=None)
+        points.append(
+            {
+                "label": preset["label"],
+                "multiplier": preset["multiplier"],
+                "tvi": result["scenario"]["tvi"],
+            }
+        )
+    return points

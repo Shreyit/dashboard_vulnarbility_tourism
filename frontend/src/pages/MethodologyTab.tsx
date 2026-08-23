@@ -9,7 +9,7 @@ import "./MethodologyTab.css";
  * Exact, citable methodology for every indicator on the dashboard: what it's
  * built from, how it's normalized, the formula, and where the numbers/framing
  * came from. Lives on the landing page's Data & Methodology section, not the
- * Dashboard Dome, so the dashboard itself stays focused on the live numbers.
+ * Dashboard, so the dashboard itself stays focused on the live numbers.
  * Reuses PillTabs (size="small") as the per-indicator picker.
  */
 export default function MethodologyTab() {

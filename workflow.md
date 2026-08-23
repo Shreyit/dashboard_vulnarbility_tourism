@@ -145,6 +145,54 @@ and a pasted research narrative:
   this recomputes the same *kind* of analysis fresh rather than displaying those numbers -- per the
   user's own choice when asked. `VARIABLES_AND_DATA_SOURCES.md` §4.3, `RESEARCH_BENCHMARKS.md` §2.7.
 
+### 5.3 Trends (Dashboard tab) -- **done**
+
+Built first as a separate, single long report page at `/trends` -- the user explicitly asked for
+"1 more page" that time, distinct from the Dashboard's instrument-panel tabs -- then, per a
+follow-up request, folded in as a sixth Dashboard tab. Per a further follow-up, the standalone
+`/trends` route and its nav link were dropped entirely: the content only ever needed to live in one
+place, and the Dashboard tab already had its own intro lede, so the separate page's header was pure
+duplication. `frontend/src/pages/dashboard/TrendsTab.tsx` is now the only home for it: KPIs, a
+scenario-trend line chart, a six-pillar bar chart, a stakeholder radar, and a dynamic variable
+explorer, using the Dashboard's shared header.
+
+Two of its four data sources are new re-readings of already-computed values, not new derivations:
+`stress_test.compute_scenario_trend()` (`backend/app/stress_test.py`) just runs the existing
+`run_stress_test()` across the 4 footfall presets and returns the town-wide TVI at each; a real
+tourism-arrival time series isn't available yet (`VARIABLES_AND_DATA_SOURCES.md` §5 still flags
+that as unfetched external data), so this substitutes honestly for a "trend" rather than fabricating
+2000-2024 history. `insights.compute_sustainability_by_stakeholder()` re-buckets the existing
+Stakeholder Pressure Matrix into the same Economic/Social/Environmental grouping the Sustainability
+Triad uses, per survey instead of town-wide -- Workers/Tourist only populate 1-2 of the 3 buckets,
+so the frontend radar only plots groups with all three present (in practice: Enterprise vs.
+Residents, a different comparison than the Resident Attitudes tab's tourism-dependency split).
+
+The variable explorer reuses the existing `GET /api/variables/{theme}` route (no new backend) --
+a theme dropdown just re-fetches and re-renders `BarChartGeneric`. Three new hand-built SVG chart
+components (`frontend/src/components/IndexViz/`): `LineChart` (category-spaced, not a continuous
+timeline, with a getTotalLength()-driven draw-on animation), `RadarChart` (multi-series, series told
+apart by stroke style and marker shape rather than new hues, same convention as `CoxcombChart`'s
+textures), and `BarChartGeneric` (the same `.subindex-bar` row visual `SubIndexBar` uses,
+generalized to arbitrary labeled data so it can re-render on a dropdown change).
+
+### 5.4 "Who we surveyed" -- **done**, `backend/app/demographics.py`
+
+Per a follow-up request, the Overview tab got a second grid of chart-only panels below the six
+pillars and the two cross-cutting insights, this time surfacing raw respondent composition instead
+of any derived index: plain `value_counts()` on real survey questions, not new indicators.
+`compute_demographics()` reads straight from the already-loaded `processed/*.csv` tables (via
+`colfind.find_col`, the same fuzzy column-matching `derive.py` already uses) and returns percentage
+breakdowns + raw counts, no normalization or weighting involved. New route
+`GET /api/insights/demographics`.
+
+Four panels, all `BarChartGeneric` (no new chart component needed): **Who we surveyed** (the
+Tourist/Resident/Worker/Enterprise split, as a share of the 1,019 people surveyed, plus the 9 zones
+site-audited separately), **Tourist profile** (age group, gender), **Visit pattern** (first-time vs.
+repeat visitor, accommodation type), and **Livelihoods** (enterprise type, worker sector -- the
+worker-sector option text is shortened to drop its parenthetical example list, e.g. "Hospitality
+(Hotels, Restaurants, Resorts etc)" -> "Hospitality", for chart-label readability only; the full
+text is unchanged in the raw data).
+
 ## 6. Stress/pressure-test simulator
 
 Goal: let the user drag a "peak-season tourist footfall" slider (e.g. baseline → +25% → +50%) and
@@ -176,6 +224,10 @@ Planned routes (v1):
   Amplification Index, and Host-Visitor Perception Gap (§5.1). Town-wide only.
 - `GET /api/insights/esac` — the E-S-AC framework, town-wide + per zone (§5.2).
 - `GET /api/insights/resident-attitudes` — the Resident Attitudes/SET group comparison (§5.2).
+- `GET /api/insights/scenario-trend` — the Stress Test's own footfall presets re-read as a trend,
+  used by the Trends page's line chart (§5.3).
+- `GET /api/insights/sustainability-by-stakeholder` — the Sustainability Triad re-bucketed per
+  survey group, used by the Trends page's radar chart (§5.3).
 - `POST /api/stress-test` — body: `{ footfall_multiplier }` → returns recomputed indices.
 - `POST /api/chat` — AI chat route (see §8).
 - Data loads from the processed store (SQLite or Parquet) at startup, served from memory —
@@ -187,8 +239,14 @@ The dashboard's assistant is named **PahadiBot** ("pahadi" = of the hills, fitti
 tool). Frontend stub already built: `frontend/src/components/PahadiBot/PahadiBotLauncher.tsx`, a
 fixed launcher button + panel that currently states plainly that it isn't connected yet.
 
-- Provider: **Groq** (key to be supplied later, build behind a small `LLMClient` interface so the
-  provider is swappable via `.env`, since the user indicated the key isn't ready yet).
+- Provider: **Groq** -- *done*: three keys supplied, configured as a fallback pool
+  (`DASHBOARD_GROQ_API_KEYS`, comma-separated, in the repo-root `.env`). `GroqLLMClient`
+  (`backend/app/llm.py`) tries each key in order and only falls back to the next one on a 429 (rate
+  limit) response; any other error (bad request, invalid key, etc.) is raised immediately rather
+  than silently masked. Built behind a small `LLMClient` interface so the provider itself stays
+  swappable. Model: `openai/gpt-oss-120b` -- the originally planned `llama-3.3-70b-versatile` has
+  since been decommissioned from Groq's lineup; confirmed the current one against `GET
+  /openai/v1/models` and a live test call before wiring it in.
 - The route grounds the model with the *current* computed indices (town-wide + selected zone) and
   the variable catalog as system-prompt context, so answers reference this dashboard's real numbers
   instead of generic tourism trivia. For example "Why is Naini Lake zone's WSI high?" should be
@@ -219,19 +277,20 @@ fixed launcher button + panel that currently states plainly that it isn't connec
   per-indicator picker (`frontend/src/pages/MethodologyTab.tsx`, a `size="small"` `PillTabs`
   instance) covering all 13 indicators — definition, source components, normalization method,
   formula, and citations, one at a time (`pages/methodologyContent.ts`). Deliberately kept off the
-  Dashboard Dome itself, so the dashboard stays focused on the live numbers and the reference
-  material lives where a reader would look for it first. (2) **Dashboard Dome** (`/dashboard`) — a
-  single merged instrument panel, not five separate routes. An iOS-style pill tab bar
-  (`components/PillTabs/`, shared with the Methodology picker above) swaps five views in place, in
-  this order: **Overview** (TVI gauge + 6 sub-index bars, the KPI strip, the Sustainability Triad
-  Coxcomb, and the Stakeholder Pressure Matrix — §5.1), **Zone Map** (click a zone to see its
-  breakdown), **E-S-AC** (the second Exposure/Sensitivity/Adaptive Capacity vulnerability lens,
-  town-wide + per zone — §5.2), **Attitudes** (the Resident Attitudes/Social Exchange Theory group
-  comparison — §5.2), and **Stress Test** (slider + before/after comparison, deliberately last now
-  that the dashboard has more to see first). Tab state lives in the URL as `?tab=`, so the landing
-  page's flowing-menu can deep-link straight into a given view. PahadiBot (see §8) is a floating
-  panel available from both pages, not a tab. Room is reserved for a possible third page (another
-  theme) later.
+  Dashboard itself, so the dashboard stays focused on the live numbers and the reference material
+  lives where a reader would look for it first. (2) **Dashboard** (`/dashboard`) — a single merged
+  instrument panel, not six separate routes. An iOS-style pill tab bar (`components/PillTabs/`,
+  shared with the Methodology picker above) swaps six views in place, in this order: **Overview**
+  (TVI gauge + 6 sub-index bars, the KPI strip, the Sustainability Triad Coxcomb, and the
+  Stakeholder Pressure Matrix — §5.1), **Zone Map** (click a zone to see its breakdown), **E-S-AC**
+  (the second Exposure/Sensitivity/Adaptive Capacity vulnerability lens, town-wide + per zone —
+  §5.2), **Attitudes** (the Resident Attitudes/Social Exchange Theory group comparison — §5.2),
+  **Trends** (the report view described below — §5.3), and **Stress Test** (slider + before/after
+  comparison, deliberately last now that the dashboard has more to see first). Tab state lives in
+  the URL as `?tab=`, so the landing page's flowing-menu can deep-link straight into a given view.
+  Trends briefly also had its own standalone route (`/trends`) with a duplicate header, but that
+  was dropped -- it only ever needed to live in the Dashboard (§5.3). PahadiBot (see §8) is a
+  floating panel available from every page, not a tab.
 
 ### 9.1 Visual language (locked in, applies to every future screen)
 
@@ -262,7 +321,7 @@ work stays consistent instead of drifting toward generic AI-tool defaults:
   offset shadow, a solid rust thumb re-parented between tabs with GSAP Flip (the same pattern the
   header's active-link marker uses). A scoped exception to the near-zero-radius rule, not a
   relaxation of it elsewhere. Extracted as a generic `{ tabs, active, onSelect }` component so both
-  the Dashboard Dome's top-level nav and the landing page's Methodology picker (`size="small"`)
+  the Dashboard's top-level nav and the landing page's Methodology picker (`size="small"`)
   share one implementation.
 - **Coxcomb / stakeholder-matrix charts** (`frontend/src/components/IndexViz/`): `CoxcombChart` is a
   hand-built SVG Nightingale rose — three categories told apart by *texture* (solid rust, a
@@ -282,25 +341,44 @@ work stays consistent instead of drifting toward generic AI-tool defaults:
    flowing-menu nav, and dome photo gallery are built into the landing page with real (cited)
    Nainital photography processed into duotone/tritone art. The data-driven views (Overview, Zone
    Map, Stress Test) are live, reading the FastAPI backend (step 2).
-4. **Dashboard Dome merge** — *done*: the data views were consolidated from separate routes into
-   one page (`frontend/src/pages/Dashboard.tsx`), navigated with an iOS-style pill tab bar instead
-   of a page change, per the "2-3 page, Tableau-style" direction. Later extended (still *done*)
-   with the Sustainability Triad, Stakeholder Pressure Matrix, Seasonality Amplification Index, and
+4. **Dashboard merge** — *done*: the data views were consolidated from separate routes into one
+   page (`frontend/src/pages/Dashboard.tsx`, originally named "Dashboard Dome" -- shortened to just
+   "Dashboard" per the user's later request), navigated with an iOS-style pill tab bar instead of a
+   page change, per the "2-3 page, Tableau-style" direction. Later extended (still *done*) with the
+   Sustainability Triad, Stakeholder Pressure Matrix, Seasonality Amplification Index, and
    Host-Visitor Perception Gap in Overview, and reordered to Overview → Zone Map → Stress Test
    (last). The per-indicator Methodology picker (§5.1) was built as part of this pass but moved to
-   the landing page's Data & Methodology section rather than staying a Dashboard Dome tab, so the
+   the landing page's Data & Methodology section rather than staying a Dashboard tab, so the
    dashboard itself stays focused on the live numbers.
 5. **GSAP polish pass** — *done*: entrance/scroll animations, the scroll-drawn Nainital SVG scene,
    the looping photo strip, magnetic controls, and the route/tab transitions are all built.
-6. **AI chat route** — *frontend done*: the PahadiBot panel is wired to `/api/chat` and degrades
-   honestly (shows raw grounding context, flags itself as unconfigured) with no key set. Only the
-   Groq key itself is still pending from the user.
+6. **AI chat route** — *done*: the PahadiBot panel is wired to `/api/chat`, degrades honestly (shows
+   raw grounding context, flags itself as unconfigured) with no key set, and now has three real Groq
+   keys configured as a fallback pool (§8) -- confirmed working end-to-end with a live test call.
 7. **E-S-AC framework + Resident Attitudes/SET** — *done* (§5.2): two more tabs, prompted by a
    user-supplied workbook and a pasted research narrative. Per the user's own choice when asked:
-   both became Dashboard Dome tabs (not a separate page), and the Resident Attitudes numbers are
+   both became Dashboard tabs (not a separate page), and the Resident Attitudes numbers are
    freshly computed from real data rather than reproducing the pasted figures.
-8. **Review & weight tuning**: revisit index weights/normalization with the user once real numbers
-   are visible; confirm the nine zone names with local reviewers.
+8. **Trends page** — *done* (§5.3): first built as a separate, single long report page -- the user
+   explicitly asked for "1 more page" that time, not more Dome tabs. KPIs, a scenario-trend line
+   chart, a pillar bar chart, a stakeholder radar, and a dynamic variable explorer, all built from data
+   already computed elsewhere in the pipeline.
+9. **Trends folded into the Dashboard, "Dome" dropped from the name** — *done*: per a follow-up
+   request, the Trends content became a sixth Dashboard tab too (`TrendsTab.tsx` extracted so both
+   the tab and the standalone `/trends` page could share it), and every "Dashboard Dome" reference
+   across the UI and docs was renamed to plain "Dashboard."
+10. **Standalone `/trends` route removed** — *done*: per a further follow-up, the separate `/trends`
+    page and its header/nav link were dropped -- Trends only ever needed to live as a Dashboard tab,
+    and the standalone page's own header (eyebrow/heading/lede) was pure duplication of the tab's
+    lede. Also dropped, same pass: the "read NN%" scroll-position readout in the header's instrument
+    rail (`components/SiteHeader/SiteHeader.tsx`), which the user found unnecessary chrome.
+11. **"Who we surveyed" charts added to Overview** — *done* (§5.4): per a follow-up asking for more
+    Overview content, "explained only via charts," sourced from the actual survey data rather than
+    another derived index -- four new chart panels of raw respondent-composition breakdowns
+    (`backend/app/demographics.py`), plus a fix for the Stakeholder Pressure Matrix's column-header
+    overlap bug (grid items need `min-width: 0` to wrap instead of overflowing past their track).
+12. **Review & weight tuning**: revisit index weights/normalization with the user once real numbers
+    are visible; confirm the nine zone names with local reviewers.
 
 ## Open questions for the user (before/while implementing)
 
@@ -320,4 +398,4 @@ work stays consistent instead of drifting toward generic AI-tool defaults:
 - Confirm the Resident Attitudes/SET pillar definitions (§5.2, §4.3) — this project's own 3-way split
   of SCPI's existing components, not the exact bundle behind the pasted narrative's p=0.093/r=-0.016
   figures, which this pipeline can't reproduce.
-- Groq API key + preferred model (e.g. `llama-3.3-70b-versatile`) — to be added to `.env` when ready.
+- ~~Groq API key~~ — *resolved*: three keys added as a fallback pool, `openai/gpt-oss-120b` (§8).

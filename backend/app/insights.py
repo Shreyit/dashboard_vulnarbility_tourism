@@ -137,6 +137,34 @@ def compute_host_visitor_gap() -> dict:
     }
 
 
+# ---------------------------------------------------------------------------
+# Sustainability triad, per stakeholder group: the same Economic/Social/
+# Environmental regrouping as compute_sustainability_triad(), applied to each
+# survey's own row in the Stakeholder Pressure Matrix instead of the town-wide
+# blend -- a different cut of the same two already-computed pieces, not a new
+# derivation. Workers/Tourist only have components in 1-2 of the 6 themes, so
+# their 3-pillar score is mostly None; the frontend only charts groups where
+# all three pillars are present (in practice: enterprise and residents).
+# ---------------------------------------------------------------------------
+
+
+def compute_sustainability_by_stakeholder() -> dict[str, dict[str, float | None]]:
+    matrix = compute_stakeholder_matrix()["matrix"]  # already direction-aligned, iai/vei inverted
+    out: dict[str, dict[str, float | None]] = {}
+    for survey, themes in matrix.items():
+        def bucket(keys: list[str]) -> float | None:
+            vals = [themes.get(k) for k in keys]
+            present = [v for v in vals if v is not None]
+            return round(sum(present) / len(present) * 100, 2) if present else None
+
+        out[survey] = {
+            "economic": bucket(["edpi"]),
+            "environmental": bucket(["wsi", "wspi", "iai"]),
+            "social": bucket(["scpi", "vei"]),
+        }
+    return out
+
+
 def compute_insights() -> dict:
     return {
         "sustainability": compute_sustainability_triad(),

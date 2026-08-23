@@ -50,7 +50,7 @@
    rows -- a 999px capsule stretched around multiple rows reads as a broken oval,
    not a segmented control. Flattened to the standard near-zero brutalist radius
    instead; the single deliberately-rounded capsule stays reserved for the
-   single-row Dashboard Dome nav, where it actually reads as a pill. */
+   single-row Dashboard nav, where it actually reads as a pill. */
 .pill-tabs-small {
   border-radius: var(--radius);
 }

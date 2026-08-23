@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { gsap, useGSAP } from "../../lib/gsap";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { useMagnetic } from "../Magnetic/useMagnetic";
@@ -8,10 +10,42 @@ import "./PahadiBot.css";
 
 type Message = { role: "user" | "bot"; text: string };
 
+/** Bot replies arrive as markdown (tables, bold, headings) -- rendered properly
+ * instead of dumped as raw asterisks and pipes. User messages stay plain text. */
+function BotMessage({ text }: { text: string }) {
+  return (
+    <div className="chat-markdown">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          table: ({ children }) => (
+            <div className="chat-markdown-table-wrap">
+              <table>{children}</table>
+            </div>
+          ),
+          a: ({ children, href }) => (
+            <a href={href} target="_blank" rel="noreferrer">
+              {children}
+            </a>
+          ),
+        }}
+      >
+        {text}
+      </ReactMarkdown>
+    </div>
+  );
+}
+
 const GREETING: Message = {
   role: "bot",
   text: "Namaste! I'm PahadiBot. Ask me about the dashboard's own numbers -- the Tourism Vulnerability Index, a sub-index, or a zone's score.",
 };
+
+const SUGGESTIONS = [
+  "What's the town-wide TVI?",
+  "Which pillar is most stressed?",
+  "Which zone is most vulnerable?",
+];
 
 /**
  * PahadiBot's chat panel (workflow.md #8). Calls POST /api/chat, which grounds
@@ -26,6 +60,7 @@ export default function PahadiBotLauncher() {
   const [llmConfigured, setLlmConfigured] = useState<boolean | null>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const reduced = useReducedMotion();
   const { ref: launcherRef, innerRef: dotRef, press } = useMagnetic<HTMLButtonElement>({
     strength: 0.4,
@@ -39,6 +74,10 @@ export default function PahadiBotLauncher() {
       behavior: reduced ? "auto" : "smooth",
     });
   }, [messages, sending, reduced]);
+
+  useEffect(() => {
+    if (open) inputRef.current?.focus();
+  }, [open]);
 
   // ---- the panel grows out of the launcher it is anchored to ----
   useGSAP(
@@ -78,8 +117,8 @@ export default function PahadiBotLauncher() {
     { dependencies: [messages.length, reduced], scope: bodyRef },
   );
 
-  const send = async () => {
-    const text = input.trim();
+  const send = async (overrideText?: string) => {
+    const text = (overrideText ?? input).trim();
     if (!text || sending) return;
     setMessages((m) => [...m, { role: "user", text }]);
     setInput("");
@@ -96,6 +135,11 @@ export default function PahadiBotLauncher() {
     } finally {
       setSending(false);
     }
+  };
+
+  const clearChat = () => {
+    setMessages([GREETING]);
+    setLlmConfigured(null);
   };
 
   return (
@@ -118,18 +162,50 @@ export default function PahadiBotLauncher() {
       {open && (
         <div className="pahadibot-panel" ref={panelRef}>
           <header>
-            <h4>PahadiBot</h4>
-            <button type="button" onClick={() => setOpen(false)} data-cursor>
-              close
-            </button>
+            <div className="pahadibot-heading">
+              <span
+                className={`pahadibot-status-dot${
+                  llmConfigured === false ? " is-warn" : llmConfigured ? " is-ok" : ""
+                }`}
+                aria-hidden="true"
+              />
+              <div>
+                <h4>PahadiBot</h4>
+                <span className="pahadibot-sub">grounded in this dashboard&apos;s live numbers</span>
+              </div>
+            </div>
+            <div className="pahadibot-header-actions">
+              <button type="button" onClick={clearChat} data-cursor aria-label="Clear chat">
+                reset
+              </button>
+              <button type="button" onClick={() => setOpen(false)} data-cursor>
+                close
+              </button>
+            </div>
           </header>
 
           <div className="body chat-body" ref={bodyRef}>
             {messages.map((m, i) => (
               <div key={i} className={`chat-msg chat-msg-${m.role}`}>
-                {m.text}
+                {m.role === "bot" ? <BotMessage text={m.text} /> : m.text}
               </div>
             ))}
+            {messages.length === 1 && !sending && (
+              <div className="chat-suggestions">
+                {SUGGESTIONS.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    className="chat-suggestion-chip"
+                    onClick={() => send(s)}
+                    data-cursor
+                    data-cursor-label="ASK"
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
             {sending && (
               <div className="chat-msg chat-msg-bot">
                 <Loading label="THINKING" />
@@ -154,6 +230,7 @@ export default function PahadiBotLauncher() {
             }}
           >
             <input
+              ref={inputRef}
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}

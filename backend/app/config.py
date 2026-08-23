@@ -15,9 +15,19 @@ WEIGHTS_PATH = BACKEND_DIR / "app" / "weights.json"
 class Settings(BaseSettings):
     cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
     groq_api_key: str | None = None
-    groq_model: str = "llama-3.3-70b-versatile"
+    groq_api_keys: str = ""  # comma-separated fallback pool, tried in order on rate-limit
+    groq_model: str = "openai/gpt-oss-120b"
 
     model_config = {"env_prefix": "DASHBOARD_", "env_file": str(REPO_ROOT / ".env")}
+
+    def groq_keys(self) -> list[str]:
+        """All configured Groq keys, in fallback order. `groq_api_keys` (plural, comma-
+        separated) is the primary way to configure a fallback pool; `groq_api_key`
+        (singular) is kept for backward compatibility and prepended if set."""
+        keys = [k.strip() for k in self.groq_api_keys.split(",") if k.strip()]
+        if self.groq_api_key and self.groq_api_key not in keys:
+            keys.insert(0, self.groq_api_key)
+        return keys
 
 
 @lru_cache

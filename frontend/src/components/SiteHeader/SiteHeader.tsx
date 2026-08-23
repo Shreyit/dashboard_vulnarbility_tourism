@@ -10,7 +10,7 @@ import "./SiteHeader.css";
 
 const NAV = [
   { to: "/", label: "home" },
-  { to: "/dashboard", label: "dashboard dome" },
+  { to: "/dashboard", label: "dashboard" },
 ];
 
 /** Rolled through the header's centre slot, so the widest breakpoint isn't
@@ -29,7 +29,6 @@ export default function SiteHeader() {
   const linksRef = useRef<HTMLElement>(null);
   const panelRef = useRef<HTMLElement>(null);
   const tickerRef = useRef<HTMLDivElement>(null);
-  const readoutRef = useRef<HTMLSpanElement>(null);
   // The marker starts life as a child of the nav itself, so its very first
   // move has no meaningful "previous box" to fly from.
   const markerPlaced = useRef(false);
@@ -72,18 +71,7 @@ export default function SiteHeader() {
   useGSAP(
     () => {
       const header = headerRef.current;
-      const readout = readoutRef.current;
-      if (!header) return;
-
-      const progress = ScrollTrigger.create({
-        start: 0,
-        end: "max",
-        onUpdate: (self) => {
-          if (readout) readout.textContent = `${String(Math.round(self.progress * 100)).padStart(2, "0")}%`;
-        },
-      });
-
-      if (reduced) return () => progress.kill();
+      if (!header || reduced) return;
 
       const condense = ScrollTrigger.create({
         start: 80,
@@ -109,10 +97,7 @@ export default function SiteHeader() {
         },
       });
 
-      return () => {
-        progress.kill();
-        condense.kill();
-      };
+      return () => condense.kill();
     },
     { dependencies: [reduced], scope: headerRef },
   );
@@ -161,9 +146,6 @@ export default function SiteHeader() {
         <span className="header-rail-meta mono-num">
           <span className="header-rail-dot" aria-hidden="true" />
           29.3865°N 79.4590°E · Kumaon, Uttarakhand
-        </span>
-        <span className="header-rail-scroll mono-num" aria-hidden="true">
-          read <span ref={readoutRef}>00%</span>
         </span>
         <PrayerFlags width={132} height={34} className="header-flags" />
       </div>
