@@ -5,6 +5,7 @@ import type {
   IndexBundle,
   InsightsOut,
   ResidentAttitudesOut,
+  ResidentLocation,
   ScenarioTrendPoint,
   StakeholderTriad,
   StressTestOut,
@@ -61,6 +62,10 @@ export function getResidentAttitudes(): Promise<ResidentAttitudesOut> {
   return request("/insights/resident-attitudes");
 }
 
+export function getWorkerDependency(): Promise<ResidentAttitudesOut> {
+  return request("/insights/worker-dependency");
+}
+
 export function getScenarioTrend(): Promise<ScenarioTrendPoint[]> {
   return request("/insights/scenario-trend");
 }
@@ -71,6 +76,10 @@ export function getSustainabilityByStakeholder(): Promise<Record<string, Stakeho
 
 export function getDemographics(): Promise<DemographicsOut> {
   return request("/insights/demographics");
+}
+
+export function getResidentLocations(): Promise<ResidentLocation[]> {
+  return request("/insights/resident-locations");
 }
 
 export function getThemeVariables(theme: string, zoneId?: string | null): Promise<VariablesOut> {

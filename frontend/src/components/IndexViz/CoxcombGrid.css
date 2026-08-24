@@ -1,0 +1,28 @@
+.coxcomb-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--sp-4);
+}
+
+@media (min-width: 860px) {
+  .coxcomb-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.coxcomb-grid-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--sp-3);
+  border: var(--border);
+}
+
+.coxcomb-grid-label {
+  margin-bottom: var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}

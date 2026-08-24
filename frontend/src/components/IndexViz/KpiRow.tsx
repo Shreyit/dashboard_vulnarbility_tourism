@@ -29,29 +29,29 @@ export default function KpiRow({
       </div>
       <div className="panel stat-panel">
         <span className="num mono-num">{mostStressed ? Math.round(mostStressed.value * 100) : "--"}</span>
-        <span className="label">Most-stressed pillar</span>
+        <span className="label">Most-stressed</span>
         <p>{mostStressed?.label ?? "No data yet"}</p>
       </div>
       <div className="panel stat-panel">
         <span className="num mono-num">{leastStressed ? Math.round(leastStressed.value * 100) : "--"}</span>
-        <span className="label">Least-stressed pillar</span>
+        <span className="label">Least-stressed</span>
         <p>{leastStressed?.label ?? "No data yet"}</p>
       </div>
       <div className="panel stat-panel">
         <span className="num mono-num">{mostVulnerableZone ? mostVulnerableZone.tvi.toFixed(1) : "--"}</span>
-        <span className="label">Most vulnerable site</span>
+        <span className="label">Most vulnerable</span>
         <p>{mostVulnerableZone?.name ?? "No data yet"}</p>
       </div>
       <div className="panel stat-panel">
         <span className="num mono-num">{seasonality === null ? "--" : seasonality.toFixed(1)}</span>
-        <span className="label">Seasonality amplification</span>
+        <span className="label">Seasonality</span>
         <p>How much worse peak season gets, from respondents&apos; own answers.</p>
       </div>
       <div className="panel stat-panel">
         <span className="num mono-num">
           {hostVisitorGap === null ? "--" : `${hostVisitorGap >= 0 ? "+" : ""}${hostVisitorGap.toFixed(2)}`}
         </span>
-        <span className="label">Host-visitor perception gap</span>
+        <span className="label">Host-visitor gap</span>
         <p>Tourist satisfaction minus host sentiment (Doxey&apos;s Irridex).</p>
       </div>
     </div>

@@ -203,12 +203,25 @@ def derive_tourist(df: pd.DataFrame) -> pd.DataFrame:
     cleanliness = df["cleanliness_rating_1to5"]
     satisfaction = df["overall_satisfaction_1to5"]
     dustbin_adequacy = df[find_col(df, "do you feel there are enough dustbins", required=False)]
+    hired_none = df[find_col(df, "hired any local tourism services during your stay?/none")]
+    bought_local = df[find_col(df, "purchased local products, handicrafts, or souvenirs during this trip")]
 
     # --- Visitor experience (higher = better; inverted only at TVI stage) ---
     out["ease_of_navigation"] = ordinal_1to5(ease_nav)
     out["signage_sufficiency"] = ordinal_1to5(signage)
     out["cleanliness_rating"] = ordinal_1to5(cleanliness)
     out["overall_satisfaction"] = ordinal_1to5(satisfaction)
+
+    # --- Economic: how little a tourist puts back into the local economy. Reimplements
+    # (not a byte-identical port of) Final_Pillar_Report.xlsx's Tourist Economic_Contribution
+    # indicator (components c_econ_spend | c_econ_localprod) with this pipeline's own two
+    # available yes/no fields -- hired any local service (guide/boating/etc, "None" = 0
+    # hired) and bought local products/souvenirs -- inverted to this project's "1 = more
+    # vulnerability/pressure" convention (workflow.md SS5 step 3), unlike the source
+    # workbook's own (undocumented) direction.
+    out["low_local_economic_engagement"] = 1 - pd.concat(
+        [1 - clean_binary(hired_none), yesno01(bought_local)], axis=1
+    ).mean(axis=1, skipna=True)
 
     # --- Waste & sanitation ---
     if dustbin_adequacy is not None:
@@ -225,9 +238,17 @@ def derive_workers(df: pd.DataFrame) -> pd.DataFrame:
     income_share = df[find_col(df, "share of your total annual income comes from tourism-related activities")]
     months_employed = pd.to_numeric(df[find_col(df, "for how many months in the previous year you received work")], errors="coerce")
     insurance = df[find_col(df, "access to any health insurance or accident coverage")]
+    arrangement = df[find_col(df, "describe your current employment arrangement")]
 
     out["tourism_income_dependency"] = category_score(income_share, INCOME_SHARE_BUCKET_MAP)
     out["months_without_work_share"] = ((12 - months_employed) / 12).clip(0, 1)
     out["no_insurance"] = 1 - yesno01(insurance)
+    # Reimplements (not a byte-identical port of) Final_Pillar_Report.xlsx's single-item
+    # Worker_Security indicator with this pipeline's own available field: permanent
+    # (year-round) vs. seasonal employment arrangement, direction-aligned so 1 = seasonal/
+    # insecure.
+    out["seasonal_employment_insecurity"] = category_score(
+        arrangement, {"permanent (year-round)": 0.0, "seasonal": 1.0}
+    )
 
     return out

@@ -3,7 +3,7 @@ import type { IndexBundle, ZoneOut } from "./types";
 
 export type ZoneWithIndices = { zone: ZoneOut; bundle: IndexBundle };
 
-/** Zones + their computed indices in one call. Shared by ZoneMapTab (the map
+/** Zones + their computed indices in one call. Shared by LocalsTab (the map
  * markers) and the Overview KPI row (the "most vulnerable zone" stat). */
 export async function loadZonesWithIndices(): Promise<ZoneWithIndices[]> {
   const zones = await getZones();

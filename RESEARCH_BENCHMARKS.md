@@ -160,7 +160,7 @@ rather than filled with a guess.
   weighted via **Analytic Hierarchy Process (AHP)** pairwise comparison.
 - **Use**: this Exposure–Sensitivity–Adaptive Capacity (E-S-AC) structure is a well-established
   alternative framing to our 6-pillar TVI. **Implemented as a second, complementary lens**
-  (`backend/app/framework_esac.py`, dashboard tab "E-S-AC"), not a replacement for the TVI — our
+  (`backend/app/framework_esac.py`, computed but not currently surfaced as its own dashboard tab), not a replacement for the TVI — our
   version reuses this pipeline's own already-derived columns rather than the Shimla study's original
   NDVI/slope/land-use/AHP-weighted inputs (we don't have those layers), so it's a reimplementation of
   the *structure*, not the original study's exact indicators or weights. Every substitution is

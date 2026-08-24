@@ -1,0 +1,39 @@
+.synthesis-grid-panel,
+.synthesis-radar-panel,
+.synthesis-dependency-panel {
+  padding: var(--sp-4);
+  margin-bottom: var(--sp-4);
+}
+
+.synthesis-radar-panel {
+  text-align: center;
+}
+
+.synthesis-dependency-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-5);
+  margin-top: var(--sp-3);
+}
+
+@media (min-width: 960px) {
+  .synthesis-dependency-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.synthesis-dependency-col {
+  display: block;
+}
+
+.synthesis-dependency-label {
+  display: block;
+  margin-bottom: var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  border-bottom: var(--border);
+  padding-bottom: var(--sp-2);
+}

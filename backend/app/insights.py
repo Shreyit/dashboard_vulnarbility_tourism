@@ -152,15 +152,29 @@ def compute_sustainability_by_stakeholder() -> dict[str, dict[str, float | None]
     matrix = compute_stakeholder_matrix()["matrix"]  # already direction-aligned, iai/vei inverted
     out: dict[str, dict[str, float | None]] = {}
     for survey, themes in matrix.items():
-        def bucket(keys: list[str]) -> float | None:
-            vals = [themes.get(k) for k in keys]
+        def bucket(keys: list[str], extra: list[float | None] | None = None) -> float | None:
+            vals = [themes.get(k) for k in keys] + (extra or [])
             present = [v for v in vals if v is not None]
             return round(sum(present) / len(present) * 100, 2) if present else None
 
+        # EDPI (the pillar "economic" otherwise reads from) has zero Tourist components --
+        # it's a livelihood-dependency pillar, not a visitor-spending one -- so Tourist's
+        # economic cut instead comes straight from derive.py's low_local_economic_engagement
+        # (already in this project's "1 = more vulnerability" direction, no inversion needed).
+        tourist_economic_extra = (
+            [indices.town_value("tourist", "low_local_economic_engagement")] if survey == "tourist" else None
+        )
+        # SCPI/VEI (the pillars "social" otherwise reads from) have zero Worker components --
+        # Workers' own social cut instead comes from derive.py's seasonal_employment_insecurity
+        # (same direction convention, no inversion needed).
+        worker_social_extra = (
+            [indices.town_value("workers", "seasonal_employment_insecurity")] if survey == "workers" else None
+        )
+
         out[survey] = {
-            "economic": bucket(["edpi"]),
+            "economic": bucket(["edpi"], tourist_economic_extra),
             "environmental": bucket(["wsi", "wspi", "iai"]),
-            "social": bucket(["scpi", "vei"]),
+            "social": bucket(["scpi", "vei"], worker_social_extra),
         }
     return out
 

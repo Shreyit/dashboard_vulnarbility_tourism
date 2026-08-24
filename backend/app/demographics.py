@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import pandas as pd
 
+from . import indices
 from .colfind import find_col
 from .data_loader import load_raw_tables
 
@@ -68,3 +69,28 @@ def compute_demographics() -> dict:
             workers[find_col(workers, "what sector do you work in")], top_n=6, shorten_parens=True
         ),
     }
+
+
+def compute_resident_locations() -> list[dict]:
+    """Every resident's own GPS point (not the 9 zone-aggregate markers ZoneMap-style
+    views use) -- each respondent's household location, colour-codeable client-side by
+    tourism dependence. Residents/Enterprise/Location are the only geotagged surveys
+    (workflow.md SS3); ~35% of residents have no usable GPS fix and are dropped here
+    rather than plotted at a fabricated position."""
+    raw = load_raw_tables()["residents"]
+    dependency = indices.derived_table("residents")["tourism_dependency"]
+    out = []
+    for idx, row in raw.iterrows():
+        lat, lon = row.get("latitude"), row.get("longitude")
+        if pd.isna(lat) or pd.isna(lon):
+            continue
+        dep = dependency.get(idx)
+        out.append(
+            {
+                "latitude": float(lat),
+                "longitude": float(lon),
+                "zone_id": row.get("zone_id") if pd.notna(row.get("zone_id")) else None,
+                "tourism_dependent": None if pd.isna(dep) else bool(dep),
+            }
+        )
+    return out

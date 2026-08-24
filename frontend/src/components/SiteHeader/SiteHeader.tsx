@@ -16,7 +16,7 @@ const NAV = [
 /** Rolled through the header's centre slot, so the widest breakpoint isn't
  *  mostly empty space between the wordmark and the nav. */
 const TICKER = [
-  "1,029 survey responses · 5 respondent groups",
+  "1,029 survey responses · 4 stakeholder groups",
   "9 surveyed zones · 6 vulnerability pillars",
   "9 cited external benchmarks · UNWTO, Sphere, GSTC",
   "extreme weekend inflow ≈ 16.7× road capacity",
@@ -156,7 +156,7 @@ export default function SiteHeader() {
           <Magnetic strength={0.3} radius={70} maxOffset={10}>
             <Link to="/" className="brand" data-cursor data-cursor-label="HOME">
               <strong>Nainital</strong>
-              <span className="brand-sub">tourism vulnerability index</span>
+              <span className="brand-sub">tourism vulnerability index (TVI)</span>
             </Link>
           </Magnetic>
         </div>

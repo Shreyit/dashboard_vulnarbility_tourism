@@ -94,6 +94,20 @@ export const STAKEHOLDER_META: Record<string, string> = {
   tourist: "Tourists",
 };
 
+// One fixed, validated color per stakeholder group -- the one place in this dashboard
+// that uses distinct hues instead of the single-rust-plus-texture convention (per-user
+// request, for the "who we surveyed" stakeholder-mix chart). Keyed by the plural display
+// label demographics.py's respondent_mix already returns. Checked with the dataviz
+// skill's validate_palette.js against the --surface paper background (#f6f2ea): all
+// four clear the lightness band, chroma floor, adjacent CVD (>=8, worst 11.3), the
+// normal-vision floor (>=15, worst 17.2) and contrast -- see git history for the run.
+export const STAKEHOLDER_COLORS: Record<string, string> = {
+  Tourists: "#b3501f", // rust -- the dashboard's existing accent
+  Residents: "#0e8f7c", // teal
+  Workers: "#9c6b0a", // ochre
+  Enterprises: "#7a3564", // plum
+};
+
 export type EsacZone = {
   zone_id: string;
   composite: number | null;
@@ -154,6 +168,13 @@ export type DemographicsOut = {
   tourist_accommodation: DemographicBar[];
   enterprise_type: DemographicBar[];
   worker_sector: DemographicBar[];
+};
+
+export type ResidentLocation = {
+  latitude: number;
+  longitude: number;
+  zone_id: string | null;
+  tourism_dependent: boolean | null;
 };
 
 // Direction + display metadata the backend doesn't need to send but the UI does.

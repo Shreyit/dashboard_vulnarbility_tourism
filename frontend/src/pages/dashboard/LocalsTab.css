@@ -84,3 +84,39 @@
   justify-content: center;
   margin: var(--sp-4) 0;
 }
+
+/* ---------- map view toggle: zone scores vs. resident locations ---------- */
+.map-view-toggle {
+  display: inline-flex;
+  margin-bottom: var(--sp-3);
+  border: var(--border-strong);
+}
+
+.map-view-toggle-btn {
+  padding: 0.5rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  background: var(--white);
+  border: none;
+  cursor: pointer;
+}
+
+.map-view-toggle-btn + .map-view-toggle-btn {
+  border-left: var(--border-strong);
+}
+
+.map-view-toggle-btn.is-active {
+  background: var(--rust);
+  color: var(--white);
+}
+
+.map-view-note {
+  max-width: 60ch;
+  margin-bottom: var(--sp-3);
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}

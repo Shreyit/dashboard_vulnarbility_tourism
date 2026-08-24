@@ -129,6 +129,15 @@ def list_zones() -> list[dict]:
     ]
 
 
+def zone_display_name(zone_id: str) -> str:
+    """Readable placeholder ("Site 7") for a raw zone_id ("Z07"). Real names (Mall
+    Road, Tallital, Naini Lake foreshore, ...) need an OSM Nominatim reverse-geocode
+    pass + user confirmation before they're locked in -- workflow.md SS3 "still open".
+    Public: shared by the /api/zones route and PahadiBot's chat grounding context."""
+    n = zone_id.lstrip("Z0") or zone_id
+    return f"Site {n}"
+
+
 def town_value(survey: str, col: str) -> float | None:
     """Town-wide mean of one derived column. Public: also used by insights.py to
     build the stakeholder pressure matrix and the seasonality/host-visitor indicators."""

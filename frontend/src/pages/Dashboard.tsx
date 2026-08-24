@@ -5,45 +5,45 @@ import { useReducedMotion } from "../hooks/useReducedMotion";
 import { SplitHeading } from "../components/Reveal/Reveal";
 import PillTabs from "../components/PillTabs/PillTabs";
 import OverviewTab from "./dashboard/OverviewTab";
-import ZoneMapTab from "./dashboard/ZoneMapTab";
-import EsacTab from "./dashboard/EsacTab";
-import ResidentAttitudesTab from "./dashboard/ResidentAttitudesTab";
-import TrendsTab from "./dashboard/TrendsTab";
-import StressTestTab from "./dashboard/StressTestTab";
+import TouristsTab from "./dashboard/TouristsTab";
+import EnterprisesTab from "./dashboard/EnterprisesTab";
+import LocalsTab from "./dashboard/LocalsTab";
+import WorkersTab from "./dashboard/WorkersTab";
+import SynthesisTab from "./dashboard/SynthesisTab";
 import "./Dashboard.css";
 
-type TabId = "overview" | "zones" | "esac" | "attitudes" | "trends" | "stress";
+type TabId = "overview" | "tourists" | "enterprises" | "locals" | "workers" | "synthesis";
 
 const TABS: { id: TabId; label: string; lede: string }[] = [
   {
     id: "overview",
-    label: "Overview",
-    lede: "Town-wide TVI, its six pillars, the sustainability triad, and who feels the pressure.",
+    label: "Big Picture",
+    lede: "Town-wide TVI, its six pillars, and who was surveyed.",
   },
   {
-    id: "zones",
-    label: "Zone Map",
-    lede: "The nine surveyed sites, each with its own score and breakdown.",
+    id: "tourists",
+    label: "Tourists",
+    lede: "The demand side: the pressure tourists feel, and the pressure they create.",
   },
   {
-    id: "esac",
-    label: "E-S-AC",
-    lede: "A second vulnerability lens: Exposure, Sensitivity, and Adaptive Capacity, by zone.",
+    id: "enterprises",
+    label: "Enterprises",
+    lede: "The supply side: water, waste, and how much of the benefit stays local.",
   },
   {
-    id: "attitudes",
-    label: "Attitudes",
-    lede: "Do tourism-dependent residents feel less irritation? A Social Exchange Theory test.",
+    id: "locals",
+    label: "Locals",
+    lede: "Residents, geotagged by zone -- where tourism's pressure actually lands.",
   },
   {
-    id: "trends",
-    label: "Trends",
-    lede: "KPIs, an intensity trend, the six pillars as a bar chart, a stakeholder radar, and a variable explorer.",
+    id: "workers",
+    label: "Workers",
+    lede: "Tourism-linked labour: the thinnest-measured group in this project.",
   },
   {
-    id: "stress",
-    label: "Stress Test",
-    lede: "Drag peak-season footfall and watch every sub-index recompute.",
+    id: "synthesis",
+    label: "Synthesis",
+    lede: "All four groups, one triad each -- side by side, overlaid, and split by tourism-dependence.",
   },
 ];
 
@@ -54,11 +54,11 @@ function isTabId(v: string | null): v is TabId {
 }
 
 /**
- * The Dashboard: one page, one instrument panel, several lenses on the same
- * underlying data. A pill tab bar swaps the content below it rather than
- * routing to a new page, so the index, the map, the alternate frameworks, the
- * trend report, and the simulator all read as one instrument rather than as
- * separate screens.
+ * The Dashboard: a narrative, not a set of parallel lenses. A pill tab bar
+ * swaps the content below it rather than routing to a new page, walking
+ * through how tourism affects each stakeholder group in turn (Tourists,
+ * Enterprises, Locals, Workers) before landing on the Synthesis tab, where
+ * all four groups' pillar profiles are read together for the first time.
  */
 export default function Dashboard() {
   const [params, setParams] = useSearchParams();
@@ -102,10 +102,10 @@ export default function Dashboard() {
             Nainital tourism vulnerability
           </SplitHeading>
           <p className="section-lede">
-            One instrument panel: the composite index, the zone-by-zone map, a second vulnerability
-            lens, a resident-attitudes test, a trends report, and the peak-season stress simulator,
-            read together instead of as separate screens. Exact methodology for every number lives
-            on the home page's Data &amp; Methodology section.
+            One story: how tourism affects each of the four groups it touches -- Tourists,
+            Enterprises, Locals, Workers -- read one at a time, then together on the Synthesis
+            tab. Exact methodology for every number lives on the home page's Data &amp; Methodology
+            section.
           </p>
         </div>
 
@@ -120,11 +120,11 @@ export default function Dashboard() {
 
         <div className="dome-content" ref={contentRef}>
           {active === "overview" && <OverviewTab />}
-          {active === "zones" && <ZoneMapTab />}
-          {active === "esac" && <EsacTab />}
-          {active === "attitudes" && <ResidentAttitudesTab />}
-          {active === "trends" && <TrendsTab />}
-          {active === "stress" && <StressTestTab />}
+          {active === "tourists" && <TouristsTab />}
+          {active === "enterprises" && <EnterprisesTab />}
+          {active === "locals" && <LocalsTab />}
+          {active === "workers" && <WorkersTab />}
+          {active === "synthesis" && <SynthesisTab />}
         </div>
       </section>
     </main>

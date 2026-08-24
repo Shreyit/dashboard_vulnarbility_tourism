@@ -147,3 +147,10 @@ class DemographicsOut(BaseModel):
     tourist_accommodation: list[DemographicBar]
     enterprise_type: list[DemographicBar]
     worker_sector: list[DemographicBar]
+
+
+class ResidentLocationOut(BaseModel):
+    latitude: float
+    longitude: float
+    zone_id: str | None
+    tourism_dependent: bool | None

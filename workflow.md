@@ -129,7 +129,7 @@ per-indicator on the landing page's Data & Methodology section (`frontend/src/pa
 Two more, prompted by a user-supplied workbook (`Nainital_Tourism_Vulnerability_Derived_Variables.xlsx`)
 and a pasted research narrative:
 
-- **E-S-AC framework** (`backend/app/framework_esac.py`, dashboard tab "E-S-AC"): the
+- **E-S-AC framework** (`backend/app/framework_esac.py`, computed but not currently surfaced as its own dashboard tab): the
   Exposure/Sensitivity/Adaptive Capacity structure `RESEARCH_BENCHMARKS.md` §4 (Shimla study) had
   flagged as a possible v2 restructuring, now built as a second, complementary lens next to the
   6-pillar TVI, reimplemented from `processed/*.csv` via this pipeline's own `derive_*` outputs.

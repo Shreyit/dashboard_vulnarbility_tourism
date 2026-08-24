@@ -1,5 +1,22 @@
+/* Override .panel-grid's auto-fit/minmax(220px) with a fixed 6-up row -- at 6 short
+   KPIs, auto-fit wraps to 5+1 well before the panels actually need the 220px floor. */
 .kpi-row {
   margin-bottom: var(--sp-4);
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--sp-3);
+}
+
+@media (max-width: 1100px) {
+  .kpi-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .kpi-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .overview-grid {
@@ -9,30 +26,12 @@
   margin-bottom: var(--sp-5);
 }
 
-.overview-insights-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--sp-4);
-}
-
-.overview-coxcomb-panel,
-.overview-matrix-panel {
-  padding: var(--sp-4);
-}
-
 .overview-insights-note {
   margin: var(--sp-2) 0 var(--sp-4);
   max-width: 46ch;
   font-size: 0.82rem;
   color: var(--ink-soft);
   line-height: 1.5;
-}
-
-@media (min-width: 960px) {
-  .overview-insights-grid {
-    grid-template-columns: 1fr 1.4fr;
-    align-items: start;
-  }
 }
 
 .overview-gauge-panel {
@@ -67,36 +66,8 @@
   font-size: 0.8rem;
 }
 
-/* ---------- who we surveyed: real survey-composition charts ---------- */
-.overview-demographics-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--sp-4);
-  margin-top: var(--sp-4);
-}
-
-@media (min-width: 860px) {
-  .overview-demographics-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
+/* ---------- who we surveyed: real survey-composition chart ---------- */
 .overview-demo-panel {
   padding: var(--sp-4);
-}
-
-.overview-demo-subchart + .overview-demo-subchart {
   margin-top: var(--sp-4);
-  padding-top: var(--sp-4);
-  border-top: var(--border);
-}
-
-.overview-demo-sublabel {
-  display: block;
-  margin-bottom: var(--sp-2);
-  font-family: var(--font-mono);
-  font-size: 0.66rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
 }

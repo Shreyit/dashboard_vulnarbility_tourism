@@ -27,22 +27,22 @@ import galleryNight from "../assets/art/gallery-night.webp";
 
 const MENU_ITEMS: FlowingMenuItem[] = [
   {
-    label: "Overview",
+    label: "Big Picture",
     href: "/dashboard?tab=overview",
     image: navLake,
     blurb: "The town-wide index and its six pillars, broken down to source questions.",
   },
   {
-    label: "Zone Map",
-    href: "/dashboard?tab=zones",
+    label: "Locals",
+    href: "/dashboard?tab=locals",
     image: navHimalaya,
-    blurb: "Nine surveyed sites, each with its own score and breakdown.",
+    blurb: "Residents, geotagged by zone -- where tourism's pressure actually lands.",
   },
   {
-    label: "Stress Test",
-    href: "/dashboard?tab=stress",
+    label: "Synthesis",
+    href: "/dashboard?tab=synthesis",
     image: navTown,
-    blurb: "Drag peak-season footfall and watch every sub-index recompute.",
+    blurb: "Tourists, Enterprises, Locals and Workers -- one sustainability triad each, compared.",
   },
   {
     label: "Data & Methodology",
@@ -137,7 +137,7 @@ export default function Landing() {
           <div>
             <span className="eyebrow">Nainital, Uttarakhand · carrying capacity &amp; overtourism</span>
             <SplitHeading as="h1" type="lines">
-              Measuring the weight tourism puts on a lake town.
+              Measuring the weight tourism puts on Nainital.
             </SplitHeading>
             <p className="hero-lede">
               Five field surveys, nine zones, one composite vulnerability index. Built from real
@@ -177,9 +177,9 @@ export default function Landing() {
             </div>
             <div className="hero-stat">
               <span className="num mono-num">
-                <CountUp value={5} />
+                <CountUp value={4} />
               </span>
-              <span className="label">Respondent groups</span>
+              <span className="label">Stakeholder groups</span>
             </div>
             <div className="hero-stat">
               <span className="num mono-num">
@@ -216,10 +216,10 @@ export default function Landing() {
       <section className="section container">
         <div className="section-head">
           <span className="eyebrow">The dashboard</span>
-          <SplitHeading as="h2">One page. Several lenses.</SplitHeading>
+          <SplitHeading as="h2">One page. Four stakeholders. One story.</SplitHeading>
           <Reveal as="p" className="section-lede">
-            The town-wide index, the zone-by-zone map, a second vulnerability framework, a
-            resident-attitudes test, a trends report, and a peak-season stress-test simulator, in
+            The town-wide index, then how tourism affects Tourists, Enterprises, Locals, and
+            Workers in turn, closing on a Synthesis view that reads all four side by side --
             one instrument panel you flip through instead of leaving.
           </Reveal>
         </div>
@@ -229,7 +229,7 @@ export default function Landing() {
       <section id="gallery" className="section gallery-section container">
         <div className="section-head">
           <span className="eyebrow">The ground truth</span>
-          <SplitHeading as="h2">Nine zones. Five voices. One lake.</SplitHeading>
+          <SplitHeading as="h2">Nine zones. Four voices. One lake.</SplitHeading>
           <Reveal as="p" className="section-lede">
             Field photography from the surveyed area, processed into this dashboard&apos;s
             visual language. Keep scrolling to browse.

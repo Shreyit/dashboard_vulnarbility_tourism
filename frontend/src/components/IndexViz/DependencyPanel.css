@@ -36,6 +36,24 @@
   color: var(--ink-soft);
 }
 
+.dependency-coxcomb-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-4);
+}
+
+@media (min-width: 720px) {
+  .dependency-coxcomb-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.dependency-coxcomb-panel {
+  padding: var(--sp-4);
+  text-align: center;
+}
+
 .attitude-table-panel {
   padding: var(--sp-4);
   margin-bottom: var(--sp-4);

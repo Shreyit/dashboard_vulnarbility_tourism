@@ -2,12 +2,13 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from .. import demographics, framework_esac, insights, resident_attitudes, stress_test
+from .. import demographics, framework_esac, insights, resident_attitudes, stress_test, worker_attitudes
 from ..schemas import (
     DemographicsOut,
     EsacOut,
     InsightsOut,
     ResidentAttitudesOut,
+    ResidentLocationOut,
     ScenarioTrendPoint,
     StakeholderTriadOut,
 )
@@ -30,6 +31,11 @@ def get_resident_attitudes() -> ResidentAttitudesOut:
     return ResidentAttitudesOut(**resident_attitudes.compute_resident_attitudes())
 
 
+@router.get("/worker-dependency", response_model=ResidentAttitudesOut)
+def get_worker_dependency() -> ResidentAttitudesOut:
+    return ResidentAttitudesOut(**worker_attitudes.compute_worker_attitudes())
+
+
 @router.get("/scenario-trend", response_model=list[ScenarioTrendPoint])
 def get_scenario_trend() -> list[ScenarioTrendPoint]:
     return [ScenarioTrendPoint(**p) for p in stress_test.compute_scenario_trend()]
@@ -43,3 +49,8 @@ def get_sustainability_by_stakeholder() -> dict[str, StakeholderTriadOut]:
 @router.get("/demographics", response_model=DemographicsOut)
 def get_demographics() -> DemographicsOut:
     return DemographicsOut(**demographics.compute_demographics())
+
+
+@router.get("/resident-locations", response_model=list[ResidentLocationOut])
+def get_resident_locations() -> list[ResidentLocationOut]:
+    return [ResidentLocationOut(**r) for r in demographics.compute_resident_locations()]

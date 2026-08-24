@@ -275,3 +275,174 @@ button.subindex-bar.is-active {
 .radar-legend-swatch-dashed {
   background: repeating-linear-gradient(to right, var(--rust) 0 5px, transparent 5px 8px);
 }
+
+/* ---------- stacked bar (100%, part-to-whole) ---------- */
+.stacked-bar-chart {
+  width: 100%;
+}
+
+.stacked-bar-track {
+  display: flex;
+  width: 100%;
+  border: 1px solid var(--line-strong);
+  /* segments that pop on hover/focus grow past the track's own box -- let them */
+  overflow: visible;
+}
+
+.stacked-bar-seg {
+  position: relative;
+  flex: 0 0 auto;
+  min-width: 2px;
+  box-sizing: border-box;
+  /* the 2px "surface gap" the spec calls for, as a border instead of a margin
+     so it never throws off the flex-basis percentages */
+  border-right: 2px solid var(--paper);
+  cursor: default;
+  transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease);
+  transform-origin: center;
+}
+
+.stacked-bar-seg:last-child {
+  border-right: none;
+}
+
+.stacked-bar-seg:hover,
+.stacked-bar-seg:focus-visible {
+  transform: scaleY(1.18);
+  z-index: 2;
+  box-shadow: 0 0 0 1.5px var(--ink);
+  outline: none;
+}
+
+.stacked-bar-seg-tip {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  transform: translate(-50%, 2px);
+  margin-bottom: 0.4rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--ink);
+  color: var(--white);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s var(--ease), transform 0.15s var(--ease);
+  z-index: 3;
+}
+
+.stacked-bar-seg:hover .stacked-bar-seg-tip,
+.stacked-bar-seg:focus-visible .stacked-bar-seg-tip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.tex-solid {
+  background: var(--rust);
+}
+
+.tex-hatch {
+  background-image: repeating-linear-gradient(45deg, var(--rust) 0 2px, var(--paper) 2px 5px);
+}
+
+.tex-hatch-reverse {
+  background-image: repeating-linear-gradient(-45deg, var(--rust) 0 2px, var(--paper) 2px 5px);
+}
+
+.tex-outline {
+  background: var(--paper);
+  box-shadow: inset 0 0 0 2px var(--rust);
+}
+
+.stacked-bar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3) var(--sp-4);
+  margin: var(--sp-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stacked-bar-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+}
+
+.stacked-bar-swatch {
+  display: inline-block;
+  width: 0.85rem;
+  height: 0.85rem;
+  flex: none;
+  border: 1px solid var(--rust);
+}
+
+.stacked-bar-legend-label {
+  color: var(--ink);
+}
+
+.stacked-bar-legend-value {
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+}
+
+.stacked-bar-legend-value small {
+  color: var(--ink-faint);
+}
+
+/* ---------- column chart (ordinal / ranked categories) ---------- */
+.column-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--sp-2);
+  padding-bottom: var(--sp-2);
+  border-bottom: 1.5px solid var(--ink);
+}
+
+.column-chart-col {
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+}
+
+.column-chart-value {
+  margin-bottom: 0.3rem;
+  font-size: 0.76rem;
+  color: var(--ink);
+}
+
+.column-chart-track {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  max-width: 2.75rem;
+  height: 100%;
+  background: var(--paper-deep);
+  border: 1px solid var(--line-strong);
+  border-bottom: none;
+}
+
+.column-chart-fill {
+  display: block;
+  width: 100%;
+  background: var(--rust);
+  will-change: transform;
+}
+
+.column-chart-label {
+  margin-top: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+  text-align: center;
+  white-space: nowrap;
+}
