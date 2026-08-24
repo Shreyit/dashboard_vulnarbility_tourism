@@ -5,6 +5,7 @@ import { THEME_META, type ThemeKey } from "../../api/types";
 import { useAsync } from "../../hooks/useAsync";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import CoxcombChart from "../../components/IndexViz/CoxcombChart";
+import ScoreScale from "../../components/IndexViz/ScoreScale";
 import BarChartGeneric, { type BarDatum } from "../../components/IndexViz/BarChartGeneric";
 import ColumnChart from "../../components/IndexViz/ColumnChart";
 import StackedBarChart from "../../components/IndexViz/StackedBarChart";
@@ -93,6 +94,7 @@ export default function TouristsTab() {
                 local products) -- not income dependency, since tourists don&apos;t rely on Nainital
                 for a living.
               </p>
+              <ScoreScale />
             </div>
 
             <div className="panel stakeholder-bars-panel">

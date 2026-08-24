@@ -10,6 +10,7 @@ import { THEME_META, type ThemeKey } from "../../api/types";
 import { useAsync } from "../../hooks/useAsync";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import CoxcombChart from "../../components/IndexViz/CoxcombChart";
+import ScoreScale from "../../components/IndexViz/ScoreScale";
 import BarChartGeneric, { type BarDatum } from "../../components/IndexViz/BarChartGeneric";
 import RadialGauge from "../../components/IndexViz/RadialGauge";
 import SubIndexBar from "../../components/IndexViz/SubIndexBar";
@@ -26,6 +27,51 @@ const DEPENDENCY_PILLARS = [
   { key: "social" as const, label: "Social" },
   { key: "environmental" as const, label: "Environmental" },
 ];
+
+type TriFilter = "all" | "yes" | "no";
+
+function matchesFilter(value: boolean | null, filter: TriFilter): boolean {
+  if (filter === "all") return true;
+  return filter === "yes" ? value === true : value === false;
+}
+
+function FilterPillGroup({
+  label,
+  value,
+  onChange,
+  yesLabel,
+  noLabel,
+}: {
+  label: string;
+  value: TriFilter;
+  onChange: (v: TriFilter) => void;
+  yesLabel: string;
+  noLabel: string;
+}) {
+  const options: [TriFilter, string][] = [
+    ["all", "All"],
+    ["yes", yesLabel],
+    ["no", noLabel],
+  ];
+  return (
+    <div className="resident-filter-group">
+      <span className="resident-filter-label">{label}</span>
+      <div className="resident-filter-pills" role="group" aria-label={label}>
+        {options.map(([v, text]) => (
+          <button
+            key={v}
+            type="button"
+            aria-pressed={value === v}
+            className={`resident-filter-pill${value === v ? " is-active" : ""}`}
+            onClick={() => onChange(v)}
+          >
+            {text}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function markerIcon(tvi: number | null, isSelected: boolean) {
   const pct = tvi === null ? 0 : Math.max(0, Math.min(100, tvi));
@@ -61,15 +107,57 @@ export default function LocalsTab() {
   const { status, data, error } = useAsync(loadLocalsData, []);
   const [selected, setSelected] = useState<string | null>(null);
   const [mapView, setMapView] = useState<MapView>("zones");
+  const [depFilter, setDepFilter] = useState<TriFilter>("all");
+  const [waterFilter, setWaterFilter] = useState<TriFilter>("all");
+  const [incomeFilter, setIncomeFilter] = useState<TriFilter>("all");
   const gridRef = useRef<HTMLDivElement>(null);
   const detailContentRef = useRef<HTMLDivElement>(null);
   const shownZone = useRef(selected);
+  const shownMapView = useRef(mapView);
   const reducedMotion = useReducedMotion();
+
+  // Cross-fade rather than an instant pop: fade whichever marker set is
+  // currently on the map out first, then swap state (which unmounts it and
+  // mounts the other set), letting the entrance effect below fade the new
+  // one in. The two marker kinds render as different DOM node types (a
+  // divIcon vs. an SVG path), so this fades by opacity only -- the one
+  // transform every element here can share safely.
+  const switchMapView = (view: MapView) => {
+    if (view === mapView) return;
+    if (reducedMotion || !gridRef.current) {
+      setMapView(view);
+      return;
+    }
+    const outgoing = gsap.utils.toArray<HTMLElement>(
+      mapView === "zones" ? ".zone-marker" : ".resident-dot",
+      gridRef.current,
+    );
+    if (!outgoing.length) {
+      setMapView(view);
+      return;
+    }
+    gsap.to(outgoing, {
+      autoAlpha: 0,
+      duration: 0.2,
+      ease: "power2.in",
+      onComplete: () => setMapView(view),
+    });
+  };
 
   const selectedEntry = useMemo(
     () => (status === "ready" ? data.zones.find((d) => d.zone.zone_id === selected) ?? null : null),
     [status, data, selected],
   );
+
+  const filteredResidentLocations = useMemo(() => {
+    if (status !== "ready") return [];
+    return data.residentLocations.filter(
+      (r) =>
+        matchesFilter(r.tourism_dependent, depFilter) &&
+        matchesFilter(r.water_stressed, waterFilter) &&
+        matchesFilter(r.no_other_income, incomeFilter),
+    );
+  }, [status, data, depFilter, waterFilter, incomeFilter]);
 
   const pillarBars: BarDatum[] = useMemo(() => {
     if (status !== "ready") return [];
@@ -137,6 +225,36 @@ export default function LocalsTab() {
     { dependencies: [selected, reducedMotion], scope: detailContentRef },
   );
 
+  // The other half of the cross-fade: whichever marker set just mounted (after
+  // switchMapView's fade-out swapped state) fades/drops back in. Guarded by
+  // shownMapView so this never doubles up with the shutter-reveal effect's own
+  // initial `.zone-marker` drop-in on first load.
+  useGSAP(
+    () => {
+      if (status !== "ready" || mapView === shownMapView.current) return;
+      shownMapView.current = mapView;
+      if (reducedMotion || !gridRef.current) return;
+
+      if (mapView === "zones") {
+        const markers = gsap.utils.toArray<HTMLElement>(".zone-marker", gridRef.current);
+        gsap.from(markers, {
+          autoAlpha: 0,
+          scale: 0.4,
+          duration: 0.45,
+          ease: "back.out(2.2)",
+          stagger: { each: 0.03, from: "random" },
+        });
+      } else {
+        // an SVG path's default transform-origin is the viewport's, not its own
+        // centre, so a scale tween here would fly in from a corner -- opacity
+        // only keeps every dot cross-fading in place.
+        const dots = gsap.utils.toArray<SVGPathElement>(".resident-dot", gridRef.current);
+        gsap.from(dots, { autoAlpha: 0, duration: 0.4, ease: "power2.out", stagger: { each: 0.006, from: "random" } });
+      }
+    },
+    { dependencies: [mapView, status, reducedMotion], scope: gridRef },
+  );
+
   return (
     <>
       {status === "loading" && <Loading label="LOADING RESIDENT DATA" />}
@@ -156,7 +274,7 @@ export default function LocalsTab() {
               role="tab"
               aria-selected={mapView === "zones"}
               className={`map-view-toggle-btn${mapView === "zones" ? " is-active" : ""}`}
-              onClick={() => setMapView("zones")}
+              onClick={() => switchMapView("zones")}
             >
               Zone scores
             </button>
@@ -165,19 +283,11 @@ export default function LocalsTab() {
               role="tab"
               aria-selected={mapView === "residents"}
               className={`map-view-toggle-btn${mapView === "residents" ? " is-active" : ""}`}
-              onClick={() => setMapView("residents")}
+              onClick={() => switchMapView("residents")}
             >
               Resident locations
             </button>
           </div>
-
-          {mapView === "residents" && (
-            <p className="map-view-note">
-              Every geotagged resident&apos;s own household point (155 of 239 -- the rest had no
-              usable GPS fix), not the 9 zone-aggregate markers. Filled = tourism-dependent
-              household, outline = non-dependent, faint dashed = dependency not reported.
-            </p>
-          )}
 
           <div className="zonemap-grid" ref={gridRef} style={{ marginBottom: "var(--sp-5)" }}>
             <div className="panel zonemap-panel">
@@ -209,12 +319,13 @@ export default function LocalsTab() {
                     ) : null,
                   )}
                 {mapView === "residents" &&
-                  data.residentLocations.map((r, i) => (
+                  filteredResidentLocations.map((r, i) => (
                     <CircleMarker
                       key={i}
                       center={[r.latitude, r.longitude]}
                       radius={6}
                       pathOptions={{
+                        className: "resident-dot",
                         color: "var(--rust)",
                         weight: r.tourism_dependent === null ? 1 : 1.5,
                         fillColor: r.tourism_dependent === false ? "var(--paper)" : "var(--rust)",
@@ -245,12 +356,36 @@ export default function LocalsTab() {
                   </div>
                 )}
                 {mapView === "residents" && (
-                  <div className="zonemap-empty">
-                    <span className="eyebrow">individual households</span>
-                    <p>
-                      Each dot is one surveyed resident&apos;s own GPS point. Tap a dot for its
-                      zone and dependency status, or switch back to &quot;Zone scores&quot; for the
-                      full per-zone breakdown.
+                  <div className="resident-filter-panel">
+                    <span className="eyebrow">Filter households</span>
+                    <p className="resident-filter-note">
+                      Each dot is one surveyed resident&apos;s own GPS point. Narrow the map down
+                      by any combination below, or tap a dot for its details.
+                    </p>
+                    <FilterPillGroup
+                      label="Tourism dependency"
+                      value={depFilter}
+                      onChange={setDepFilter}
+                      yesLabel="Dependent"
+                      noLabel="Non-dependent"
+                    />
+                    <FilterPillGroup
+                      label="Water stress"
+                      value={waterFilter}
+                      onChange={setWaterFilter}
+                      yesLabel="High"
+                      noLabel="Low"
+                    />
+                    <FilterPillGroup
+                      label="Other income source"
+                      value={incomeFilter}
+                      onChange={setIncomeFilter}
+                      yesLabel="None"
+                      noLabel="Has other"
+                    />
+                    <p className="resident-filter-count">
+                      <strong className="mono-num">{filteredResidentLocations.length}</strong> of{" "}
+                      {data.residentLocations.length} households shown
                     </p>
                   </div>
                 )}
@@ -280,6 +415,7 @@ export default function LocalsTab() {
                   { key: "social", label: "Social", value: data.triads.residents?.social ?? null },
                 ]}
               />
+              <ScoreScale />
             </div>
             <div className="panel stakeholder-bars-panel">
               <span className="eyebrow">Where residents show up in the six pillars</span>

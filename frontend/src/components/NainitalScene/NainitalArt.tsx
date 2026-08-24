@@ -62,16 +62,21 @@ export default function NainitalArt() {
       <g data-layer="sky">
         <rect className="sky-wash" x="0" y="0" width="1200" height="430" fill="var(--paper)" />
         <g id="sun">
+          <circle cx="0" cy="0" r="33" fill="none" stroke="var(--line)" strokeWidth="1.4" />
           <circle cx="0" cy="0" r="25" fill="var(--paper)" stroke="var(--rust)" strokeWidth="2.5" />
-          <g className="sun-rays" stroke="var(--rust)" strokeWidth="2" strokeLinecap="butt">
-            <line x1="0" y1="-39" x2="0" y2="-32" />
-            <line x1="27" y1="-27" x2="22" y2="-22" />
-            <line x1="39" y1="0" x2="32" y2="0" />
-            <line x1="27" y1="27" x2="22" y2="22" />
-            <line x1="0" y1="39" x2="0" y2="32" />
-            <line x1="-27" y1="27" x2="-22" y2="22" />
-            <line x1="-39" y1="0" x2="-32" y2="0" />
-            <line x1="-27" y1="-27" x2="-22" y2="-22" />
+          <g className="sun-rays" stroke="var(--rust)" strokeLinecap="round">
+            <line x1="0" y1="-40" x2="0" y2="-31" strokeWidth="2.2" />
+            <line x1="20.5" y1="-34.5" x2="16.5" y2="-27" strokeWidth="1.6" />
+            <line x1="35.5" y1="-20.5" x2="28" y2="-16.5" strokeWidth="1.6" />
+            <line x1="41" y1="0" x2="32" y2="0" strokeWidth="2.2" />
+            <line x1="35.5" y1="20.5" x2="28" y2="16.5" strokeWidth="1.6" />
+            <line x1="20.5" y1="34.5" x2="16.5" y2="27" strokeWidth="1.6" />
+            <line x1="0" y1="41" x2="0" y2="32" strokeWidth="2.2" />
+            <line x1="-20.5" y1="34.5" x2="-16.5" y2="27" strokeWidth="1.6" />
+            <line x1="-35.5" y1="20.5" x2="-28" y2="16.5" strokeWidth="1.6" />
+            <line x1="-41" y1="0" x2="-32" y2="0" strokeWidth="2.2" />
+            <line x1="-35.5" y1="-20.5" x2="-28" y2="-16.5" strokeWidth="1.6" />
+            <line x1="-20.5" y1="-34.5" x2="-16.5" y2="-27" strokeWidth="1.6" />
           </g>
         </g>
         {/* the arc the sun travels, never painted */}
@@ -82,17 +87,32 @@ export default function NainitalArt() {
       <g data-layer="himalaya">
         <path
           className="peak-line"
-          d="M-20 252 L58 200 L102 226 L150 162 L202 220 L246 186 L300 228 L352 152 L402 212 L456 178 L500 224 L560 170 L610 216 L662 154 L712 214 L760 184 L820 226 L870 164 L920 218 L976 188 L1030 230 L1082 174 L1140 220 L1220 198"
+          d="M-20 252
+             L44 209 Q58 200 66 205 L94 221 Q102 226 111 214
+             L141 174 Q150 162 159 172 L193 210 Q202 220 210 214
+             L238 192 Q246 186 256 194 L290 220 Q300 228 309 214
+             L343 166 Q352 152 361 163 L393 201 Q402 212 412 206
+             L446 184 Q456 178 464 186 L492 216 Q500 224 511 214
+             L549 180 Q560 170 569 178 L601 208 Q610 216 619 205
+             L653 165 Q662 154 671 165 L703 203 Q712 214 721 209
+             L751 189 Q760 184 771 192 L809 218 Q820 226 829 215
+             L861 175 Q870 164 879 174 L911 208 Q920 218 930 213
+             L966 193 Q976 188 986 196 L1020 222 Q1030 230 1039 220
+             L1073 184 Q1082 174 1092 182 L1130 212 Q1140 220 1154 216
+             L1220 198"
           fill="none"
           stroke="var(--ink-faint)"
           strokeWidth="2"
+          strokeLinecap="round"
           strokeLinejoin="round"
         />
-        {/* snowline hatching on the three tallest summits */}
-        <g className="snow-hatch" stroke="var(--ink-faint)" strokeWidth="1.4" fill="none">
-          <path d="M338 176 L352 152 L366 176" />
-          <path d="M650 178 L662 154 L676 180" />
-          <path d="M1070 196 L1082 174 L1096 198" />
+        {/* snowline hatching on the three tallest summits (apex positions follow
+            the now only-lightly-rounded curve, a few px off the original sharp
+            peak coordinates) */}
+        <g className="snow-hatch" stroke="var(--ink-faint)" strokeWidth="1.4" fill="none" strokeLinecap="round">
+          <path d="M338 182 Q352 158 366 182" />
+          <path d="M648 184 Q662 160 676 184" />
+          <path d="M1068 203 Q1082 179 1096 203" />
         </g>
       </g>
 
@@ -163,9 +183,27 @@ export default function NainitalArt() {
       <g data-layer="pines" fill="none" strokeLinejoin="round">
         {PINES.map(([x, y], i) => (
           <g className="pine" key={i}>
-            <path d={`M${x} ${y} L${x} ${y - 24}`} stroke="var(--ink-soft)" strokeWidth="1.5" />
-            <path d={`M${x - 9} ${y - 5} L${x} ${y - 29} L${x + 9} ${y - 5} Z`} fill="var(--white)" stroke="var(--ink-soft)" strokeWidth="1.5" />
-            <path d={`M${x - 6.5} ${y - 14} L${x} ${y - 33} L${x + 6.5} ${y - 14} Z`} fill="var(--white)" stroke="var(--ink-soft)" strokeWidth="1.5" />
+            <path d={`M${x} ${y} L${x} ${y - 7}`} stroke="var(--ink-soft)" strokeWidth="1.5" />
+            {/* three graduated tiers, each a gently concave (pinched-waist) taper
+                rather than a straight-sided triangle -- the refined-conifer silhouette */}
+            <path
+              d={`M${x - 11} ${y - 4} Q${x - 3} ${y - 9} ${x} ${y - 19} Q${x + 3} ${y - 9} ${x + 11} ${y - 4} Z`}
+              fill="var(--white)"
+              stroke="var(--ink-soft)"
+              strokeWidth="1.4"
+            />
+            <path
+              d={`M${x - 8} ${y - 13} Q${x - 2} ${y - 17} ${x} ${y - 26} Q${x + 2} ${y - 17} ${x + 8} ${y - 13} Z`}
+              fill="var(--white)"
+              stroke="var(--ink-soft)"
+              strokeWidth="1.4"
+            />
+            <path
+              d={`M${x - 5} ${y - 21} Q${x - 1.5} ${y - 24} ${x} ${y - 32} Q${x + 1.5} ${y - 24} ${x + 5} ${y - 21} Z`}
+              fill="var(--white)"
+              stroke="var(--ink-soft)"
+              strokeWidth="1.4"
+            />
           </g>
         ))}
       </g>
@@ -187,10 +225,17 @@ export default function NainitalArt() {
       {/* ---------------- Naina Devi temple, on the near bank ---------------- */}
       <g id="temple">
         <path d="M398 359 L432 359 L432 340 L398 340 Z" fill="var(--white)" stroke="var(--ink)" strokeWidth="1.8" />
-        {/* shikhara */}
-        <path d="M415 306 C 426 323, 432 333, 432 340 L398 340 C 398 333, 404 323, 415 306 Z" fill="var(--white)" stroke="var(--ink)" strokeWidth="1.8" />
-        <path d="M415 306 L415 297" stroke="var(--ink)" strokeWidth="1.6" />
-        <circle cx="415" cy="294" r="3" fill="var(--rust)" />
+        {/* shikhara: a gentle S-curve (convex near the tip, concave near the base) rather
+            than a single uniform bow, closer to a real spire's silhouette */}
+        <path
+          d="M415 300 C 425 309, 430 320, 431 330 C 431.5 335, 432 337, 432 340 L398 340 C 398 337, 398.5 335, 399 330 C 400 320, 405 309, 415 300 Z"
+          fill="var(--white)"
+          stroke="var(--ink)"
+          strokeWidth="1.8"
+        />
+        <path d="M403.5 331 Q 415 336, 426.5 331" fill="none" stroke="var(--ink-faint)" strokeWidth="1.2" />
+        <path d="M415 300 L415 291" stroke="var(--ink)" strokeWidth="1.6" strokeLinecap="round" />
+        <circle cx="415" cy="288" r="3" fill="var(--rust)" />
         <path d="M407 346 L423 346" stroke="var(--ink-faint)" strokeWidth="1.4" />
       </g>
 
@@ -199,8 +244,11 @@ export default function NainitalArt() {
         <g className="town-block">
           {BUILDINGS.map(([x, y, w, h], i) => (
             <g className="building" key={i}>
-              <rect x={x} y={y - h} width={w} height={h} fill="var(--white)" stroke="var(--ink)" strokeWidth="1.6" />
+              <rect x={x} y={y - h} width={w} height={h} rx={1.5} fill="var(--white)" stroke="var(--ink)" strokeWidth="1.6" />
               <line x1={x + 4} y1={y - h + 6} x2={x + w - 4} y2={y - h + 6} stroke="var(--ink-faint)" strokeWidth="1.2" />
+              {h > 22 && (
+                <line x1={x + 4} y1={y - h + 13} x2={x + w - 4} y2={y - h + 13} stroke="var(--ink-faint)" strokeWidth="1.2" />
+              )}
             </g>
           ))}
         </g>
@@ -256,9 +304,15 @@ export default function NainitalArt() {
         {/* the rowing boats the Boat House Club hires out */}
         {["a", "b", "c"].map((k) => (
           <g className="boat" data-boat={k} key={k}>
-            <path d="M-12 4 L12 4 L8 11 L-8 11 Z" fill="var(--paper)" stroke="var(--ink)" strokeWidth="1.6" strokeLinejoin="round" />
-            <path d="M0 4 L0 -12" stroke="var(--ink)" strokeWidth="1.4" />
-            <path d="M1 -11 L10 1 L1 1 Z" fill="var(--rust)" stroke="var(--rust-deep)" strokeWidth="1" />
+            <path
+              d="M-13 3 L13 3 C 13 3, 11 12.5, 0 13 C -11 12.5, -13 3, -13 3 Z"
+              fill="var(--paper)"
+              stroke="var(--ink)"
+              strokeWidth="1.6"
+              strokeLinejoin="round"
+            />
+            <path d="M0 3 L0 -13" stroke="var(--ink)" strokeWidth="1.4" strokeLinecap="round" />
+            <path d="M1 -12 C 7 -8, 10.5 -3, 11.5 1 L1 1 Z" fill="var(--rust)" stroke="var(--rust-deep)" strokeWidth="1" strokeLinejoin="round" />
           </g>
         ))}
       </g>
@@ -267,7 +321,7 @@ export default function NainitalArt() {
       <path id="bird-path" d="M-40 214 C 260 154, 620 254, 1240 182" fill="none" stroke="none" />
       <g data-layer="birds" stroke="var(--ink)" strokeWidth="1.8" fill="none" strokeLinecap="round">
         {[0, 1, 2, 3].map((i) => (
-          <path className="bird" key={i} d="M-7 0 C -4 -5, -1 -5, 0 -1 C 1 -5, 4 -5, 7 0" />
+          <path className="bird" key={i} d="M-9 0.5 C -6 -7, -2 -7.5, 0 -1.5 C 2 -7.5, 6 -7, 9 0.5" />
         ))}
       </g>
 

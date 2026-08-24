@@ -1,12 +1,19 @@
 import { useMemo, useRef } from "react";
 import { gsap, useGSAP } from "../../lib/gsap";
 import { getResidentAttitudes, getSustainabilityByStakeholder, getWorkerDependency } from "../../api/client";
-import { STAKEHOLDER_META, type GroupComparison, type ResidentAttitudesOut, type StakeholderTriad } from "../../api/types";
+import {
+  STAKEHOLDER_COLORS,
+  STAKEHOLDER_META,
+  type GroupComparison,
+  type ResidentAttitudesOut,
+  type StakeholderTriad,
+} from "../../api/types";
 import { useAsync } from "../../hooks/useAsync";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import CoxcombGrid, { type CoxcombGridItem } from "../../components/IndexViz/CoxcombGrid";
 import CoxcombChart, { type CoxcombSlice } from "../../components/IndexViz/CoxcombChart";
 import RadarChart, { type RadarSeries } from "../../components/IndexViz/RadarChart";
+import ScoreScale from "../../components/IndexViz/ScoreScale";
 import ErrorPanel from "../../components/ErrorPanel";
 import Loading from "../../components/Loading";
 import "../../components/IndexViz/DependencyPanel.css";
@@ -81,12 +88,16 @@ export default function SynthesisTab() {
     return GROUP_ORDER.filter((g) => {
       const t = data.triads[g];
       return t && t.economic !== null && t.social !== null && t.environmental !== null;
-    }).map((g, i) => ({
-      key: g,
-      label: STAKEHOLDER_META[g] ?? g,
-      values: { economic: data.triads[g].economic, social: data.triads[g].social, environmental: data.triads[g].environmental },
-      dashed: i % 2 === 1,
-    }));
+    }).map((g, i) => {
+      const label = STAKEHOLDER_META[g] ?? g;
+      return {
+        key: g,
+        label,
+        values: { economic: data.triads[g].economic, social: data.triads[g].social, environmental: data.triads[g].environmental },
+        dashed: i % 2 === 1,
+        color: STAKEHOLDER_COLORS[label],
+      };
+    });
   }, [status, data]);
 
   useGSAP(
@@ -124,7 +135,10 @@ export default function SynthesisTab() {
               present. See the coxcomb grid above, or the Workers tab, for their partial profile.
             </p>
             {radarSeries.length > 0 ? (
-              <RadarChart axes={RADAR_AXES} series={radarSeries} size={360} />
+              <>
+                <RadarChart axes={RADAR_AXES} series={radarSeries} size={360} />
+                <ScoreScale />
+              </>
             ) : (
               <p className="component-empty">Not enough populated groups to compare yet.</p>
             )}
@@ -142,11 +156,11 @@ export default function SynthesisTab() {
                 <span className="synthesis-dependency-label">Residents</span>
                 <div className="dependency-coxcomb-row">
                   <div className="panel dependency-coxcomb-panel">
-                    <span className="eyebrow">Dependent</span>
+                    <span className="eyebrow">Tourism-dependent</span>
                     <CoxcombChart size={200} data={dependencySlices(data.residentAttitudes, "mean_dependent")} />
                   </div>
                   <div className="panel dependency-coxcomb-panel">
-                    <span className="eyebrow">Non-dependent</span>
+                    <span className="eyebrow">Tourism non-dependent</span>
                     <CoxcombChart size={200} data={dependencySlices(data.residentAttitudes, "mean_non_dependent")} />
                   </div>
                 </div>
@@ -156,11 +170,11 @@ export default function SynthesisTab() {
                 <span className="synthesis-dependency-label">Workers</span>
                 <div className="dependency-coxcomb-row">
                   <div className="panel dependency-coxcomb-panel">
-                    <span className="eyebrow">Dependent</span>
+                    <span className="eyebrow">Tourism-dependent</span>
                     <CoxcombChart size={200} data={dependencySlices(data.workerAttitudes, "mean_dependent")} />
                   </div>
                   <div className="panel dependency-coxcomb-panel">
-                    <span className="eyebrow">Non-dependent</span>
+                    <span className="eyebrow">Tourism non-dependent</span>
                     <CoxcombChart size={200} data={dependencySlices(data.workerAttitudes, "mean_non_dependent")} />
                   </div>
                 </div>

@@ -3,6 +3,7 @@ import { gsap, useGSAP } from "../../lib/gsap";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import type { GroupComparison, ResidentAttitudesOut } from "../../api/types";
 import CoxcombChart from "./CoxcombChart";
+import ScoreScale from "./ScoreScale";
 import "./DependencyPanel.css";
 
 export type DependencyPillar = { key: "economic" | "social" | "environmental"; label: string };
@@ -117,10 +118,12 @@ export default function DependencyPanel({
         <div className="panel dependency-coxcomb-panel">
           <span className="eyebrow">{dependentLabel}</span>
           <CoxcombChart data={coxcombDependent} size={260} />
+          <ScoreScale />
         </div>
         <div className="panel dependency-coxcomb-panel">
           <span className="eyebrow">{nonDependentLabel}</span>
           <CoxcombChart data={coxcombNonDependent} size={260} />
+          <ScoreScale />
         </div>
       </div>
 

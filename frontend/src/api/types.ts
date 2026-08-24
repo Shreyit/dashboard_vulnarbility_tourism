@@ -175,6 +175,8 @@ export type ResidentLocation = {
   longitude: number;
   zone_id: string | null;
   tourism_dependent: boolean | null;
+  water_stressed: boolean | null;
+  no_other_income: boolean | null;
 };
 
 // Direction + display metadata the backend doesn't need to send but the UI does.

@@ -5,6 +5,7 @@ import { THEME_META, type ThemeKey } from "../../api/types";
 import { useAsync } from "../../hooks/useAsync";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import CoxcombChart from "../../components/IndexViz/CoxcombChart";
+import ScoreScale from "../../components/IndexViz/ScoreScale";
 import BarChartGeneric, { type BarDatum } from "../../components/IndexViz/BarChartGeneric";
 import DependencyPanel from "../../components/IndexViz/DependencyPanel";
 import ErrorPanel from "../../components/ErrorPanel";
@@ -64,7 +65,7 @@ export default function WorkersTab() {
       // race two GSAP tweens over the same elements and strand them at autoAlpha:0.
       gsap
         .timeline({ defaults: { ease: "power3.out" } })
-        .from(q(".stakeholder-grid > .panel, .stakeholder-demo-panel"), { autoAlpha: 0, y: 22, duration: 0.5, stagger: 0.08 });
+        .from(q(".stakeholder-grid > .panel"), { autoAlpha: 0, y: 22, duration: 0.5, stagger: 0.08 });
     },
     { dependencies: [status, reducedMotion], scope: rootRef, revertOnUpdate: true },
   );
@@ -97,6 +98,7 @@ export default function WorkersTab() {
                 Environmental is blank -- not zero -- because no survey question asks workers about
                 environmental conditions at all.
               </p>
+              <ScoreScale />
             </div>
             <div className="panel stakeholder-bars-panel">
               <span className="eyebrow">Where workers show up in the six pillars</span>
@@ -108,6 +110,10 @@ export default function WorkersTab() {
                   simply weren&apos;t asked of this group.
                 </p>
               )}
+              <div className="stakeholder-subchart">
+                <span className="eyebrow">Worker sector</span>
+                <BarChartGeneric data={toBars(data.demographics.worker_sector)} max={100} />
+              </div>
             </div>
           </div>
 
@@ -119,11 +125,6 @@ export default function WorkersTab() {
             aggregateLabel="Worker Precarity Index"
             theoryNote="Same Social Exchange Theory test as the Residents tab, applied to Workers: does relying on tourism for the majority of annual income (tourism_income_dependency >= 0.5) correlate with a different precarity read? Environmental is omitted -- not measured for this group anywhere in this project."
           />
-
-          <div className="panel stakeholder-demo-panel" style={{ marginTop: "var(--sp-4)" }}>
-            <span className="eyebrow">Worker sector</span>
-            <BarChartGeneric data={toBars(data.demographics.worker_sector)} max={100} />
-          </div>
         </div>
       )}
     </>

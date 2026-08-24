@@ -1,4 +1,5 @@
 import CoxcombChart, { type CoxcombSlice } from "./CoxcombChart";
+import ScoreScale from "./ScoreScale";
 import "./CoxcombGrid.css";
 
 export type CoxcombGridItem = { key: string; label: string; data: CoxcombSlice[] };
@@ -21,6 +22,7 @@ export default function CoxcombGrid({ items, size = 240 }: CoxcombGridProps) {
         <div className="coxcomb-grid-cell" key={item.key}>
           <span className="coxcomb-grid-label">{item.label}</span>
           <CoxcombChart data={item.data} size={size} />
+          <ScoreScale />
         </div>
       ))}
     </div>

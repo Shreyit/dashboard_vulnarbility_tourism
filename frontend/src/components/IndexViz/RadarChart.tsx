@@ -4,7 +4,16 @@ import { useReducedMotion } from "../../hooks/useReducedMotion";
 import "./IndexViz.css";
 
 export type RadarAxis = { key: string; label: string };
-export type RadarSeries = { key: string; label: string; values: Record<string, number | null>; dashed?: boolean };
+export type RadarSeries = {
+  key: string;
+  label: string;
+  values: Record<string, number | null>;
+  dashed?: boolean;
+  /** Explicit CSS color for this series' stroke/fill/markers. Falls back to
+   * the shared rust accent when omitted (e.g. a 2-series comparison, where
+   * dash style alone is already unambiguous). */
+  color?: string;
+};
 
 type RadarChartProps = {
   axes: RadarAxis[];
@@ -14,10 +23,11 @@ type RadarChartProps = {
 };
 
 /**
- * A radar/spider chart: one polygon per series over shared axes. Series are
- * told apart by stroke style (solid vs. dashed) and marker shape (circle vs.
- * square), not by new hues -- everything stays rust-on-paper, same convention
- * as CoxcombChart's texture-only wedges.
+ * A radar/spider chart: one polygon per series over shared axes. With 3+
+ * overlapping series, stroke style (solid vs. dashed) and marker shape
+ * (circle vs. square) alone stop being enough to tell two solid-stroke series
+ * apart at a glance -- so each series can also carry its own color (still
+ * kept to dash/marker-shape as a secondary channel, not color-only identity).
  */
 export default function RadarChart({ axes, series, size = 320, max = 100 }: RadarChartProps) {
   const rootRef = useRef<SVGSVGElement>(null);
@@ -77,34 +87,48 @@ export default function RadarChart({ axes, series, size = 320, max = 100 }: Rada
           );
         })}
 
-        {seriesPoints.map((s) => (
-          <g className="radar-series" key={s.key}>
-            <path
-              d={s.path}
-              fill="var(--rust)"
-              fillOpacity={0.08}
-              stroke="var(--rust)"
-              strokeWidth={2}
-              strokeDasharray={s.dashed ? "6 4" : undefined}
-            />
-            {s.pts.map((p, i) =>
-              s.dashed ? (
-                <rect key={i} x={p.x - 4} y={p.y - 4} width={8} height={8} fill="var(--white)" stroke="var(--rust)" strokeWidth={1.5} />
-              ) : (
-                <circle key={i} cx={p.x} cy={p.y} r={4.5} fill="var(--rust)" stroke="var(--white)" strokeWidth={1.5} />
-              ),
-            )}
-          </g>
-        ))}
+        {seriesPoints.map((s) => {
+          const color = s.color ?? "var(--rust)";
+          return (
+            <g className="radar-series" key={s.key}>
+              <path
+                d={s.path}
+                fill={color}
+                fillOpacity={0.08}
+                stroke={color}
+                strokeWidth={2}
+                strokeDasharray={s.dashed ? "6 4" : undefined}
+              />
+              {s.pts.map((p, i) =>
+                s.dashed ? (
+                  <rect key={i} x={p.x - 4} y={p.y - 4} width={8} height={8} fill="var(--white)" stroke={color} strokeWidth={1.5} />
+                ) : (
+                  <circle key={i} cx={p.x} cy={p.y} r={4.5} fill={color} stroke="var(--white)" strokeWidth={1.5} />
+                ),
+              )}
+            </g>
+          );
+        })}
       </svg>
 
       <div className="radar-legend">
-        {series.map((s) => (
-          <span className="radar-legend-item" key={s.key}>
-            <span className={`radar-legend-swatch${s.dashed ? " radar-legend-swatch-dashed" : ""}`} aria-hidden="true" />
-            {s.label}
-          </span>
-        ))}
+        {series.map((s) => {
+          const color = s.color ?? "var(--rust)";
+          return (
+            <span className="radar-legend-item" key={s.key}>
+              <span
+                className="radar-legend-swatch"
+                style={{
+                  background: s.dashed
+                    ? `repeating-linear-gradient(to right, ${color} 0 5px, transparent 5px 8px)`
+                    : color,
+                }}
+                aria-hidden="true"
+              />
+              {s.label}
+            </span>
+          );
+        })}
       </div>
     </div>
   );

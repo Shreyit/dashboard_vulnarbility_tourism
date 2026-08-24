@@ -5,6 +5,7 @@ import { THEME_META, type ThemeKey } from "../../api/types";
 import { useAsync } from "../../hooks/useAsync";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import CoxcombChart from "../../components/IndexViz/CoxcombChart";
+import ScoreScale from "../../components/IndexViz/ScoreScale";
 import BarChartGeneric, { type BarDatum } from "../../components/IndexViz/BarChartGeneric";
 import ErrorPanel from "../../components/ErrorPanel";
 import Loading from "../../components/Loading";
@@ -116,6 +117,7 @@ export default function EnterprisesTab() {
                   { key: "social", label: "Social", value: data.triads.enterprise?.social ?? null },
                 ]}
               />
+              <ScoreScale />
             </div>
 
             <div className="panel stakeholder-bars-panel">

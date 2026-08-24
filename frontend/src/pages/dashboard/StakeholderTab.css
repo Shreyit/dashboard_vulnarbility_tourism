@@ -90,6 +90,15 @@
   padding: var(--sp-4);
 }
 
+/* A second chart stacked inside a panel that would otherwise be left mostly
+   blank next to a taller neighbour (e.g. Workers' single-pillar bar next to
+   its coxcomb) -- fills the gap with real content instead of empty space. */
+.stakeholder-subchart {
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-4);
+  border-top: var(--border);
+}
+
 .stakeholder-kpi-row {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

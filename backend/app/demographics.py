@@ -73,24 +73,34 @@ def compute_demographics() -> dict:
 
 def compute_resident_locations() -> list[dict]:
     """Every resident's own GPS point (not the 9 zone-aggregate markers ZoneMap-style
-    views use) -- each respondent's household location, colour-codeable client-side by
-    tourism dependence. Residents/Enterprise/Location are the only geotagged surveys
-    (workflow.md SS3); ~35% of residents have no usable GPS fix and are dropped here
-    rather than plotted at a fabricated position."""
+    views use) -- each respondent's household location, filterable client-side by three
+    already-derived resident attributes: tourism dependence, water-hours deficit
+    (thresholded at >=0.5, i.e. household gets less than half a day's supply), and
+    whether the household has no income source besides tourism. Residents/Enterprise/
+    Location are the only geotagged surveys (workflow.md SS3); ~35% of residents have
+    no usable GPS fix and are dropped here rather than plotted at a fabricated
+    position."""
     raw = load_raw_tables()["residents"]
-    dependency = indices.derived_table("residents")["tourism_dependency"]
+    derived = indices.derived_table("residents")
+    dependency = derived["tourism_dependency"]
+    water_deficit = derived["water_hours_deficit"]
+    no_other_income = derived["no_other_income_source"]
     out = []
     for idx, row in raw.iterrows():
         lat, lon = row.get("latitude"), row.get("longitude")
         if pd.isna(lat) or pd.isna(lon):
             continue
         dep = dependency.get(idx)
+        water = water_deficit.get(idx)
+        income = no_other_income.get(idx)
         out.append(
             {
                 "latitude": float(lat),
                 "longitude": float(lon),
                 "zone_id": row.get("zone_id") if pd.notna(row.get("zone_id")) else None,
                 "tourism_dependent": None if pd.isna(dep) else bool(dep),
+                "water_stressed": None if pd.isna(water) else bool(water >= 0.5),
+                "no_other_income": None if pd.isna(income) else bool(income),
             }
         )
     return out

@@ -113,10 +113,64 @@
   color: var(--white);
 }
 
-.map-view-note {
-  max-width: 60ch;
-  margin-bottom: var(--sp-3);
+/* ---------- resident-locations filter panel (in the map's side panel) ---------- */
+.resident-filter-note {
+  margin-top: var(--sp-2);
+  margin-bottom: var(--sp-4);
   color: var(--ink-soft);
-  font-size: 0.82rem;
-  line-height: 1.55;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.resident-filter-group + .resident-filter-group {
+  margin-top: var(--sp-3);
+}
+
+.resident-filter-label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.resident-filter-pills {
+  display: inline-flex;
+  flex-wrap: wrap;
+  border: var(--border-strong);
+}
+
+.resident-filter-pill {
+  padding: 0.4rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+  background: var(--white);
+  border: none;
+  cursor: pointer;
+}
+
+.resident-filter-pill + .resident-filter-pill {
+  border-left: var(--border-strong);
+}
+
+.resident-filter-pill.is-active {
+  background: var(--rust);
+  color: var(--white);
+}
+
+.resident-filter-count {
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-3);
+  border-top: var(--border);
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+}
+
+.resident-filter-count strong {
+  color: var(--rust);
+  font-size: 0.95rem;
 }

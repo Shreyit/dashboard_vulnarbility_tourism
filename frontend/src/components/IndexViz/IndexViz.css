@@ -1,3 +1,18 @@
+/* ---------- score scale (how to read a coxcomb/radar chart) ---------- */
+.score-scale {
+  margin-top: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border: var(--border-strong);
+  max-width: 32rem;
+}
+
+.score-scale p {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--ink);
+}
+
 /* ---------- radial gauge ---------- */
 .radial-gauge {
   position: relative;
@@ -270,10 +285,6 @@ button.subindex-bar.is-active {
   width: 1.2rem;
   height: 2px;
   background: var(--rust);
-}
-
-.radar-legend-swatch-dashed {
-  background: repeating-linear-gradient(to right, var(--rust) 0 5px, transparent 5px 8px);
 }
 
 /* ---------- stacked bar (100%, part-to-whole) ---------- */

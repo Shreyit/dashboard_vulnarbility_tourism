@@ -154,3 +154,5 @@ class ResidentLocationOut(BaseModel):
     longitude: float
     zone_id: str | None
     tourism_dependent: bool | None
+    water_stressed: bool | None
+    no_other_income: bool | None
