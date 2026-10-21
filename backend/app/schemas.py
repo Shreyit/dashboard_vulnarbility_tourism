@@ -156,3 +156,71 @@ class ResidentLocationOut(BaseModel):
     tourism_dependent: bool | None
     water_stressed: bool | None
     no_other_income: bool | None
+
+
+class ZoneClusterOut(BaseModel):
+    zone_id: str
+    name: str
+    cluster: int
+    pca_x: float
+    pca_y: float
+
+
+class ClusterProfileOut(BaseModel):
+    cluster: int
+    label: str
+    size: int
+    sub_indices: dict[str, float]
+
+
+class ZoneClustersOut(BaseModel):
+    k: int
+    silhouette: float
+    silhouette_by_k: dict[int, float]
+    explained_variance: list[float]
+    zones: list[ZoneClusterOut]
+    profiles: list[ClusterProfileOut]
+    note: str
+
+
+class DependencyModelFeatureOut(BaseModel):
+    key: str
+    label: str
+    importance: float
+    coefficient: float
+
+
+class DependencyModelOut(BaseModel):
+    n_samples: int
+    n_features: int
+    cv_accuracy: float
+    cv_roc_auc: float
+    baseline_accuracy: float
+    features: list[DependencyModelFeatureOut]
+    note: str
+
+
+class SensitivityZoneOut(BaseModel):
+    zone_id: str
+    name: str
+    baseline_tvi: float | None
+    mean_tvi: float
+    p5_tvi: float
+    p95_tvi: float
+    pct_most_vulnerable: float
+
+
+class SensitivityTownOut(BaseModel):
+    baseline_tvi: float | None
+    mean_tvi: float
+    p5_tvi: float
+    p95_tvi: float
+
+
+class SensitivityOut(BaseModel):
+    n_iterations: int
+    perturbation_pct: int
+    zones: list[SensitivityZoneOut]
+    town: SensitivityTownOut
+    rank_stability_note: str
+    note: str

@@ -10,9 +10,10 @@ import EnterprisesTab from "./dashboard/EnterprisesTab";
 import LocalsTab from "./dashboard/LocalsTab";
 import WorkersTab from "./dashboard/WorkersTab";
 import SynthesisTab from "./dashboard/SynthesisTab";
+import ModelInsightsTab from "./dashboard/ModelInsightsTab";
 import "./Dashboard.css";
 
-type TabId = "overview" | "tourists" | "enterprises" | "locals" | "workers" | "synthesis";
+type TabId = "overview" | "tourists" | "enterprises" | "locals" | "workers" | "synthesis" | "model";
 
 const TABS: { id: TabId; label: string; lede: string }[] = [
   {
@@ -44,6 +45,11 @@ const TABS: { id: TabId; label: string; lede: string }[] = [
     id: "synthesis",
     label: "Synthesis",
     lede: "All four groups, one triad each -- side by side, overlaid, and split by tourism-dependence.",
+  },
+  {
+    id: "model",
+    label: "Model Insights",
+    lede: "The composite-index approach, checked three more ways: unsupervised zone clustering, a predictive model, and a robustness test on the weights themselves.",
   },
 ];
 
@@ -125,6 +131,7 @@ export default function Dashboard() {
           {active === "locals" && <LocalsTab />}
           {active === "workers" && <WorkersTab />}
           {active === "synthesis" && <SynthesisTab />}
+          {active === "model" && <ModelInsightsTab />}
         </div>
       </section>
     </main>

@@ -1,15 +1,18 @@
 import type {
   ChatResponse,
   DemographicsOut,
+  DependencyModelOut,
   EsacOut,
   IndexBundle,
   InsightsOut,
   ResidentAttitudesOut,
   ResidentLocation,
   ScenarioTrendPoint,
+  SensitivityOut,
   StakeholderTriad,
   StressTestOut,
   VariablesOut,
+  ZoneClustersOut,
   ZoneOut,
 } from "./types";
 
@@ -99,6 +102,18 @@ export function postChat(message: string, zoneId?: string | null): Promise<ChatR
     method: "POST",
     body: JSON.stringify({ message, zone_id: zoneId ?? null }),
   });
+}
+
+export function getZoneClusters(): Promise<ZoneClustersOut> {
+  return request("/ml/zone-clusters");
+}
+
+export function getDependencyModel(): Promise<DependencyModelOut> {
+  return request("/ml/dependency-model");
+}
+
+export function getSensitivity(): Promise<SensitivityOut> {
+  return request("/ml/sensitivity");
 }
 
 export { ApiError };

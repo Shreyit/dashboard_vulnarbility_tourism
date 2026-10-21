@@ -179,6 +179,56 @@ export type ResidentLocation = {
   no_other_income: boolean | null;
 };
 
+export type ZoneCluster = { zone_id: string; name: string; cluster: number; pca_x: number; pca_y: number };
+
+export type ClusterProfile = {
+  cluster: number;
+  label: string;
+  size: number;
+  sub_indices: Partial<Record<ThemeKey, number>>;
+};
+
+export type ZoneClustersOut = {
+  k: number;
+  silhouette: number;
+  silhouette_by_k: Record<string, number>;
+  explained_variance: [number, number];
+  zones: ZoneCluster[];
+  profiles: ClusterProfile[];
+  note: string;
+};
+
+export type DependencyModelFeature = { key: string; label: string; importance: number; coefficient: number };
+
+export type DependencyModelOut = {
+  n_samples: number;
+  n_features: number;
+  cv_accuracy: number;
+  cv_roc_auc: number;
+  baseline_accuracy: number;
+  features: DependencyModelFeature[];
+  note: string;
+};
+
+export type SensitivityZone = {
+  zone_id: string;
+  name: string;
+  baseline_tvi: number | null;
+  mean_tvi: number;
+  p5_tvi: number;
+  p95_tvi: number;
+  pct_most_vulnerable: number;
+};
+
+export type SensitivityOut = {
+  n_iterations: number;
+  perturbation_pct: number;
+  zones: SensitivityZone[];
+  town: { baseline_tvi: number | null; mean_tvi: number; p5_tvi: number; p95_tvi: number };
+  rank_stability_note: string;
+  note: string;
+};
+
 // Direction + display metadata the backend doesn't need to send but the UI does.
 export const THEME_META: Record<ThemeKey, { label: string; short: string; higherIsBetter: boolean }> = {
   wsi: { label: "Water Stress Index", short: "Water", higherIsBetter: false },

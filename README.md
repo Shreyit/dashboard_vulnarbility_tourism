@@ -5,6 +5,72 @@ Index** and an interactive **peak-season stress/pressure test**, so overtourism 
 waste/sanitation, infrastructure, local livelihoods, and the host community becomes visible and
 explorable, not just anecdotal.
 
+<p align="center">
+  <img src="docs/assets/architecture.svg" alt="System architecture: field surveys → cleaning notebook → processed CSVs → FastAPI (indices, insights, ML, RAG) → React dashboard + PahadiBot" width="100%">
+</p>
+
+## How it works
+
+The diagrams below are animated SVGs (they respect `prefers-reduced-motion`). The Mermaid
+maps further down are rendered by GitHub with pan/zoom controls — hover a diagram and use the
+toolbar to explore it.
+
+### 1. From survey row to index
+
+<p align="center">
+  <img src="docs/assets/index-pipeline.svg" alt="Derived variables are min-max normalised, averaged into six pillars, then weighted into the TVI; a Monte Carlo run tests ranking stability" width="100%">
+</p>
+
+### 2. How PahadiBot answers
+
+<p align="center">
+  <img src="docs/assets/pahadibot-rag.svg" alt="Question → fact cards → TF-IDF + cosine top-k → Groq → grounded answer" width="100%">
+</p>
+
+### 3. Request flow (interactive)
+
+```mermaid
+flowchart LR
+    U([Browser]) -->|/api/*| V[Vite proxy :5173]
+    V --> F[FastAPI :8010]
+    subgraph Backend
+      F --> Z["/api/zones · /api/variables/{theme}"]
+      F --> I["/api/indices/town · /zone/{id}"]
+      F --> N["/api/insights/*<br/>town · esac · resident-attitudes<br/>worker-dependency · scenario-trend<br/>sustainability-by-stakeholder<br/>demographics · resident-locations"]
+      F --> M["/api/ml/*<br/>zone-clusters · dependency-model · sensitivity"]
+      F --> S["/api/stress-test"]
+      F --> C["/api/chat"]
+      Z & I & N & M & S --> D[(processed/*.csv<br/>cached in memory)]
+      C --> K[knowledge_base<br/>TF-IDF top-k]
+      K --> D
+      K --> G{{Groq<br/>gpt-oss-120b}}
+    end
+    click D "https://github.com/Shreyit/dashboard_vulnarbility_tourism/tree/main/processed" "Open processed/"
+    click K "https://github.com/Shreyit/dashboard_vulnarbility_tourism/blob/main/backend/app/knowledge_base.py" "Open knowledge_base.py"
+```
+
+### 4. Model Insights — three checks on the composite index
+
+```mermaid
+flowchart TB
+    T[6 pillar scores × 9 zones] --> A[K-means + PCA<br/>k chosen by silhouette, k = 2..4]
+    T --> B[Monte Carlo<br/>weights ±30%, re-rank zones]
+    R[Resident-level survey rows] --> L[Random Forest + Logistic Regression<br/>5-fold CV vs. majority baseline]
+    A --> O1[Vulnerability archetypes]
+    B --> O2[Rank stability per zone]
+    L --> O3[Does water / economic strain<br/>predict socio-cultural pressure?]
+```
+
+### 5. CI pipeline
+
+```mermaid
+flowchart LR
+    P[push / PR to main] --> BE[backend job<br/>Python 3.12]
+    P --> FE[frontend job<br/>Node 20]
+    BE --> R1[ruff check app] --> R2[pytest -q]
+    FE --> N1[npm ci] --> N2[oxlint] --> N3[tsc -b --noEmit]
+```
+
 ## Background
 
 The source data comes from the **Urban Immersion program**, TISS BS Analytics & Sustainability
@@ -39,17 +105,24 @@ Raw files live in `survey_data/` (KoBoToolbox exports, labeled).
   residents across Economic/Social/Environmental attitude pillars.
 - **Peak-season stress test**: a "what if tourist footfall rises by X%" simulator that recomputes
   water, waste, and livelihood pressure under a higher-load scenario, with the assumptions shown,
-  not hidden.
+  not hidden. Served by `/api/stress-test`; not currently surfaced as its own dashboard tab.
 - **Zone map**: the 9 surveyed sites plotted with per-zone scores, enriched with OpenStreetMap
   points of interest (parking, toilets, dustbins, healthcare) around each site.
 - **Methodology** (on the home page's Data & Methodology section, not a dashboard tab): exact
   definition, source components, normalization method, formula, and citations for every indicator
   above, one at a time.
-- **Trends** (a Dashboard tab): a single long report -- top KPIs, a scenario-based intensity trend,
+- **Trends** (scenario-trend + stakeholder APIs): a single long report -- top KPIs, a scenario-based intensity trend,
   the six pillars as a bar chart, an Enterprise-vs-Residents sustainability radar, and a dynamic
   variable explorer (pick a pillar, the chart updates).
-- **PahadiBot**: the dashboard's AI chat assistant. Ask it about the dashboard's own numbers;
-  answers are grounded in the computed indices, not generic tourism facts.
+- **PahadiBot**: the dashboard's AI chat assistant. Ask it about the dashboard's own numbers.
+  Grounded via a small retrieval layer (`backend/app/knowledge_base.py`): every computed number
+  is rendered as a short factual "card", TF-IDF + cosine similarity ranks cards against the
+  question, and only the top-matching ones go into the prompt -- not the whole dashboard stuffed
+  into every request.
+- **Model Insights** (a Dashboard tab): three independent checks on the composite-index approach
+  above -- K-means clustering of the 9 zones into vulnerability archetypes, a cross-validated
+  model predicting socio-cultural pressure from water/economic conditions, and a Monte Carlo
+  test of how much the TVI ranking would move if the pillar weights were different.
 
 Full variable list (raw / derived / composite) and every external data source (OSM, Open-Meteo,
 Census, tourism-department stats, etc.) is in
@@ -71,17 +144,36 @@ output tables land in `processed/`.
 
 ## Tech stack
 
-- **Backend**: FastAPI (Python), serving processed indices + a stress-test scenario endpoint +
-  PahadiBot's chat route (Groq, `openai/gpt-oss-120b`, a 3-key fallback pool configured in `.env`).
-  `scipy` powers the Resident Attitudes/SET group comparison (Mann-Whitney U + rank-biserial effect
-  size).
-- **Frontend**: React + TypeScript, built with Vite. Client-side SPA wired to the live API.
-  Animation is GSAP throughout (ScrollTrigger, SplitText, DrawSVG, MotionPath, Flip), with real
-  photography processed into duotone art and a deliberately narrow warm-white/grey/terracotta
-  palette with no dark mode. See `workflow.md` §9.1 for the full visual-language rules, and
-  `frontend/README.md` for how the animation layer is organised.
-- **Data prep**: pandas-based cleaning/harmonization/index-computation pipeline, run offline, output
-  cached so the live dashboard never re-processes raw Excel files per request.
+### Frontend
+- React 19 + TypeScript, built with Vite
+- React Router (`react-router-dom`)
+- GSAP + `@gsap/react` (ScrollTrigger, DrawSVG, MotionPath -- all the scroll animation)
+- Leaflet + `react-leaflet` (the resident-location/zone map), tiles from OpenStreetMap
+- `react-markdown` + `remark-gfm` (methodology page)
+- `oxlint` (linting)
+
+Real photography is processed into duotone art, with a deliberately narrow warm-white/grey/
+terracotta palette and no dark mode. See `workflow.md` §9.1 for the full visual-language rules,
+and `frontend/README.md` for how the animation layer is organised.
+
+### Backend
+- FastAPI + Uvicorn (Python)
+- Pandas + NumPy (data pipeline, composite index computation)
+- SciPy (Mann-Whitney U tests for the dependency comparisons)
+- scikit-learn (K-means + PCA clustering, Random Forest + Logistic Regression, TF-IDF retrieval)
+- Pydantic + pydantic-settings (schemas/config)
+- httpx (Groq API calls)
+- pytest + ruff (testing/linting, dev-only)
+
+The `processed/*.csv` tables are cleaned/harmonized offline (see the notebook above) and cached in
+memory on startup, so the live dashboard never re-processes raw Excel files per request.
+
+### AI / LLM
+- Groq API, serving `openai/gpt-oss-120b`, for PahadiBot -- a 3-key fallback pool configured in `.env`
+
+### Infra / DevOps
+- Vercel (frontend hosting), Render (backend hosting)
+- GitHub Actions (CI: tests, lint, typecheck)
 
 ## Status
 
@@ -96,18 +188,19 @@ output tables land in `processed/`.
   Routes: `/api/zones`, `/api/indices/town`, `/api/indices/zone/{zone_id}`, `/api/variables/{theme}`,
   `/api/insights/town`, `/api/insights/esac`, `/api/insights/resident-attitudes`,
   `/api/insights/scenario-trend`, `/api/insights/sustainability-by-stakeholder`,
-  `/api/stress-test`, `/api/chat`.
+  `/api/insights/worker-dependency`, `/api/insights/demographics`,
+  `/api/insights/resident-locations`, `/api/ml/zone-clusters`, `/api/ml/dependency-model`,
+  `/api/ml/sensitivity`, `/api/stress-test`, `/api/chat`.
 - `frontend/`: two pages. **Landing** (`/`) is the front page, ending in a **Data & Methodology**
   section with an interactive per-indicator picker (definitions/formulas/citations for all 13
   indicators). **Dashboard** (`/dashboard`) is a single merged instrument panel, not six separate
   routes -- an iOS-style pill tab bar (`components/PillTabs/`, shared with the Methodology picker)
-  swaps between **Overview** (TVI, six pillars, KPI strip, Sustainability Triad, Stakeholder
-  Pressure Matrix, and a "who we surveyed" chart grid: respondent composition, tourist age/gender/
-  visit-pattern, enterprise & worker mix -- all raw survey counts, no derived index), **Zone Map**,
-  **E-S-AC** (second vulnerability lens), **Attitudes** (Social
-  Exchange Theory group comparison), **Trends** (KPIs, a scenario-trend line chart, a six-pillar bar
-  chart, an Enterprise-vs-Residents radar, and a dynamic variable explorer), and **Stress Test** (now
-  last), all reading the live API. Design system, custom crosshair cursor, magnetic controls, the
+  swaps between seven tabs, all reading the live API: **Big Picture** (town-wide TVI, six
+  pillars, and who was surveyed), **Tourists** (the demand side), **Enterprises** (the supply
+  side: water, waste, local benefit), **Locals** (residents geotagged by zone), **Workers**
+  (tourism-linked labour), **Synthesis** (all four groups' sustainability triads side by side,
+  overlaid, and split by tourism-dependence), and **Model Insights** (clustering, a predictive
+  model, and a weight-robustness test). Design system, custom crosshair cursor, magnetic controls, the
   scroll-drawn Nainital SVG scene, the looping photo strip, and the route wipe between pages are
   built. PahadiBot's chat panel is wired to `/api/chat` and floats over every page.
 
@@ -240,6 +333,21 @@ npm run preview                  # serve the build locally
 The built SPA is designed to be served by FastAPI's `StaticFiles` at the same origin, which is
 why `src/api/client.ts` uses relative `/api` paths rather than an absolute base URL.
 
+### Testing & CI
+
+```bash
+cd backend
+pip install -r requirements-dev.txt
+ruff check app        # lint (E/F rules -- real bugs, not a style rewrite)
+pytest -q             # unit tests + a data-quality gate + an API smoke test over every route
+```
+
+`backend/tests/` covers the composite-index math (`test_indices.py`, `test_derive.py`), the
+three Model Insights endpoints (`test_ml.py`), PahadiBot's retrieval layer with a small
+labeled recall@k eval (`test_retrieval.py`), and a smoke test hitting every route in every
+router (`test_api.py`). `.github/workflows/ci.yml` runs this plus `oxlint` and a `tsc`
+type-check on the frontend on every push/PR.
+
 ## Repo structure
 
 ```
@@ -255,6 +363,7 @@ backend/                         FastAPI app: derives indices from processed/, s
 .env.example                     copy to .env for the optional PahadiBot LLM key
 .agents/skills/                  vendored GSAP skill docs (pinned by skills-lock.json)
 VARIABLES_AND_DATA_SOURCES.md    full data dictionary: raw/derived/composite variables + external sources
+docs/assets/                     animated SVG diagrams used in this README
 workflow.md                      pipeline architecture, index methodology, visual language, build plan
 RESEARCH_BENCHMARKS.md           cited external research: metrics/thresholds/frameworks behind the indices
 # planned, not yet created:

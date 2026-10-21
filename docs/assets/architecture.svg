@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 520" width="960" height="520" role="img" aria-labelledby="t d">
+  <title id="t">System architecture</title>
+  <desc id="d">Field surveys flow through an offline cleaning notebook into processed CSVs, which the FastAPI backend loads once and turns into indices, insights, ML checks and a retrieval layer, served to the React dashboard and the PahadiBot chat.</desc>
+  <style>
+    .bg{fill:#FBF8F3}
+    .ink{fill:#2B2622}
+    .muted{fill:#7A7068}
+    text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+    .h{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;fill:#C0583A}
+    .lbl{font-size:13px;font-weight:600;fill:#2B2622}
+    .sub{font-size:11px;fill:#7A7068}
+    .box{fill:#FFFFFF;stroke:#D9CFC3;stroke-width:1.2}
+    .box.accent{fill:#F6E6DD;stroke:#C0583A}
+    .lane{fill:none;stroke:#E8DFD4;stroke-width:1;stroke-dasharray:4 4}
+    .wire{fill:none;stroke:#C9BDB0;stroke-width:1.6}
+    .flow{fill:none;stroke:#C0583A;stroke-width:2;stroke-dasharray:6 10;animation:flow 1.4s linear infinite}
+    .dot{fill:#C0583A}
+    .pulse{animation:pulse 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+    .p2{animation-delay:.6s}.p3{animation-delay:1.2s}.p4{animation-delay:1.8s}
+    @keyframes flow{to{stroke-dashoffset:-32}}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+    @media (prefers-reduced-motion:reduce){.flow,.pulse{animation:none}}
+  </style>
+
+  <rect class="bg" width="960" height="520" rx="16"/>
+
+  <!-- lanes -->
+  <rect class="lane" x="16" y="16" width="200" height="488" rx="12"/>
+  <rect class="lane" x="236" y="16" width="190" height="488" rx="12"/>
+  <rect class="lane" x="446" y="16" width="270" height="488" rx="12"/>
+  <rect class="lane" x="736" y="16" width="208" height="488" rx="12"/>
+  <text class="h" x="32" y="44">1 · Field data</text>
+  <text class="h" x="252" y="44">2 · Offline clean</text>
+  <text class="h" x="462" y="44">3 · FastAPI backend</text>
+  <text class="h" x="752" y="44">4 · React dashboard</text>
+
+  <!-- 1. surveys -->
+  <g>
+    <rect class="box pulse" x="32" y="64" width="168" height="54" rx="9"/>
+    <text class="lbl" x="44" y="87">Enterprises</text><text class="sub" x="44" y="105">157 · hotels, shops, eateries</text>
+    <rect class="box pulse p2" x="32" y="130" width="168" height="54" rx="9"/>
+    <text class="lbl" x="44" y="153">Tourists</text><text class="sub" x="44" y="171">320 · spend, satisfaction</text>
+    <rect class="box pulse p3" x="32" y="196" width="168" height="54" rx="9"/>
+    <text class="lbl" x="44" y="219">Local residents</text><text class="sub" x="44" y="237">239 · water, crowding, RII</text>
+    <rect class="box pulse p4" x="32" y="262" width="168" height="54" rx="9"/>
+    <text class="lbl" x="44" y="285">Workers</text><text class="sub" x="44" y="303">303 · seasonality, precarity</text>
+    <rect class="box pulse p2" x="32" y="328" width="168" height="54" rx="9"/>
+    <text class="lbl" x="44" y="351">Site audit</text><text class="sub" x="44" y="369">9 geo-tagged zones</text>
+    <text class="sub" x="32" y="412">KoBoToolbox exports</text>
+    <text class="sub" x="32" y="428">survey_data/  (read-only)</text>
+  </g>
+
+  <!-- 2. notebook + processed -->
+  <rect class="box" x="252" y="160" width="158" height="74" rx="9"/>
+  <text class="lbl" x="264" y="185">Cleaning notebook</text>
+  <text class="sub" x="264" y="203">harmonise form versions,</text>
+  <text class="sub" x="264" y="219">drop bad GPS, assign zones</text>
+  <rect class="box accent" x="252" y="282" width="158" height="62" rx="9"/>
+  <text class="lbl" x="264" y="307">processed/*.csv</text>
+  <text class="sub" x="264" y="325">committed, cached on boot</text>
+
+  <!-- 3. backend modules -->
+  <rect class="box" x="462" y="64" width="238" height="50" rx="9"/>
+  <text class="lbl" x="474" y="86">data_loader + derive</text><text class="sub" x="474" y="103">raw → derived variables (in memory)</text>
+  <rect class="box accent" x="462" y="128" width="238" height="58" rx="9"/>
+  <text class="lbl" x="474" y="151">indices · 6 pillars → TVI</text><text class="sub" x="474" y="169">min–max 0–100, weights.json (OECD/JRC)</text>
+  <rect class="box" x="462" y="200" width="238" height="58" rx="9"/>
+  <text class="lbl" x="474" y="223">insights</text><text class="sub" x="474" y="241">E-S-AC · Irridex · SET Mann-Whitney U</text>
+  <rect class="box" x="462" y="272" width="238" height="58" rx="9"/>
+  <text class="lbl" x="474" y="295">Model insights (scikit-learn)</text><text class="sub" x="474" y="313">K-means · RF/LogReg · Monte Carlo</text>
+  <rect class="box" x="462" y="344" width="238" height="50" rx="9"/>
+  <text class="lbl" x="474" y="366">stress_test</text><text class="sub" x="474" y="383">footfall +X% scenario</text>
+  <rect class="box accent" x="462" y="408" width="238" height="58" rx="9"/>
+  <text class="lbl" x="474" y="431">knowledge_base (RAG)</text><text class="sub" x="474" y="449">fact cards · TF-IDF · cosine top-k</text>
+  <text class="sub" x="462" y="490">/api/zones · /indices · /insights · /ml · /stress-test · /chat</text>
+
+  <!-- 4. frontend -->
+  <rect class="box" x="752" y="64" width="176" height="74" rx="9"/>
+  <text class="lbl" x="764" y="88">Landing</text><text class="sub" x="764" y="106">scroll-drawn Nainital scene,</text><text class="sub" x="764" y="122">methodology picker</text>
+  <rect class="box accent" x="752" y="152" width="176" height="206" rx="9"/>
+  <text class="lbl" x="764" y="176">Dashboard tabs</text>
+  <text class="sub" x="764" y="198">Big Picture</text>
+  <text class="sub" x="764" y="216">Tourists · Enterprises</text>
+  <text class="sub" x="764" y="234">Locals (zone map)</text>
+  <text class="sub" x="764" y="252">Workers</text>
+  <text class="sub" x="764" y="270">Synthesis</text>
+  <text class="sub" x="764" y="288">Model insights</text>
+
+  <text class="sub" x="764" y="336">React 19 · GSAP · Leaflet</text>
+  <rect class="box" x="752" y="408" width="176" height="58" rx="9"/>
+  <text class="lbl" x="764" y="431">PahadiBot</text><text class="sub" x="764" y="449">Groq · gpt-oss-120b</text>
+
+  <!-- wires -->
+  <path class="wire" d="M200 91 C226 91 226 197 252 197"/>
+  <path class="wire" d="M200 157 C226 157 226 197 252 197"/>
+  <path class="wire" d="M200 223 C226 223 226 197 252 197"/>
+  <path class="wire" d="M200 289 C226 289 226 197 252 197"/>
+  <path class="wire" d="M200 355 C226 355 226 197 252 197"/>
+  <path class="flow" d="M331 234 L331 282"/>
+  <path class="flow" d="M410 313 C436 313 436 89 462 89"/>
+  <path class="wire" d="M581 114 L581 128"/>
+  <path class="wire" d="M450 89 L450 437 L462 437"/>
+  <path class="wire" d="M450 229 L462 229"/><path class="wire" d="M450 301 L462 301"/><path class="wire" d="M450 369 L462 369"/>
+  <path class="flow" d="M700 157 C726 157 726 200 752 200"/>
+  <path class="flow" d="M700 229 C726 229 726 240 752 240"/>
+  <path class="flow" d="M700 301 C726 301 726 280 752 280"/>
+  <path class="flow" d="M700 437 L752 437"/>
+  <path class="wire" d="M700 101 C726 101 726 101 752 101"/>
+
+  <!-- travelling packets -->
+  <circle class="dot" r="4"><animateMotion dur="3s" repeatCount="indefinite" path="M200 157 C226 157 226 197 252 197 L331 197 L331 282 L331 313 L410 313 C436 313 436 89 462 89"/></circle>
+  <circle class="dot" r="4"><animateMotion dur="3s" begin="1.5s" repeatCount="indefinite" path="M200 289 C226 289 226 197 252 197 L331 197 L331 282 L331 313 L410 313 C436 313 436 89 462 89"/></circle>
+  <circle class="dot" r="4"><animateMotion dur="2.2s" repeatCount="indefinite" path="M581 114 L581 157 L700 157 C726 157 726 200 752 200"/></circle>
+  <circle class="dot" r="4"><animateMotion dur="2.2s" begin="1.1s" repeatCount="indefinite" path="M752 437 L700 437"/></circle>
+</svg>

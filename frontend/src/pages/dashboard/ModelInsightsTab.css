@@ -1,0 +1,37 @@
+.model-panel {
+  padding: var(--sp-4);
+  margin-bottom: var(--sp-4);
+}
+
+.model-scatter-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-5);
+  align-items: start;
+  margin-top: var(--sp-3);
+}
+
+@media (min-width: 860px) {
+  .model-scatter-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.model-cluster-profiles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.model-cluster-profile-label {
+  display: block;
+  margin-bottom: var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+
+.model-cluster-profile-label small {
+  color: var(--ink-faint);
+}

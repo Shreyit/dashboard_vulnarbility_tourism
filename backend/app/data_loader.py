@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import pandas as pd
 
+from . import validation
 from .config import PROCESSED_DIR
 
 _RAW: dict[str, pd.DataFrame] | None = None
@@ -24,12 +25,17 @@ def load_raw_tables() -> dict[str, pd.DataFrame]:
     if _RAW is not None:
         return _RAW
     location = pd.read_csv(PROCESSED_DIR / "location_clean.csv")
+    validation.validate_location(location)
     location = location[~location["zone_id"].isin(EXCLUDED_ZONES)].reset_index(drop=True)
-    _RAW = {
-        "enterprise": pd.read_csv(PROCESSED_DIR / "enterprise_clean.csv"),
-        "location": location,
-        "tourist": pd.read_csv(PROCESSED_DIR / "tourist_clean.csv"),
-        "residents": pd.read_csv(PROCESSED_DIR / "residents_clean.csv"),
-        "workers": pd.read_csv(PROCESSED_DIR / "workers_clean.csv"),
-    }
+
+    enterprise = pd.read_csv(PROCESSED_DIR / "enterprise_clean.csv")
+    tourist = pd.read_csv(PROCESSED_DIR / "tourist_clean.csv")
+    residents = pd.read_csv(PROCESSED_DIR / "residents_clean.csv")
+    workers = pd.read_csv(PROCESSED_DIR / "workers_clean.csv")
+    validation.validate_enterprise(enterprise)
+    validation.validate_tourist(tourist)
+    validation.validate_residents(residents)
+    validation.validate_workers(workers)
+
+    _RAW = {"enterprise": enterprise, "location": location, "tourist": tourist, "residents": residents, "workers": workers}
     return _RAW

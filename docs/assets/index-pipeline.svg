@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 400" width="960" height="400" role="img" aria-labelledby="t d">
+  <title id="t">How the Tourism Vulnerability Index is built</title>
+  <desc id="d">Derived survey variables are min-max normalised to 0-100, averaged into six pillar sub-indices, then combined with weights from weights.json into the TVI. A Monte Carlo run perturbs the weights by up to plus or minus 30 percent to test ranking stability. Bar lengths are illustrative.</desc>
+  <style>
+    text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+    .h{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;fill:#C0583A}
+    .lbl{font-size:13px;font-weight:600;fill:#2B2622}
+    .sub{font-size:11px;fill:#7A7068}
+    .box{fill:#FFFFFF;stroke:#D9CFC3;stroke-width:1.2}
+    .accent{fill:#F6E6DD;stroke:#C0583A}
+    .track{fill:#EFE8DF}
+    .bar{fill:#C0583A;transform-box:fill-box;transform-origin:left center;animation:grow 6s ease-in-out infinite}
+    .b2{animation-delay:.15s;fill:#CB6D50}.b3{animation-delay:.3s;fill:#D58167}.b4{animation-delay:.45s;fill:#B24E33}.b5{animation-delay:.6s;fill:#C66347}.b6{animation-delay:.75s;fill:#D9917A}
+    .flow{fill:none;stroke:#C0583A;stroke-width:2;stroke-dasharray:6 10;animation:flow 1.4s linear infinite}
+    .ring{fill:none;stroke:#EFE8DF;stroke-width:14}
+    .arc{fill:none;stroke:#C0583A;stroke-width:14;stroke-linecap:round;stroke-dasharray:283;animation:gauge 6s ease-in-out infinite}
+    .jit{animation:jit 1.8s ease-in-out infinite}
+    .j2{animation-delay:.3s}.j3{animation-delay:.6s}.j4{animation-delay:.9s}
+    @keyframes grow{0%{transform:scaleX(0)}25%,80%{transform:scaleX(1)}100%{transform:scaleX(0)}}
+    @keyframes flow{to{stroke-dashoffset:-32}}
+    @keyframes gauge{0%,10%{stroke-dashoffset:283}40%,80%{stroke-dashoffset:120}100%{stroke-dashoffset:283}}
+    @keyframes jit{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+    @media (prefers-reduced-motion:reduce){.bar,.flow,.arc,.jit{animation:none}.arc{stroke-dashoffset:120}}
+  </style>
+
+  <rect fill="#FBF8F3" width="960" height="400" rx="16"/>
+
+  <text class="h" x="28" y="40">Raw → derived</text>
+  <text class="h" x="230" y="40">Normalise</text>
+  <text class="h" x="400" y="40">Six pillars</text>
+  <text class="h" x="760" y="40">Composite</text>
+
+  <!-- inputs -->
+  <rect class="box" x="28" y="60" width="170" height="250" rx="10"/>
+  <text class="lbl" x="42" y="86">Derived variables</text>
+  <text class="sub" x="42" y="110">litres / guest / day</text>
+  <text class="sub" x="42" y="130">supply-hour shortfall</text>
+  <text class="sub" x="42" y="150">waste segregation share</text>
+  <text class="sub" x="42" y="170">toilets / dustbins per zone</text>
+  <text class="sub" x="42" y="190">off-season income drop</text>
+  <text class="sub" x="42" y="210">crowding · noise · prices</text>
+  <text class="sub" x="42" y="230">tourist satisfaction</text>
+  <text class="sub" x="42" y="258">see VARIABLES_AND_</text>
+  <text class="sub" x="42" y="274">DATA_SOURCES.md §3</text>
+
+  <path class="flow" d="M198 185 L226 185"/>
+  <rect class="box" x="226" y="130" width="160" height="110" rx="10"/>
+  <text class="lbl" x="244" y="156">Min–max</text>
+  <text class="sub" x="244" y="178">x′ = (x − min)</text>
+  <text class="sub" x="244" y="194">     / (max − min)</text>
+  <text class="sub" x="244" y="216">scaled 0–100,</text>
+  <text class="sub" x="244" y="230">higher = more vulnerable</text>
+  <path class="flow" d="M386 185 L396 185"/>
+
+  <!-- pillars -->
+  <g>
+    <text class="lbl" x="400" y="78">Water stress</text>
+    <rect class="track" x="560" y="66" width="160" height="14" rx="7"/><rect class="bar" x="560" y="66" width="124" height="14" rx="7"/>
+    <text class="lbl" x="400" y="118">Waste &amp; sanitation</text>
+    <rect class="track" x="560" y="106" width="160" height="14" rx="7"/><rect class="bar b2" x="560" y="106" width="96" height="14" rx="7"/>
+    <text class="lbl" x="400" y="158">Infrastructure</text>
+    <rect class="track" x="560" y="146" width="160" height="14" rx="7"/><rect class="bar b3" x="560" y="146" width="78" height="14" rx="7"/>
+    <text class="lbl" x="400" y="198">Economic precarity</text>
+    <rect class="track" x="560" y="186" width="160" height="14" rx="7"/><rect class="bar b4" x="560" y="186" width="140" height="14" rx="7"/>
+    <text class="lbl" x="400" y="238">Socio-cultural</text>
+    <rect class="track" x="560" y="226" width="160" height="14" rx="7"/><rect class="bar b5" x="560" y="226" width="64" height="14" rx="7"/>
+    <text class="lbl" x="400" y="278">Visitor experience</text>
+    <rect class="track" x="560" y="266" width="160" height="14" rx="7"/><rect class="bar b6" x="560" y="266" width="88" height="14" rx="7"/>
+    <text class="sub" x="400" y="306">bar lengths illustrative · live values on /api/indices/town</text>
+  </g>
+
+  <path class="flow" d="M724 170 L798 170"/>
+  <!-- gauge -->
+  <g transform="translate(850 170)">
+    <circle class="ring" r="45" transform="rotate(-90)"/>
+    <circle class="arc" r="45" transform="rotate(-90)"/>
+    <text class="lbl" x="0" y="-2" text-anchor="middle" style="font-size:22px">TVI</text>
+    <text class="sub" x="0" y="16" text-anchor="middle">0 – 100</text>
+  </g>
+  <text class="sub" x="790" y="246">TVI = Σ w·pillar / Σ w</text>
+  <text class="sub" x="790" y="262">weights.json (equal 1/6)</text>
+  <text class="sub" x="790" y="278">town-wide + per zone</text>
+
+  <!-- sensitivity -->
+  <rect class="box accent" x="400" y="326" width="532" height="56" rx="10"/>
+  <text class="lbl" x="416" y="350">Monte Carlo weight sensitivity</text>
+  <text class="sub" x="416" y="368">perturb each weight ±30% → re-rank the 9 zones → how often does the order change?</text>
+  <g transform="translate(830 346)">
+    <circle class="jit" cx="0" cy="0" r="5" fill="#C0583A"/>
+    <circle class="jit j2" cx="20" cy="8" r="5" fill="#D58167"/>
+    <circle class="jit j3" cx="40" cy="-2" r="5" fill="#B24E33"/>
+    <circle class="jit j4" cx="60" cy="6" r="5" fill="#D9917A"/>
+  </g>
+  <path class="flow" d="M895 170 L924 170 L924 326"/>
+</svg>

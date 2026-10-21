@@ -1,0 +1,7 @@
+line-length = 120
+
+[lint]
+# A CI gate for real bugs (syntax errors, undefined names, unused imports),
+# not a full-codebase style rewrite -- E/F is pyflakes + pycodestyle errors.
+select = ["E", "F"]
+ignore = ["E501"]

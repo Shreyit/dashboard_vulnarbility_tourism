@@ -346,4 +346,99 @@ export const METHODOLOGY: MethodologyEntry[] = [
       },
     ],
   },
+  {
+    id: "model-insights-clusters",
+    name: "Zone Archetypes (K-means clustering)",
+    definition:
+      "An unsupervised check: do the 9 zones actually fall into distinct vulnerability profiles, " +
+      "or is a single town-wide average hiding real variation? Clusters the same 6 sub-index " +
+      "scores the TVI is built from -- no new data, a different technique applied to it.",
+    components: ["WSI", "WSPI", "IAI", "EDPI", "SCPI", "VEI (constant across zones -- see Limitations)"],
+    normalization:
+      "Each zone's 6 sub-index scores are standardized (z-score) before clustering. PCA(2) is fit " +
+      "separately, only for the 2D scatter plot -- clustering itself runs on the standardized 6-d " +
+      "vectors, not the PCA projection.",
+    formula:
+      "KMeans(k) for k in {2,3,4}; the silhouette score (Rousseeuw, 1987) picks k. Cluster profile " +
+      "= mean of each theme's raw (unstandardized) score within that cluster. Cluster label = the " +
+      "1-2 themes whose cluster mean deviates most from the town-wide mean, direction-aware.",
+    citations: [
+      { label: "Rousseeuw, P.J. (1987). Silhouettes: A graphical aid to the interpretation and validation of cluster analysis. Journal of Computational and Applied Mathematics, 20, 53-65." },
+    ],
+  },
+  {
+    id: "model-insights-dependency",
+    name: "Predicting Socio-Cultural Pressure (cross-validated model)",
+    definition:
+      "A supervised, cross-pillar check: does a resident's water-access and tourism-economic " +
+      "profile predict whether they report above-median socio-cultural pressure? An earlier version " +
+      "tried predicting tourism-dependence itself from other resident indicators -- that target had " +
+      "no real signal in this dataset (cross-validated accuracy at or below a majority-class guess " +
+      "for every model tried), so it was dropped in favor of this question instead of reporting a " +
+      "misleading number.",
+    components: [
+      "residents.water_hours_deficit", "residents.tanker_dependency", "residents.bought_tanker_water",
+      "residents.water_deprioritized_vs_hotels", "residents.water_trend_worsened", "residents.no_rainwater_harvesting",
+      "residents.poor_sewage_adequacy", "residents.sewage_overflow_peak", "residents.tourism_dependency",
+      "residents.no_other_income_source",
+    ],
+    normalization:
+      "Target = 1 if a resident's mean of 6 socio-cultural indicators (the same ones SCPI draws " +
+      "from) is at or above the sample median, else 0. Features are median-imputed; the Logistic " +
+      "Regression pipeline additionally standardizes them (the Random Forest doesn't need to).",
+    formula:
+      "RandomForestClassifier (n_estimators=300) + LogisticRegression, both StratifiedKFold(5) " +
+      "cross-validated for accuracy/ROC-AUC. Feature importance from the Random Forest's " +
+      "feature_importances_; coefficients from the standardized Logistic Regression.",
+    citations: [
+      { label: "Breiman, L. (2001). Random Forests. Machine Learning, 45(1), 5-32." },
+      { label: "Illustrative, not a production model -- small-N (~230 respondents), no held-out test split, feature importances show signal, not causal effects." },
+    ],
+  },
+  {
+    id: "model-insights-sensitivity",
+    name: "Index Robustness (Monte Carlo weight sensitivity)",
+    definition:
+      "How much would the TVI ranking actually move if the pillar weights were different from the " +
+      "equal-weight default? The OECD/JRC Handbook's own uncertainty/sensitivity-analysis step, run " +
+      "against this project's weights.",
+    components: ["tvi_weights (backend/app/weights.json)", "baseline sub-index scores (fixed)", "n_iterations = 1000"],
+    normalization:
+      "Sub-index scores themselves are already OECD/JRC-normalized and are not touched here -- only " +
+      "the six aggregation weights are perturbed, since that's the parameter actually in question.",
+    formula:
+      "weight_i' = weight_i x Uniform(0.7, 1.3), renormalized to sum to the original total; TVI' " +
+      "recombined with the same formula as the TVI entry above; repeated 1,000 times per zone and " +
+      "town-wide. Reports p5/mean/p95 TVI and the % of draws each zone is the single most vulnerable.",
+    citations: [
+      {
+        label: "OECD/JRC -- Handbook on Constructing Composite Indicators (uncertainty and sensitivity analysis step)",
+        url: "https://www.oecd.org/content/dam/oecd/en/publications/reports/2008/08/handbook-on-constructing-composite-indicators-methodology-and-user-guide_g1gh9301/9789264043466-en.pdf",
+      },
+    ],
+  },
+  {
+    id: "limitations",
+    name: "Known Limitations & Caveats",
+    definition:
+      "What this dashboard and its underlying data don't (yet) cover -- collected in one place so " +
+      "it isn't only visible by reading code comments. PahadiBot answers 'what does this dashboard " +
+      "lack' questions from this same list (backend/app/knowledge_base.py), not a separate one.",
+    components: [
+      "Residents: only 155/239 geotagged",
+      "Tourist & Worker surveys: not GPS-tagged at all",
+      "Workers: Environmental pillar not measured",
+      "Enterprise: no dependency-split comparison",
+      "VEI: constant across every zone",
+      "Zone names: placeholders, not confirmed",
+      "Pillar weights: equal by default, unvalidated",
+      "Stress test: a scenario calculator, not a forecast",
+      "ML models: illustrative, small-N, not production-grade",
+    ],
+    normalization: "N/A -- this entry lists structural gaps and stated assumptions, not a computed indicator.",
+    formula: "N/A",
+    citations: [
+      { label: "Each caveat here reuses a `note` field an API endpoint already returns, or a structural fact already true of the pipeline -- none of it is new information, only newly surfaced." },
+    ],
+  },
 ];

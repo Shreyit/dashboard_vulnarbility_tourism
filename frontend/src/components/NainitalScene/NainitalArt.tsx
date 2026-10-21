@@ -85,6 +85,32 @@ export default function NainitalArt() {
 
       {/* ---------------- the Himalayan wall, far behind ---------------- */}
       <g data-layer="himalaya">
+        {/* a solid hazy silhouette behind the ridge line -- previously this
+            range had no fill at all (bare stroke), which is exactly why the
+            whole background read as a thin wire sketch instead of a real
+            mountain wall. Same outline as .peak-line, closed down to a
+            baseline safely behind the nearer hill-bodies. Joins the existing
+            .hill-body autoAlpha reveal group for free -- no changes needed in
+            NainitalScene.tsx. */}
+        <path
+          className="hill-body"
+          d="M-20 252
+             L44 209 Q58 200 66 205 L94 221 Q102 226 111 214
+             L141 174 Q150 162 159 172 L193 210 Q202 220 210 214
+             L238 192 Q246 186 256 194 L290 220 Q300 228 309 214
+             L343 166 Q352 152 361 163 L393 201 Q402 212 412 206
+             L446 184 Q456 178 464 186 L492 216 Q500 224 511 214
+             L549 180 Q560 170 569 178 L601 208 Q610 216 619 205
+             L653 165 Q662 154 671 165 L703 203 Q712 214 721 209
+             L751 189 Q760 184 771 192 L809 218 Q820 226 829 215
+             L861 175 Q870 164 879 174 L911 208 Q920 218 930 213
+             L966 193 Q976 188 986 196 L1020 222 Q1030 230 1039 220
+             L1073 184 Q1082 174 1092 182 L1130 212 Q1140 220 1154 216
+             L1220 198
+             L1220 440 L-20 440 Z"
+          fill="var(--ink-faint)"
+          fillOpacity="0.4"
+        />
         <path
           className="peak-line"
           d="M-20 252
@@ -143,11 +169,14 @@ export default function NainitalArt() {
           strokeWidth="2"
         />
 
-        {/* Naina Peak on the left, Ayarpatha opposite */}
+        {/* Naina Peak on the left, Ayarpatha opposite -- was fill="var(--paper)",
+            exactly the sky's own color, so this whole prominent named hill was
+            invisible except for its ridge stroke. var(--line) gives it real,
+            solid contrast against the sky while staying inside the palette. */}
         <path
           className="hill-body"
           d="M-20 356 C 60 346, 130 268, 250 288 C 350 304, 420 344, 540 350 C 660 356, 760 306, 880 312 C 1000 318, 1120 350, 1220 354 L1220 560 L-20 560 Z"
-          fill="var(--paper)"
+          fill="var(--line)"
         />
         <path
           className="ridge"
@@ -180,29 +209,32 @@ export default function NainitalArt() {
       </g>
 
       {/* ---------------- deodar line, standing on the near bank ---------------- */}
+      {/* Solid ink-soft silhouettes, not white-filled outlines -- a tree drawn as
+          a white cutout with a thin border reads as a sketch icon; a solid dark
+          taper reads as an actual conifer standing against the light bank. */}
       <g data-layer="pines" fill="none" strokeLinejoin="round">
         {PINES.map(([x, y], i) => (
           <g className="pine" key={i}>
-            <path d={`M${x} ${y} L${x} ${y - 7}`} stroke="var(--ink-soft)" strokeWidth="1.5" />
+            <path d={`M${x} ${y} L${x} ${y - 7}`} stroke="var(--ink)" strokeWidth="1.5" />
             {/* three graduated tiers, each a gently concave (pinched-waist) taper
                 rather than a straight-sided triangle -- the refined-conifer silhouette */}
             <path
               d={`M${x - 11} ${y - 4} Q${x - 3} ${y - 9} ${x} ${y - 19} Q${x + 3} ${y - 9} ${x + 11} ${y - 4} Z`}
-              fill="var(--white)"
-              stroke="var(--ink-soft)"
-              strokeWidth="1.4"
+              fill="var(--ink-soft)"
+              stroke="var(--ink)"
+              strokeWidth="1"
             />
             <path
               d={`M${x - 8} ${y - 13} Q${x - 2} ${y - 17} ${x} ${y - 26} Q${x + 2} ${y - 17} ${x + 8} ${y - 13} Z`}
-              fill="var(--white)"
-              stroke="var(--ink-soft)"
-              strokeWidth="1.4"
+              fill="var(--ink-soft)"
+              stroke="var(--ink)"
+              strokeWidth="1"
             />
             <path
               d={`M${x - 5} ${y - 21} Q${x - 1.5} ${y - 24} ${x} ${y - 32} Q${x + 1.5} ${y - 24} ${x + 5} ${y - 21} Z`}
-              fill="var(--white)"
-              stroke="var(--ink-soft)"
-              strokeWidth="1.4"
+              fill="var(--ink-soft)"
+              stroke="var(--ink)"
+              strokeWidth="1"
             />
           </g>
         ))}
@@ -244,7 +276,7 @@ export default function NainitalArt() {
         <g className="town-block">
           {BUILDINGS.map(([x, y, w, h], i) => (
             <g className="building" key={i}>
-              <rect x={x} y={y - h} width={w} height={h} rx={1.5} fill="var(--white)" stroke="var(--ink)" strokeWidth="1.6" />
+              <rect x={x} y={y - h} width={w} height={h} rx={1.5} fill="var(--paper-deep)" stroke="var(--ink)" strokeWidth="1.6" />
               <line x1={x + 4} y1={y - h + 6} x2={x + w - 4} y2={y - h + 6} stroke="var(--ink-faint)" strokeWidth="1.2" />
               {h > 22 && (
                 <line x1={x + 4} y1={y - h + 13} x2={x + w - 4} y2={y - h + 13} stroke="var(--ink-faint)" strokeWidth="1.2" />
